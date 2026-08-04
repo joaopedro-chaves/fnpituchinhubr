@@ -15,14 +15,14 @@ const KEYS = {
     openExports: 'fn_state_open_exports',
 };
 
-const THEME_ORDER = ['Basic', 'Gold', 'Candy', 'Galaxy', 'Gem', 'Holofoil', 'Cube', 'Rift', 'Quack'];
-const RARITY_ORDER = ['Mythic', 'Legendary', 'Epic', 'Rare', 'Special'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Holográfico', 'Cubo', 'Rift', 'Pato'];
+const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
-const UI_THEME_LABELS = { Candy: 'Gummy' };
-const EXPORT_THEME_LABELS = { Basic: 'NORMAL', Candy: 'GUMMY' };
-const TRADE_THEME_LABELS = { Basic: 'Base', Candy: 'Gummy' };
-const TRACKER_URL = 'https://staticvacant.github.io/fnsprites/';
+const UI_THEME_LABELS = { Doce: 'Doce' };
+const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'Doce' };
+const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce' };
+const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 const CROWN_ICON = '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
 const EXPORT_LAYOUT = {
@@ -462,7 +462,7 @@ function populateThemeFilter() {
     const selectedTheme = themes.includes(state.filters.theme) ? state.filters.theme : 'all';
 
     dom.themeFilter.replaceChildren(
-        new Option('All themes', 'all'),
+        new Option('Todos', 'all'),
         ...themes.map(theme => new Option(getUiThemeLabel(theme), theme))
     );
     state.filters.theme = selectedTheme;
@@ -510,11 +510,11 @@ function buildCardHTML(sprite, obtained, mastered) {
 
     let badge = '';
     if (sprite.unreleased) {
-        badge = '<div class="card-badge unreleased-badge">Unreleased</div>';
+        badge = '<div class="card-badge unreleased-badge">Não lançado</div>';
     } else if (mastered) {
-        badge = '<div class="card-badge mastered-badge">Mastered</div>';
+        badge = '<div class="card-badge mastered-badge">Dominado</div>';
     } else if (obtained) {
-        badge = '<div class="card-badge collected">Collected</div>';
+        badge = '<div class="card-badge collected">Coletado</div>';
     }
 
     let crownAction = '';
@@ -623,29 +623,29 @@ function getExportConfig(mode) {
     const configs = {
         collected: {
             items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'MY COLLECTION',
-            color: '#32cd32', filename: 'fnsprites-collection', emptyMsg: 'No collected sprites to export!',
+            color: '#32cd32', filename: 'fnsprites-collection', emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
         missing: {
             items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: "I'M LOOKING FOR THESE!",
-            color: '#ef4444', filename: 'fnsprites-missing', emptyMsg: "You aren't missing any released sprites!",
+            color: '#ef4444', filename: 'fnsprites-missing', emptyMsg: "Você não está faltando nenhum pituchinhu!",
         },
         unmastered: {
             items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'UNMASTERED SPRITES',
-            color: '#00f0ff', filename: 'fnsprites-unmastered', emptyMsg: "You don't have any unmastered sprites!",
+            color: '#00f0ff', filename: 'fnsprites-unmastered', emptyMsg: "Você não tem nenhum pituchinhu para exportar!",
         },
         mastered: {
             items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'MASTERED SPRITES',
-            color: '#ffd700', filename: 'fnsprites-mastered', emptyMsg: "You don't have any mastered sprites!",
+            color: '#ffd700', filename: 'fnsprites-mastered', emptyMsg: "Você não tem nenhum pituchinhu dominado!",
         },
         trade: {
             items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'TRADE CARD',
-            color: '#ffd700', filename: 'fnsprites-trade-card', emptyMsg: 'No sprites to export!',
+            color: '#ffd700', filename: 'fnsprites-trade-card', emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
     };
 
     const config = configs[mode];
     if (!config || config.items.length === 0) {
-        toast(config?.emptyMsg || 'Nothing to export!', 'error');
+        toast(config?.emptyMsg || 'Nada para exportar!', 'error');
         return null;
     }
     return config;
@@ -793,13 +793,13 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
 
-    let labelText = 'COLLECTED';
+    let labelText = 'COLETADO';
     let labelColor = '#22c55e';
     if (isMastered) {
-        labelText = 'MASTERED';
+        labelText = 'DOMINADO';
         labelColor = '#ffd700';
     } else if (isMissing) {
-        labelText = 'MISSING';
+        labelText = 'FALTANDO';
         labelColor = '#ef4444';
     }
 
@@ -1258,9 +1258,9 @@ function generateTradeText() {
         buildSection('HAVE', sprites => sprites.filter(sprite => isObtained(sprite.id))),
         buildSection('STILL NEED TO MASTER', sprites => sprites.filter(sprite => isObtained(sprite.id) && !isMastered(sprite.id))),
         [
-            `Collected: ${collected}/${total}`,
-            `Mastered: ${mastered}/${total}`,
-            `Track yours: ${TRACKER_URL}`,
+            `Colecionados: ${collected}/${total}`,
+            `Dominados: ${mastered}/${total}`,
+            `Link do rastreador: ${TRACKER_URL}`,
         ].join('\n'),
     ].filter(Boolean);
 

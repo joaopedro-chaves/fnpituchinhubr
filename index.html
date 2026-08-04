@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Track, manage, and share your Fortnite Sprites collection and mastery progress.">
-    <title>Fortnite Sprites Tracker</title>
+    <meta name="description" content="Rastreie, gerencie e compartilhe sua coleção de pituchinhos do Fortnite e seu progresso de maestria.">
+    <title>Rastreador de pituchinhos</title>
     <link rel="icon" type="image/png" href="siteimages/staticsprite.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="sprites-data.js" defer></script>
     <script type="module" src="app.js"></script>
@@ -16,27 +16,27 @@
 <body>
 
 <div class="banner" id="viewBanner" hidden>
-    <span>Viewing a shared collection - showing collected sprites only.</span>
-    <a href="index.html">Go to my tracker</a>
+    <span>Visualizando uma coleção compartilhada - exibindo apenas pituchinhos coletados.</span>
+    <a href="index.html">Ir para meu rastreador</a>
 </div>
 
 <div class="app">
     <header class="header">
         <div class="brand">
             <img src="siteimages/staticsprite.png" alt="" class="brand-icon" width="36" height="36">
-            <h1>Sprites Tracker</h1>
+            <h1>Rastreador de Pituchinhos</h1>
         </div>
         <div class="progress-group">
             <div class="progress-item">
                 <div class="progress-meta">
-                    <span class="progress-label">Collection</span>
+                    <span class="progress-label">Coleção</span>
                     <span class="progress-value" id="collectionRatio">0 / 0</span>
                 </div>
                 <div class="progress-track"><div class="progress-fill" id="collectionFill"></div></div>
             </div>
             <div class="progress-item">
                 <div class="progress-meta">
-                    <span class="progress-label">Mastery</span>
+                    <span class="progress-label">Dominados</span>
                     <span class="progress-value" id="masteryRatio">0 / 0</span>
                 </div>
                 <div class="progress-track"><div class="progress-fill mastery" id="masteryFill"></div></div>
@@ -46,60 +46,60 @@
 
     <nav class="toolbar">
         <div class="toolbar-row">
-            <label class="sr-only" for="searchInput">Search sprites</label>
-            <input type="search" id="searchInput" class="input" placeholder="Search sprites…" autocomplete="off" spellcheck="false">
-            <label class="sr-only" for="themeFilter">Filter by theme</label>
+            <label class="sr-only" for="searchInput">Buscar</label>
+            <input type="search" id="searchInput" class="input" placeholder="Buscar…" autocomplete="off" spellcheck="false">
+            <label class="sr-only" for="themeFilter">Filtrar</label>
             <select id="themeFilter" class="select">
-                <option value="all">All themes</option>
+                <option value="all">Todos</option>
             </select>
-            <label class="sr-only" for="sortOrder">Sort sprites</label>
+            <label class="sr-only" for="sortOrder">Ordenar</label>
             <select id="sortOrder" class="select">
-                <option value="theme">Group by theme</option>
-                <option value="sprite">Group by sprite</option>
-                <option value="name">Alphabetical (A-Z)</option>
-                <option value="rarity">Sort by rarity</option>
+                <option value="theme">Tema</option>
+                <option value="sprite">Elementais</option>
+                <option value="name">Nome</option>
+                <option value="rarity">Raridade</option>
             </select>
             <div class="pills" id="statusPills">
-                <button type="button" class="pill active" data-status="all">All</button>
-                <button type="button" class="pill" data-status="owned">Owned</button>
-                <button type="button" class="pill" data-status="missing">Missing</button>
+                <button type="button" class="pill active" data-status="all">Todos</button>
+                <button type="button" class="pill" data-status="owned">Coletados</button>
+                <button type="button" class="pill" data-status="missing">Faltando</button>
             </div>
         </div>
         <div class="toolbar-row">
             <div class="switches">
-                <label class="switch"><input type="checkbox" id="hideMastered"><span>Hide mastered</span></label>
-                <label class="switch"><input type="checkbox" id="showUnreleased"><span>Unreleased</span></label>
-                <label class="switch"><input type="checkbox" id="lowFidelity"><span>Low fidelity</span></label>
-                <label class="switch" id="exportModeSwitch"><input type="checkbox" id="openExports"><span>Download Exports</span></label>
+                <label class="switch"><input type="checkbox" id="hideMastered"><span>Ocultar dominados</span></label>
+                <label class="switch"><input type="checkbox" id="showUnreleased"><span>Não lançados</span></label>
+                <label class="switch"><input type="checkbox" id="lowFidelity"><span>Baixo Desempenho</span></label>
+                <label class="switch" id="exportModeSwitch"><input type="checkbox" id="openExports"><span>Baixar exportações</span></label>
             </div>
             <div class="actions">
                 <div class="dropdown" id="exportDropdown">
-                    <button type="button" class="btn" id="exportToggle" aria-haspopup="true" aria-expanded="false">Export</button>
-                    <div class="dropdown-menu" aria-label="Export options">
-                        <button type="button" data-export="collected"><span class="dot dot-collected"></span>Collection image</button>
-                        <button type="button" data-export="missing"><span class="dot dot-missing"></span>Missing sprites</button>
-                        <button type="button" data-export="unmastered"><span class="dot dot-unmastered"></span>Unmastered sprites</button>
-                        <button type="button" data-export="mastered"><span class="dot dot-mastered"></span>Mastered sprites</button>
-                        <button type="button" data-export="trade"><span class="dot dot-trade"></span>Trade card image</button>
+                    <button type="button" class="btn" id="exportToggle" aria-haspopup="true" aria-expanded="false">Exportar</button>
+                    <div class="dropdown-menu" aria-label="Opções de exportação">
+                        <button type="button" data-export="collected"><span class="dot dot-collected"></span>Imagem da coleção</button>
+                        <button type="button" data-export="missing"><span class="dot dot-missing"></span>pituchinhos faltando</button>
+                        <button type="button" data-export="unmastered"><span class="dot dot-unmastered"></span>pituchinhos não dominados</button>
+                        <button type="button" data-export="mastered"><span class="dot dot-mastered"></span>pituchinhos dominados</button>
+                        <button type="button" data-export="trade"><span class="dot dot-trade"></span>Imagem de troca</button>
                         <hr class="dropdown-divider">
-                        <button type="button" id="exportBackupBtn"><span class="dot dot-backup"></span>Backup data (JSON)</button>
+                        <button type="button" id="exportBackupBtn"><span class="dot dot-backup"></span>Backup dos dados (JSON)</button>
                     </div>
                 </div>
-                <button type="button" class="btn" id="importBtn">Import</button>
+                <button type="button" class="btn" id="importBtn">Importar</button>
                 <input type="file" id="importInput" class="file-input" accept=".json">
                 <div class="dropdown" id="copyDropdown">
-                    <button type="button" class="btn" id="copyToggle" aria-haspopup="true" aria-expanded="false">Copy trade list</button>
-                    <div class="dropdown-menu" aria-label="Copy options">
-                        <button type="button" id="copyTradeTextBtn"><span class="dot dot-text"></span>Trade list (text)</button>
-                        <button type="button" id="copyTradeGridBtn"><span class="dot dot-backup"></span>Trade grid (text)</button>
+                    <button type="button" class="btn" id="copyToggle" aria-haspopup="true" aria-expanded="false">Copiar lista de trocas</button>
+                    <div class="dropdown-menu" aria-label="Opções de cópia">
+                        <button type="button" id="copyTradeTextBtn"><span class="dot dot-text"></span>Lista de trocas (texto)</button>
+                        <button type="button" id="copyTradeGridBtn"><span class="dot dot-backup"></span>Grade de trocas (texto)</button>
                     </div>
                 </div>
-                <button type="button" class="btn btn-accent" id="shareBtn">Share</button>
+                <button type="button" class="btn btn-accent" id="shareBtn">Compartilhar</button>
             </div>
         </div>
     </nav>
 
-    <main class="grid" id="spriteGrid" aria-label="Sprites collection"></main>
+    <main class="grid" id="spriteGrid" aria-label="Coleção de pituchinhos"></main>
 </div>
 
 </body>
