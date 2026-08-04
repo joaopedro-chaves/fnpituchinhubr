@@ -15,7 +15,7 @@ const KEYS = {
     openExports: 'fn_state_open_exports',
 };
 
-const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Holográfico', 'Cubo', 'Rift', 'Pato'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato'];
 const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
@@ -787,7 +787,7 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
 
     /* Status label */
     ctx.save();
-    ctx.font = '900 8.5px "Oswald", sans-serif';
+    ctx.font = '900 8.5px "Roboto", sans-serif';
     ctx.shadowColor = 'rgba(0,0,0,0.8)';
     ctx.shadowBlur = 2;
     ctx.textAlign = 'left';
@@ -833,7 +833,7 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     ctx.restore();
 
     ctx.fillStyle = tagText;
-    ctx.font = '900 8.5px "Oswald", sans-serif';
+    ctx.font = '900 8.5px "Roboto", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(rarity === 'Mythic' ? 'MYTHIC' : rarity.toUpperCase(), x + 4, y + innerH - 6);
@@ -845,12 +845,12 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     ctx.fillStyle = isMissing ? '#ef4444' : '#ffffff';
     let fontSize = 9.5;
     const name = sprite.name.toUpperCase();
-    ctx.font = `bold ${fontSize}px "Oswald", sans-serif`;
+    ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     while (ctx.measureText(name).width > w - 6 && fontSize > 6.5) {
         fontSize -= 0.5;
-        ctx.font = `bold ${fontSize}px "Oswald", sans-serif`;
+        ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
     }
     ctx.fillText(name, x + w / 2, y + innerH + 11);
 
@@ -1036,16 +1036,16 @@ function exportImage(mode) {
 
         const fitFont = (text, maxWidth, startSize, minSize, style) => {
             let size = startSize;
-            ctx.font = `${style} ${size}px "Oswald", sans-serif`;
+            ctx.font = `${style} ${size}px "Roboto", sans-serif`;
             while (ctx.measureText(text).width > maxWidth && size > minSize) {
                 size -= 0.5;
-                ctx.font = `${style} ${size}px "Oswald", sans-serif`;
+                ctx.font = `${style} ${size}px "Roboto", sans-serif`;
             }
             return size;
         };
 
         const drawProgressBlock = (label, count, total, pct, x, y, color) => {
-            ctx.font = '900 12px "Oswald", sans-serif';
+            ctx.font = '900 12px "Roboto", sans-serif';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             ctx.fillStyle = color;
@@ -1116,7 +1116,7 @@ function exportImage(mode) {
 
             const drawColHeaders = (startX) => {
                 ctx.fillStyle = '#8891a5';
-                ctx.font = 'bold 12px "Oswald", sans-serif';
+                ctx.font = 'bold 12px "Roboto", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 themeColumns.forEach((t, i) => {
@@ -1139,12 +1139,12 @@ function exportImage(mode) {
 
                 ctx.fillStyle = '#ffffff';
                 let fontSize = 14;
-                ctx.font = `bold ${fontSize}px "Oswald", sans-serif`;
+                ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'middle';
                 while (ctx.measureText(displayName).width > layout.labelW - 12 && fontSize > 8) {
                     fontSize -= 0.5;
-                    ctx.font = `bold ${fontSize}px "Oswald", sans-serif`;
+                    ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
                 }
                 ctx.fillText(displayName, startX + layout.labelW - 10, y + layout.cardH / 2);
 
@@ -1199,7 +1199,7 @@ function exportImage(mode) {
         ctx.fillRect(layout.border, canvasH - layout.footerH - layout.border, canvasW - layout.border * 2, layout.footerH);
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px "Oswald", sans-serif';
+        ctx.font = 'bold 16px "Roboto", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('staticvacant.github.io/fnsprites/', canvasW / 2, canvasH - layout.border - layout.footerH / 2);
