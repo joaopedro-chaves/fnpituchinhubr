@@ -8,10 +8,10 @@
 
 :root {
     /* Color Palette */
-    --primary: #a8c7fa;
-    --on-primary: #062e6f;
-    --primary-container: #004990;
-    --on-primary-container: #d3e4ff;
+    --primary: #d6a8fa;
+    --on-primary: #4f066f;
+    --primary-container: #4a0090;
+    --on-primary-container: #efd3ff;
 
     --secondary: #bec6dc;
     --on-secondary: #283141;
@@ -256,7 +256,7 @@ a:hover {
 }
 
 .progress-track {
-    height: 4px;
+    height: 8px;
     background: var(--surface-container-highest);
     border-radius: var(--radius-pill);
     overflow: hidden;
@@ -345,7 +345,7 @@ a:hover {
 
 .pill {
     min-width: 0;
-    padding: 8px 18px;
+    padding: 12px 18px;
     font-size: 13px;
     font-weight: 500;
     transition: background-color var(--duration-short) var(--ease), color var(--duration-short) var(--ease);
@@ -640,7 +640,6 @@ a:hover {
 
 /* Card name footer */
 .card-name {
-    padding: 8px 12px;
     text-align: center;
     background: var(--surface-container-highest);
     min-height: 38px;
