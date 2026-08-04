@@ -1,5 +1,7 @@
 A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortnite (C7T3)
 
+Modificação do projeto https://github.com/staticvacant/fnsprites para português e organização do layout (material design).
+
 Aqui está o site do repositório:
 https://joaopedro-chaves.github.io/fnpituchinhubr/
 
