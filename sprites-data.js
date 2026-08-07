@@ -4,7 +4,7 @@ const baseSprites = [
     { id: "water_gold", name: "Água Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "water_candy", name: "Água de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "water_galaxy", name: "Água Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "water_gem", name: "Água de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    { id: "water_gem", name: "Água de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "water_holofoil", name: "Água Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "water_quack", name: "Água Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T3"  },
     
@@ -12,7 +12,7 @@ const baseSprites = [
     { id: "earth_gold", name: "Terra Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "earth_candy", name: "Terra de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "earth_galaxy", name: "Terra Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "earth_gem", name: "Terra de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    { id: "earth_gem", name: "Terra de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "earth_rift", name: "Terra Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "earth_quack", name: "Terra Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	
@@ -23,13 +23,13 @@ const baseSprites = [
     { id: "fire_holofoil", name: "Fogo Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "fire_rift", name: "Fogo Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "fire_quack", name: "Fogo Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "fire_gem", name: "Fogo de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    // { id: "fire_gem", name: "Fogo de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "none"  },
 	
     { id: "duck_basic", name: "Pato", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T3"  },
     { id: "duck_gold", name: "Pato Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "duck_candy", name: "Pato de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "duck_galaxy", name: "Pato Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "duck_gem", name: "Pato de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    { id: "duck_gem", name: "Pato de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	
     { id: "ghost_basic", name: "Fantasma", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T3"  },
     { id: "ghost_gold", name: "Fantasma Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
@@ -49,7 +49,7 @@ const baseSprites = [
     { id: "demon_gold", name: "Demônio Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "demon_candy", name: "Demônio de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "demon_galaxy", name: "Demônio Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "demon_gem", name: "Demônio de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    { id: "demon_gem", name: "Demônio de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
 
 	{ id: "punk_basic", name: "Punk", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T3"  },
     { id: "punk_gold", name: "Punk Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
@@ -68,7 +68,7 @@ const baseSprites = [
     { id: "zeropoint_gold", name: "Ponto Zero Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "zeropoint_candy", name: "Ponto Zero de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "zeropoint_galaxy", name: "Ponto Zero Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "zeropoint_gem", name: "Ponto Zero de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+    { id: "zeropoint_gem", name: "Ponto Zero de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "zeropoint_holofoil", name: "Ponto Zero Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "zeropoint_quack", name: "Ponto Zero Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "zeropoint_rift", name: "Ponto Zero Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
@@ -94,23 +94,22 @@ const baseSprites = [
     { id: "aura_gold", name: "Aura Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "aura_candy", name: "Aura de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "aura_galaxy", name: "Aura Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "aura_gem", name: "Aura de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "none"  },
+    { id: "aura_gem", name: "Aura de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	//	{ id: "aura_holofoil", name: "Aura Metálico", theme: "Metálico", rarity: "Especial", unreleased: true, season: "none"  },
 
-    { id: "boss_basic", name: "Boss", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T3"  },
-    { id: "boss_gold", name: "Boss Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "boss_candy", name: "Boss de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
-    { id: "boss_galaxy", name: "Boss Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-	//	{ id: "boss_gem", name: "Boss de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "none"  },
-	//	{ id: "boss_holofoil", name: "Boss Metálico", theme: "Metálico", rarity: "Especial", unreleased: true, season: "none"  },
-	{ id: "boss_rift", name: "Boss Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
-
+    { id: "boss_basic", name: "Chefe", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T3"  },
+    { id: "boss_gold", name: "Chefe Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
+    { id: "boss_candy", name: "Chefe de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
+    { id: "boss_galaxy", name: "Chefe Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
+	// { id: "boss_gem", name: "Chefe de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "none"  },
+	// { id: "boss_holofoil", name: "Chefe Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
+	{ id: "boss_rift", name: "Chefe Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
 
     { id: "grim_basic", name: "Ceifador", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },
     { id: "grim_gold", name: "Ceifador Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "grim_candy", name: "Ceifador de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "grim_galaxy", name: "Ceifador Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-	{ id: "grim_gem", name: "Ceifador de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
+	{ id: "grim_gem", name: "Ceifador de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "grim_holofoil", name: "Ceifador Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	{ id: "grim_rift", name: "Ceifador Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
 
@@ -156,7 +155,6 @@ const baseSprites = [
     { id: "peely_holofoil", name: "Embananado Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
 	//	{ id: "peely_rift", name: "Embananado Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "none"  },
 
-	
 	{ id: "ironmouse_basic", name: "Ironmouse", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },
 	
 	{ id: "wick_basic", name: "John Wick", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },

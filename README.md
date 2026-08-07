@@ -2,6 +2,8 @@ A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortni
 
 Modificação do projeto https://github.com/staticvacant/fnsprites para português e organização do layout (material design).
 
+Criado originalmente por [staticvacant](https://github.com/staticvacant)
+
 Aqui está o site do repositório:
 https://joaopedro-chaves.github.io/fnpituchinhubr/
 
