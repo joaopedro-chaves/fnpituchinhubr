@@ -482,7 +482,7 @@ function populateThemeFilter() {
     );
     state.filters.theme = selectedTheme;
 }
-
+///.///////////
 function renderGrid() {
     let items = filterSprites();
     items = sortSprites(items, state.settings.sortOrder);
@@ -640,24 +640,24 @@ function getExportConfig(mode) {
 
     const configs = {
         collected: {
-            items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'MY COLLECTION',
-            color: '#32cd32', filename: 'fnsprites-collection', emptyMsg: 'Nenhum pituchinhu para exportar!',
+            items, titleL1: 'Rastreador de Pituchinhos:', titleL2: 'Minha coleção',
+            color: '#3fac3fff', filename: 'fnsprites-collection', emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
         missing: {
-            items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: "I'M LOOKING FOR THESE!",
-            color: '#ef4444', filename: 'fnsprites-missing', emptyMsg: "Você não está faltando nenhum pituchinhu!",
+            items, titleL1: 'Rastreador de Pituchinhos:', titleL2: "Eu procuro estes!",
+            color: '#e34b4bff', filename: 'fnsprites-missing', emptyMsg: "Você não está faltando nenhum pituchinhu!",
         },
         unmastered: {
-            items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'UNMASTERED SPRITES',
-            color: '#00f0ff', filename: 'fnsprites-unmastered', emptyMsg: "Você não tem nenhum pituchinhu para exportar!",
+            items, titleL1: 'Rastreador de Pituchinhos:', titleL2: "Não Dominados",
+            color: '#6ad1d8ff', filename: 'fnsprites-unmastered', emptyMsg: "Você não tem nenhum pituchinhu para exportar!",
         },
         mastered: {
-            items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'MASTERED SPRITES',
-            color: '#ffd700', filename: 'fnsprites-mastered', emptyMsg: "Você não tem nenhum pituchinhu dominado!",
+            items, titleL1: 'Rastreador de Pituchinhos:', titleL2: "Dominados",
+            color: '#edd234ff', filename: 'fnsprites-mastered', emptyMsg: "Você não tem nenhum pituchinhu dominado!",
         },
         trade: {
-            items, titleL1: 'FORTNITE SPRITES TRACKER:', titleL2: 'TRADE CARD',
-            color: '#ffd700', filename: 'fnsprites-trade-card', emptyMsg: 'Nenhum pituchinhu para exportar!',
+            items, titleL1: 'Rastreador de Pituchinhos:', titleL2: 'Lista de Trocas',
+            color: '#ce26d3ff', filename: 'fnsprites-trade-card', emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
     };
 
@@ -736,7 +736,7 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     /* Card base background */
     ctx.fillStyle = '#0f141d';
     ctx.beginPath();
-    drawRoundRect(ctx, x, y, w, h, 8);
+    drawRoundRect(ctx, x, y, w, h);
     ctx.fill();
 
     /* Rarity background */
@@ -931,7 +931,7 @@ function exportImage(mode) {
         ...releasedSprites.map(sprite => ({ id: sprite.id, src: `sprites/${encodeURIComponent(sprite.id)}.png` })),
     ];
 
-    toast('Generating image export...', 'info');
+    toast('Gerando imagem...', 'info');
 
     Promise.all(imagesToLoad.map(loadImage)).then(loadedImages => {
         const imageMap = {};
@@ -1102,8 +1102,8 @@ function exportImage(mode) {
             const statsW = bw * 2 + statGap;
             const statsX = (canvasW - statsW) / 2;
             const statsY = layout.border + 86;
-            drawProgressBlock('COLLECTION', ownedCount, totalCount, colPct, statsX, statsY, '#22c55e');
-            drawProgressBlock('MASTERY', masteredCount, totalCount, masPct, statsX + bw + statGap, statsY, '#ffd700');
+            drawProgressBlock('COLECIONADOS', ownedCount, totalCount, colPct, statsX, statsY, '#22c55e');
+            drawProgressBlock('DOMINADOS', masteredCount, totalCount, masPct, statsX + bw + statGap, statsY, '#ffd700');
         } else {
             const statsRight = canvasW - layout.border - layout.sidePad;
             const collectionX = statsRight - bw * 2 - statGap;
@@ -1125,8 +1125,8 @@ function exportImage(mode) {
             }
             ctx.fillText(fullTitle, textLeft, layout.border + headerH / 2);
 
-            drawProgressBlock('COLLECTION', ownedCount, totalCount, colPct, collectionX, layout.border + 28, '#22c55e');
-            drawProgressBlock('MASTERY', masteredCount, totalCount, masPct, masteryX, layout.border + 28, '#ffd700');
+            drawProgressBlock('COLECIONADOS', ownedCount, totalCount, colPct, collectionX, layout.border + 28, '#22c55e');
+            drawProgressBlock('DOMINADOS', masteredCount, totalCount, masPct, masteryX, layout.border + 28, '#ffd700');
         }
 
         if (mode === 'trade') {
@@ -1220,7 +1220,7 @@ function exportImage(mode) {
         ctx.font = 'bold 16px "Roboto", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('staticvacant.github.io/fnsprites/', canvasW / 2, canvasH - layout.border - layout.footerH / 2);
+        ctx.fillText('joaopedro-chaves.github.io/fnpituchinhubr/', canvasW / 2, canvasH - layout.border - layout.footerH / 2);
 
         // Export mode
         const shouldOpenInNewTab = isIOS() || state.settings.openExports;
@@ -1228,19 +1228,19 @@ function exportImage(mode) {
         if (shouldOpenInNewTab) {
             canvas.toBlob((blob) => {
                 if (!blob) {
-                    toast('Failed to generate image', 'error');
+                    toast('Erro ao gerar imagem!', 'error');
                     return;
                 }
                 const url = URL.createObjectURL(blob);
                 window.open(url, '_blank');
-                toast('Image opened in new tab!', 'success');
+                toast('Imagem aberta em nova aba!', 'success');
             }, 'image/png');
         } else {
             const link = document.createElement('a');
             link.download = `${config.filename}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            toast('Image exported successfully!', 'success');
+            toast('Imagem exportada com sucesso!', 'success');
         }
     });
 }
@@ -1294,7 +1294,7 @@ function generateTradeGridText() {
 
     let lines = [
         '```',
-        '✅ Owned  👑 Mastered  ❌ Missing',
+        '✅ Tenho  👑 Dominado  ❌ Não tenho',
         '',
         `| ${activeThemes.map(getExportThemeLabel).join(' | ')} | Sprite`,
         '-----------------------',
@@ -1313,9 +1313,9 @@ function generateTradeGridText() {
 
     lines.push(
         '',
-        `Collected: ${collected}/${total}`,
-        `Mastered: ${mastered}/${total}`,
-        `Track yours: ${TRACKER_URL}`,
+        `Colecionados: ${collected}/${total}`,
+        `Dominados: ${mastered}/${total}`,
+        `Link: ${TRACKER_URL}`,
         '```'
     );
 
@@ -1488,14 +1488,14 @@ function bindEvents() {
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
-        toast('Backup file exported!', 'success');
+        toast('Backup exportado com sucesso!', 'success');
         setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
     });
 
     /* Backup Import */
     dom.importBtn.addEventListener('click', () => {
         if (state.viewMode) {
-            toast('Cannot import in view-only mode!', 'error');
+            toast('Não é possível importar no modo somente leitura!', 'error');
             return;
         }
         dom.importInput.click();
@@ -1525,9 +1525,9 @@ function bindEvents() {
                 saveCollection();
 
                 renderGrid();
-                toast('Collection imported successfully!', 'success');
+                toast('Coleção importada com sucesso!', 'success');
             } catch (err) {
-                toast('Failed to import: invalid JSON format', 'error');
+                toast('Falha ao importar: formato JSON inválido', 'error');
                 console.error(err);
             }
             dom.importInput.value = '';
@@ -1537,13 +1537,13 @@ function bindEvents() {
 
     /* Copy trade list */
     dom.copyTradeTextBtn.addEventListener('click', () => {
-        copyText(generateTradeText(), 'Trade list copied to clipboard!', 'Failed to copy trade list');
+        copyText(generateTradeText(), 'Lista de trocas copiada para a área de transferência!', 'Falha ao copiar lista de trocas');
         setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
     });
 
     /* Copy trade grid */
     dom.copyTradeGridBtn.addEventListener('click', () => {
-        copyText(generateTradeGridText(), 'Trade grid copied to clipboard!', 'Failed to copy trade grid');
+        copyText(generateTradeGridText(), 'Grelha de trocas copiada para a área de transferência!', 'Falha ao copiar grelha de trocas');
         setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
     });
 
@@ -1551,7 +1551,7 @@ function bindEvents() {
     dom.shareBtn.addEventListener('click', () => {
         const code = compressCollection(baseSprites, state.obtained, state.mastered);
         const url = `${location.origin}${location.pathname}?c=${code}`;
-        copyText(url, 'Share link copied to clipboard!', 'Failed to copy link');
+        copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
     });
 }
 
