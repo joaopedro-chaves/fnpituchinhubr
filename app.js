@@ -548,8 +548,8 @@ function buildCardHTML(sprite, obtained, mastered) {
         <div class="card-display">
             ${crownDisplay}
             <img src="${imgPath}" alt="${safeName}" loading="lazy">
+            <div class="card-season">${safeSeasonName}</div>
             <div class="card-rarity">${safeRarity}</div>
-            <div class="card-season" title="${safeSeasonName}"></div>
         </div>
         <div class="card-name"><span>${safeName}</span></div>`;
 }
