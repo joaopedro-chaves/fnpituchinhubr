@@ -763,6 +763,28 @@ a:hover {
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
 }
 
+/* Season tag */
+.card-season {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    z-index: 3;
+    height: 20px;
+    padding: 3px 14px 3px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+}
+
+/* .card-season img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}*/
+
 /* ===================================================
    Rarity Backgrounds
    =================================================== */

@@ -13,6 +13,7 @@ const KEYS = {
     showUnreleased: 'fn_state_unreleased',
     lowFidelity: 'fn_state_low_fidelity',
     openExports: 'fn_state_open_exports',
+    season: 'fn_state_season',
 };
 
 const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato'];
@@ -51,7 +52,7 @@ const state = {
     obtained: [],
     mastered: [],
     viewMode: false,
-    filters: { search: '', theme: 'all', status: 'all' },
+    filters: { search: '', theme: 'all', season: 'all', status: 'all' },
     settings: {
         hideMastered: false,
         sortOrder: 'theme',
@@ -75,6 +76,7 @@ const dom = {
     hideMastered: document.getElementById('hideMastered'),
     showUnreleased: document.getElementById('showUnreleased'),
     lowFidelity: document.getElementById('lowFidelity'),
+    seasonFilter: document.getElementById('seasonFilter'),
     openExports: document.getElementById('openExports'), // ADD THIS
     exportModeSwitch: document.getElementById('exportModeSwitch'),
     exportDropdown: document.getElementById('exportDropdown'),
@@ -135,6 +137,7 @@ function load() {
         .filter(id => state.obtained.includes(id));
     state.filters.search = localStorage.getItem(KEYS.search) || '';
     state.filters.theme = localStorage.getItem(KEYS.theme) || 'all';
+    state.filters.season = localStorage.getItem(KEYS.season) || 'all';
 
     let savedStatus = localStorage.getItem(KEYS.status) || 'all';
     if (savedStatus === 'obtained') savedStatus = 'owned';
@@ -157,6 +160,7 @@ function load() {
 function applyStateToDOM() {
     dom.searchInput.value = state.filters.search;
     dom.themeFilter.value = state.filters.theme;
+    dom.seasonFilter.value = state.filters.season;
     dom.sortOrder.value = state.settings.sortOrder;
     dom.hideMastered.checked = state.settings.hideMastered;
     dom.showUnreleased.checked = state.settings.showUnreleased;
@@ -301,8 +305,18 @@ function getSpriteIdSet(sprites = baseSprites) {
     return new Set(sprites.map(sprite => sprite.id));
 }
 
+function getSeasonData(season) {
+    if (season === 'C7T3') return { name: 'C7T3' };
+    if (season === 'C7T4') return { name: 'C7T4' };
+    return { name: 'none' };
+}
+
 function getReleasedSprites() {
-    return baseSprites.filter(sprite => !sprite.unreleased);
+    return baseSprites.filter(sprite => {
+            if (sprite.unreleased) return false;
+            if (state.filters.season !== 'all' && (sprite.season || 'none') !== state.filters.season) return false;
+            return true;
+    });
 }
 
 function getFamilyKeys(sprites = getReleasedSprites()) {
@@ -409,6 +423,7 @@ function filterSprites() {
 
         const matchesSearch = !search || sprite.name.toLowerCase().includes(search);
         const matchesTheme = state.filters.theme === 'all' || sprite.theme === state.filters.theme;
+        const matchesSeason = state.filters.season === 'all' || (sprite.season || 'none') === state.filters.season;
 
         let matchesStatus = true;
         if (!state.viewMode) {
@@ -417,7 +432,7 @@ function filterSprites() {
             if (state.filters.status === 'missing') matchesStatus = !isOwned;
         }
 
-        return matchesSearch && matchesTheme && matchesStatus;
+        return matchesSearch && matchesTheme && matchesSeason && matchesStatus;
     });
 }
 
@@ -507,6 +522,8 @@ function buildCardHTML(sprite, obtained, mastered) {
     const imgPath = `sprites/${encodeURIComponent(sprite.id)}.png`;
     const safeName = escapeHTML(sprite.name);
     const safeRarity = escapeHTML(rarityLabel);
+    const seasonData = getSeasonData(sprite.season);
+    const safeSeasonName = escapeHTML(seasonData.name);
 
     let badge = '';
     if (sprite.unreleased) {
@@ -532,6 +549,7 @@ function buildCardHTML(sprite, obtained, mastered) {
             ${crownDisplay}
             <img src="${imgPath}" alt="${safeName}" loading="lazy">
             <div class="card-rarity">${safeRarity}</div>
+            <div class="card-season" title="${safeSeasonName}"></div>
         </div>
         <div class="card-name"><span>${safeName}</span></div>`;
 }
@@ -1377,6 +1395,13 @@ function bindEvents() {
     dom.themeFilter.addEventListener('change', () => {
         state.filters.theme = dom.themeFilter.value;
         persist(KEYS.theme, state.filters.theme);
+        renderGrid();
+    });
+
+    /* Season filter */
+    dom.seasonFilter.addEventListener('change', () => {
+        state.filters.season = dom.seasonFilter.value;
+        persist(KEYS.season, state.filters.season);
         renderGrid();
     });
 
