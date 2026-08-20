@@ -881,7 +881,7 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    color: #ffffff;
+    color: #c8ffc5;
 }
 
 .codes-toolbar .toolbar-row {
@@ -935,7 +935,6 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     padding: 12px 16px;
     background: var(--surface-container);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--primary);
     border-radius: var(--radius);
     color: var(--text-soft);
     font-size: 14px;
