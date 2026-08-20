@@ -16,13 +16,13 @@ const KEYS = {
     season: 'fn_state_season',
 };
 
-const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça'];
 const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 const UI_THEME_LABELS = { Doce: 'Doce' };
-const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'Doce' };
-const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce' };
+const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA' };
+const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça' };
 const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 const CROWN_ICON = '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
@@ -1559,6 +1559,22 @@ function bindEvents() {
    Initialization
    =================================================== */
 
+function updateCodesNotification() {
+    const dot = document.getElementById('codesNotification');
+    if (!dot) return;
+    if (typeof baseCodes === 'undefined') {
+        dot.hidden = true;
+        return;
+    }
+    try {
+        const redeemed = JSON.parse(localStorage.getItem('fn_redeemed_codes')) || [];
+        const hasUnredeemed = baseCodes.some(c => c.active !== false && !redeemed.includes(c.code));
+        dot.hidden = !hasUnredeemed;
+    } catch {
+        dot.hidden = true;
+    }
+}
+
 function init() {
     if (typeof baseSprites === 'undefined') {
         console.error('baseSprites is not defined.');
@@ -1582,6 +1598,10 @@ function init() {
     applyStateToDOM();
     renderGrid();
     bindEvents();
+    updateCodesNotification();
+
+    window.addEventListener('storage', updateCodesNotification);
+    window.addEventListener('focus', updateCodesNotification);
 }
 
 init();

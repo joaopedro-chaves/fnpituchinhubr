@@ -158,11 +158,63 @@ const baseSprites = [
 	{ id: "ironmouse_basic", name: "Ironmouse", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },
 	
 	{ id: "wick_basic", name: "John Wick", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },
+	
+    { id: "bush_basic", name: "Arbusto", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
+    { id: "bush_gold", name: "Arbusto Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "bush_cheat", name: "Arbusto Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
 
-	{ id: "xray_basic", name: "X-Ray", theme: "Basic", rarity: "Mythic", unreleased: true, season: "C7T4" },
-	{ id: "pond_basic", name: "Pond", theme: "Basic", rarity: "Mythic", unreleased: true, season: "C7T4" },
-	{ id: "honey_basic", name: "Honey", theme: "Basic", rarity: "Mythic", unreleased: true, season: "C7T4" },
-	{ id: "dumpster_basic", name: "Dumpster Dive", theme: "Basic", rarity: "Mythic", unreleased: true, season: "C7T4" },
-	{ id: "bullet_basic", name: "Bullet", theme: "Basic", rarity: "Mythic", unreleased: true, season: "C7T4" },
+    { id: "jonesy_basic", name: "Jonesy", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
+    { id: "jonesy_gold", name: "Jonesy Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "jonesy_cheat", name: "Jonesy Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
 
+    { id: "adventure_basic", name: "Aventureiro", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
+    { id: "adventure_gold", name: "Aventureiro Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "adventure_cheat", name: "Aventureiro Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+	{ id: "8bit_basic", name: "8-Bit", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
+    { id: "8bit_gold", name: "8-Bit Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "8bit_cheat", name: "8-Bit Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+	
+    { id: "stormking_basic", name: "Escoteiro da Tempestade", theme: "Básico", rarity: "Raro", unreleased: true, season: "C7T4" },
+    { id: "stormking_gold", name: "Escoteiro da Tempestade Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "stormking_cheat", name: "Escoteiro da Tempestade Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: true, season: "C7T4" },
+
+    { id: "killswitch_basic", name: "Killswitch", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
+    { id: "killswitch_gold", name: "Killswitch Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "killswitch_cheat", name: "Killswitch Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+	{ id: "sonic_basic", name: "Sonic", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
+    { id: "sonic_gold", name: "Sonic Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "sonic_cheat", name: "Sonic Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    { id: "tails_basic", name: "Tails", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
+    { id: "tails_gold", name: "Tails Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "tails_cheat", name: "Tails Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },	
+
+    { id: "shadow_basic", name: "Shadow", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
+    { id: "shadow_gold", name: "Shadow Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "shadow_cheat", name: "Shadow Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    { id: "jackrabbit_basic", name: "Jackrabbit", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T4" },
+    { id: "jackrabbit_gold", name: "Jackrabbit Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "jackrabbit_cheat", name: "Jackrabbit Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+	
+    { id: "klombo_basic", name: "Klombo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
+    { id: "klombo_gold", name: "Klombo Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "klombo_cheat", name: "Klombo Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    { id: "crown_basic", name: "Coroa", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
+    { id: "crown_gold", name: "Coroa Dourada", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "crown_cheat", name: "Coroa Trapaçeira", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+	
+	{ id: "xray_basic", name: "Raio-X", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T4" },
+	{ id: "pond_basic", name: "Lagoa", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T4" },
+	{ id: "honey_basic", name: "Mel", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T4" },
+	{ id: "dumpster_basic", name: "Guaxinim", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T4" },
+	{ id: "bullet_basic", name: "Balisco", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T4" },
 ];
+
+if (typeof window !== 'undefined') {
+    window.baseSprites = baseSprites;
+}
+
