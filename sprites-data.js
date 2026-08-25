@@ -199,9 +199,9 @@ const baseSprites = [
     { id: "jackrabbit_gold", name: "Jackrabbit Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jackrabbit_cheat", name: "Jackrabbit Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
 	
-    { id: "klombo_basic", name: "Klombo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
-    { id: "klombo_gold", name: "Klombo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_cheat", name: "Klombo Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_basic", name: "Klimbo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
+    { id: "klombo_gold", name: "Klimbo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_cheat", name: "Klimbo Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "crown_basic", name: "Coroa", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
     { id: "crown_gold", name: "Coroa Dourada", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },

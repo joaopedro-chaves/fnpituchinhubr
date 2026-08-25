@@ -13,12 +13,12 @@ const CATEGORY_ORDER = ["cat1", "cat2", "cat3", "cat4", "cat5"];
 // code data sheet
 const baseCodes = [
     // --- cat1
-    { code: "Born2Play", reward: "Elemento Aventura", internalreward: "adventure_cheat", category: "cat1", active: true },
-    { code: "8BitBlast", reward: "Elemento 8-Bit", internalreward: "8bit_cheat", category: "cat1", active: true },
-    { code: "GottaGoFast", reward: "Elemento Sonic", internalreward: "sonic_cheat", category: "cat1", active: true },
-    { code: "IWannaFlyHigh", reward: "Elemento Tails", internalreward: "tails_cheat", category: "cat1", active: true },
-    { code: "Play4All", reward: "Elemento Jonesy", internalreward: "jonesy_cheat", category: "cat1", active: true },
-    { code: "GatherAndCraft", reward: "Elemento Arbusto", internalreward: "bush_cheat", category: "cat1", active: true },
+    { code: "Born2Play", reward: "Elemental Aventura", internalreward: "adventure_cheat", category: "cat1", active: true },
+    { code: "8BitBlast", reward: "Elemental 8-Bit", internalreward: "8bit_cheat", category: "cat1", active: true },
+    { code: "GottaGoFast", reward: "Elemental Sonic", internalreward: "sonic_cheat", category: "cat1", active: true },
+    { code: "IWannaFlyHigh", reward: "Elemental Tails", internalreward: "tails_cheat", category: "cat1", active: true },
+    { code: "Play4All", reward: "Elemental Jonesy", internalreward: "jonesy_cheat", category: "cat1", active: true },
+    { code: "GatherAndCraft", reward: "Elemental Arbusto", internalreward: "bush_cheat", category: "cat1", active: true },
 
     // --- cat2
     { code: "BeMoreAlien", reward: "Tela de Carregamento: Pronta para Sobrescrita", internalreward: null, category: "cat2", active: true },
@@ -26,10 +26,10 @@ const baseCodes = [
 
     // --- cat3
     { code: "OverrideXP", reward: "40,000 XP", internalreward: null, category: "cat3", active: true },
-    { code: "Magilume", reward: "2,000 Pó de Elemento", internalreward: null, category: "cat3", active: true },
-    { code: "Chispambo", reward: "2,000 Pó de Elemento", internalreward: null, category: "cat3", active: true },
-    { code: "Abgestaubt", reward: "2,000 Pó de Elemento", internalreward: null, category: "cat3", active: true },
-    { code: "PerlimPinPin", reward: "2,000 Pó de Elemento", internalreward: null, category: "cat3", active: true },
+    { code: "Magilume", reward: "2,000 Pó Elemental", internalreward: null, category: "cat3", active: true },
+    { code: "Chispambo", reward: "2,000 Pó Elemental", internalreward: null, category: "cat3", active: true },
+    { code: "Abgestaubt", reward: "2,000 Pó Elemental", internalreward: null, category: "cat3", active: true },
+    { code: "PerlimPinPin", reward: "2,000 Pó Elemental", internalreward: null, category: "cat3", active: true },
     { code: "SurviveTheNight", reward: "2 Localizadores de Código de Trapaça", internalreward: null, category: "cat3", active: true },
     { code: "FindItChat", reward: "2 Localizadores de Código de Trapaça", internalreward: null, category: "cat3", active: true },
     { code: "TakeYourHeart", reward: "2 Aceleradores de Extração", internalreward: null, category: "cat3", active: true },
@@ -37,8 +37,8 @@ const baseCodes = [
     { code: "O2Override", reward: "1 Drop de Suprimentos Llama & 1 Extrator Portátil", internalreward: null, category: "cat3", active: true },
 
     // --- cat4
-    { code: "DontBlockMe", reward: "Transforma você em um Tetrimino.", internalreward: null, category: "cat4", active: true },
-    { code: "LetsBlockAndRoll", reward: "Transforma você em um Tetrimino.", internalreward: null, category: "cat4", active: true }
+    { code: "DontBlockMe", reward: "Transforma você em um Tetris.", internalreward: null, category: "cat4", active: true },
+    { code: "LetsBlockAndRoll", reward: "Transforma você em um Tetris.", internalreward: null, category: "cat4", active: true }
     
     // --- cat5
     //{ code: "Looper1", reward: "Unknown", internalreward: null, category: "cat5", active: false },
