@@ -176,7 +176,7 @@ const baseSprites = [
     { id: "8bit_cheat", name: "8-Bit Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
 	
     { id: "stormking_basic", name: "Escoteiro da Tempestade", theme: "Básico", rarity: "Raro", unreleased: true, season: "C7T4" },
-    { id: "stormking_gold", name: "Escoteiro da Tempestade Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "stormking_gold", name: "Escoteiro da Tempestade Dourado", theme: "Dourado", rarity: "Especial", unreleased: true, season: "C7T4" },
     { id: "stormking_cheat", name: "Escoteiro da Tempestade Trapaçeiro", theme: "Trapaça", rarity: "Especial", unreleased: true, season: "C7T4" },
 
     { id: "killswitch_basic", name: "Killswitch", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
