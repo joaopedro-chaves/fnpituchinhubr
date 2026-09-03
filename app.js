@@ -16,13 +16,13 @@ const KEYS = {
     season: 'fn_state_season',
 };
 
-const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça', 'Saque'];
 const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 const UI_THEME_LABELS = { Doce: 'Doce' };
-const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA' };
-const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça' };
+const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA', Saque: 'SAQUE' };
+const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça', Saque: 'Saque' };
 const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 const CROWN_ICON = '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
@@ -77,7 +77,7 @@ const dom = {
     showUnreleased: document.getElementById('showUnreleased'),
     lowFidelity: document.getElementById('lowFidelity'),
     seasonFilter: document.getElementById('seasonFilter'),
-    openExports: document.getElementById('openExports'), // ADD THIS
+    openExports: document.getElementById('openExports'),
     exportModeSwitch: document.getElementById('exportModeSwitch'),
     exportDropdown: document.getElementById('exportDropdown'),
     exportToggle: document.getElementById('exportToggle'),
@@ -482,7 +482,7 @@ function populateThemeFilter() {
     );
     state.filters.theme = selectedTheme;
 }
-///.///////////
+
 function renderGrid() {
     let items = filterSprites();
     items = sortSprites(items, state.settings.sortOrder);

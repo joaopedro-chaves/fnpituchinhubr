@@ -59,6 +59,7 @@
                 <option value="all">Todas Tempo.</option>
                 <option value="C7T3">C7T3</option>
                 <option value="C7T4">C7T4</option>
+                <option value="C7T5">C7T5</option>
             </select>
             <label class="sr-only" for="sortOrder">Ordenar</label>
             <select id="sortOrder" class="select">
@@ -103,7 +104,10 @@
                     </div>
                 </div>
                 <button type="button" class="btn btn-accent" id="shareBtn">Compartilhar</button>
-                <a href="./codes.html" style="font-family: 'Roboto Mono'; font-weight:bold;" class="btn btn-codes" id="codesBtn">Trapaças</a>
+                <a href="./codes.html" style="font-family: 'Roboto Mono'; font-weight:bold; position: relative;" class="btn btn-codes" id="codesBtn">
+                    Trapaças
+                    <span id="codesNotification" style="position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; background-color: #ef4444; border-radius: 50%; border: 2px solid #0f141d;" hidden></span>
+                </a>
             </div>
         </div>
     </nav>
