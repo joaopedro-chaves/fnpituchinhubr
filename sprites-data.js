@@ -37,15 +37,13 @@ const baseSprites = [
     { id: "ghost_candy", name: "Fantasma de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "ghost_galaxy", name: "Fantasma Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "ghost_holofoil", name: "Fantasma Metálico", theme: "Metálico", rarity: "Especial", unreleased: false, season: "C7T3"  },
-	{ id: "ghost_gem", name: "Fantasma de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
-
+    
     { id: "dream_basic", name: "Sonho", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T3"  },
     { id: "dream_gold", name: "Sonho Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "dream_candy", name: "Sonho de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "dream_galaxy", name: "Sonho Galáctico", theme: "Galáctico", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "dream_rift", name: "Sonho Cubo", theme: "Cubo", rarity: "Especial", unreleased: false, season: "C7T3"  },
-	{ id: "dream_gem", name: "Sonho de Gema", theme: "Gema", rarity: "Especial", unreleased: true, season: "C7T3"  },
-	
+
     { id: "demon_basic", name: "Demônio", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T3"  },
     { id: "demon_gold", name: "Demônio Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T3"  },
     { id: "demon_candy", name: "Demônio de Goma", theme: "Doce", rarity: "Especial", unreleased: false, season: "C7T3"  },
