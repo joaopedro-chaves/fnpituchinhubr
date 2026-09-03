@@ -1005,7 +1005,7 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     display: grid;
     grid-template-columns: 200px 1fr auto;
     align-items: center;
-    gap: 16px;
+    gap: 94px;
     padding: 10px 14px;
     background: var(--surface-container-high);
     border: 1px solid var(--border);
