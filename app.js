@@ -16,13 +16,13 @@ const KEYS = {
     season: 'fn_state_season',
 };
 
-const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça', 'Saque'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça', 'Hacker'];
 const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 const UI_THEME_LABELS = { Doce: 'Doce' };
-const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA', Saque: 'SAQUE' };
-const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça', Saque: 'Saque' };
+const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA', Hacker: 'HACKER' };
+const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça', Hacker: 'Hacker' };
 const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 const CROWN_ICON = '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
@@ -613,6 +613,8 @@ function getRarityGradient(rarity, theme) {
         Cube: ['#4c1d95', '#1e0b3d'],
         Rift: ['#154b5e', '#04161c'],
         Quack: ['#322554', '#12091f'],
+        Trapaça: ['#441359', '#15051c'],
+        Hacker: ['#114030', '#051b14'],
     };
     return themes[theme] || themes.Basic;
 }
