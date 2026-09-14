@@ -145,87 +145,86 @@ const baseSprites = [
 	
 	{ id: "wick_basic", name: "John Wick", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T3"  },
 	
-    // ============================ C7T4 ============================
+    // ============================ C7T4 ============================ /
 
     { id: "bush_basic", name: "Arbusto", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "bush_gold", name: "Arbusto Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "bush_cheat", name: "Arbusto Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "bush_loot", name: "Arbusto Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "bush_Hacker", name: "Arbusto Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "jonesy_basic", name: "Jonesy", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "jonesy_gold", name: "Jonesy Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jonesy_cheat", name: "Jonesy Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "jonesy_loot", name: "Jonesy Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "jonesy_Hacker", name: "Jonesy Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "adventure_basic", name: "Aventureiro", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "adventure_gold", name: "Aventureiro Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "adventure_cheat", name: "Aventureiro Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "adventure_loot", name: "Aventureiro Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "adventure_Hacker", name: "Aventureiro Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
 	{ id: "8bit_basic", name: "8-Bit", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "8bit_gold", name: "8-Bit Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "8bit_cheat", name: "8-Bit Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "8bit_loot", name: "8-Bit Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "8bit_Hacker", name: "8-Bit Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 	
     { id: "stormking_basic", name: "Escoteiro da Tempestade", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "stormking_gold", name: "Escoteiro da Tempestade Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "stormking_cheat", name: "Escoteiro da Tempestade Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "stormking_loot", name: "Escoteiro da Tempestade Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "stormking_Hacker", name: "Escoteiro da Tempestade Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "killswitch_basic", name: "Killswitch", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
     { id: "killswitch_gold", name: "Killswitch Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "killswitch_cheat", name: "Killswitch Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "killswitch_loot", name: "Killswitch Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "killswitch_Hacker", name: "Killswitch Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
 	{ id: "sonic_basic", name: "Sonic", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
     { id: "sonic_gold", name: "Sonic Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "sonic_cheat", name: "Sonic Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "sonic_loot", name: "Sonic Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "sonic_Hacker", name: "Sonic Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "tails_basic", name: "Tails", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
     { id: "tails_gold", name: "Tails Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "tails_cheat", name: "Tails Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "tails_loot", name: "Tails Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "tails_Hacker", name: "Tails Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "shadow_basic", name: "Shadow", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
     { id: "shadow_gold", name: "Shadow Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "shadow_cheat", name: "Shadow Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "shadow_loot", name: "Shadow Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "shadow_Hacker", name: "Shadow Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "jackrabbit_basic", name: "Jackrabbit", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T4" },
     { id: "jackrabbit_gold", name: "Jackrabbit Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jackrabbit_cheat", name: "Jackrabbit Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "jackrabbit_loot", name: "Jackrabbit Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "jackrabbit_Hacker", name: "Jackrabbit Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 	
     { id: "klombo_basic", name: "Klimbo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
     { id: "klombo_gold", name: "Klimbo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "klombo_cheat", name: "Klimbo Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_loot", name: "Klimbo Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "klombo_Hacker", name: "Klimbo Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "crown_basic", name: "Coroa", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
     { id: "crown_gold", name: "Coroa Dourada", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "crown_cheat", name: "Coroa Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-	{ id: "crown_loot", name: "Coroa Saqueador", theme: "Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
+	{ id: "crown_Hacker", name: "Coroa Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
 	{ id: "xray_basic", name: "Raio-X", theme: "Básico", rarity: "Lendário", unreleased: false, season: "C7T4" },
     { id: "xray_gold", name: "Raio-X Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "xray_cheat", name: "Raio-X Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "xray_loot", name: "Raio-X Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id: "xray_Hacker", name: "Raio-X Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "megaman_basic", name: "Mega Men", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
 
     { id:"overshield_basic", name: "Escudão", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id:"overshield_gold", name: "Escudão Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id:"overshield_cheat", name: "Escudão Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id:"overshield_loot", name: "Escudão Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id:"overshield_Hacker", name: "Escudão Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id:"onigiri_basic", name: "Onigiri", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id:"onigiri_gold", name: "Onigiri Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id:"onigiri_cheat", name: "Onigiri Trapaça", theme: "Trapaça", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id:"onigiri_loot", name: "Onigiri Saqueador", theme: "Saque", rarity: "Especial", unreleased: true, season: "C7T4" },
+    { id:"onigiri_Hacker", name: "Onigiri Hacker", theme: "Hacker", rarity: "Especial", unreleased: false, season: "C7T4" },
 ];
 
 if (typeof window !== 'undefined') {
     window.baseSprites = baseSprites;
 }
-
