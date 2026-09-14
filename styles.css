@@ -23,7 +23,7 @@
     --surface-container: #1b202e;
     --surface-container-high: #242a3c;
     --surface-container-highest: #2e354b;
-    
+
     --border: rgba(255, 255, 255, 0.12);
     --outline: #8c9199;
     --outline-variant: #43474e;
@@ -57,23 +57,58 @@
     /* Layout & Component Specs */
     --gap: 12px;
     --gap-lg: 20px;
-    
-    /* Radius */
-    --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius: 12px;
-    --radius-lg: 16px;
-    --radius-pill: 999px;
 
-    /* Transitions */
-    --ease: cubic-bezier(0.2, 0, 0, 1);
-    --duration-short: 150ms;
-    --duration-standard: 250ms;
+    /* ── Shape Scale (MD3) ── */
+    --radius-xs:   4px;    /* corner-extra-small */
+    --radius-sm:   8px;    /* corner-small */
+    --radius:     12px;    /* corner-medium */
+    --radius-lg:  16px;    /* corner-large */
+    --radius-xl:  20px;    /* corner-large-increased */
+    --radius-2xl: 28px;    /* corner-extra-large  */
+    --radius-3xl: 48px;    /* corner-extra-extra-large */
+    --radius-pill: 9999px; /* corner-full */
 
-    /* Elevations */
+    /* ── Motion Tokens (MD3) ── */
+    --duration-short1:   50ms;
+    --duration-short2:  100ms;
+    --duration-short:   150ms;   /* legacy alias */
+    --duration-medium1: 250ms;
+    --duration-standard: 250ms;  /* legacy alias */
+    --duration-medium2: 300ms;
+    --duration-long1:   400ms;
+
+    --ease-standard:   cubic-bezier(0.2, 0, 0, 1);
+    --ease:            cubic-bezier(0.2, 0, 0, 1); /* legacy alias */
+    --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+    /* ── Elevations (MD3) ── */
+    --elevation-0: none;
     --elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
     --elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
     --elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
+    --elevation-4: 0px 6px 14px 4px rgba(0, 0, 0, 0.15), 0px 2px 4px 0px rgba(0, 0, 0, 0.30);
+
+    /* ── Additional MD3 Color Roles ── */
+    --tertiary: #efb8c8;
+    --on-tertiary: #492532;
+    --tertiary-container: #633b48;
+    --on-tertiary-container: #ffd8e4;
+
+    --surface-dim: #0d1019;
+    --surface-bright: #333944;
+    --surface-container-low: #131722;
+
+    --inverse-surface: #e3e2e6;
+    --inverse-on-surface: #2f3036;
+    --inverse-primary: #6750a4;
+
+    --scrim: rgba(0, 0, 0, 0.6);
+
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --error-container: #93000a;
+    --on-error-container: #ffdad6;
 }
 
 /* ===================================================
@@ -137,6 +172,35 @@ a:hover {
     white-space: nowrap;
     border: 0;
 }
+
+/* ===================================================
+   MD3 Typography Utility Classes
+   =================================================== */
+
+/* Display */
+.display-large  { font-size: 3.5625rem; line-height: 4rem;    font-weight: 400; letter-spacing: -0.015625rem; }
+.display-medium { font-size: 2.8125rem; line-height: 3.25rem; font-weight: 400; }
+.display-small  { font-size: 2.25rem;   line-height: 2.75rem; font-weight: 400; }
+
+/* Headline */
+.headline-large  { font-size: 2rem;    line-height: 2.5rem;  font-weight: 400; }
+.headline-medium { font-size: 1.75rem; line-height: 2.25rem; font-weight: 400; }
+.headline-small  { font-size: 1.5rem;  line-height: 2rem;    font-weight: 400; }
+
+/* Title */
+.title-large  { font-size: 1.375rem; line-height: 1.75rem; font-weight: 400; }
+.title-medium { font-size: 1rem;     line-height: 1.5rem;  font-weight: 500; letter-spacing: 0.009375rem; }
+.title-small  { font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; letter-spacing: 0.00625rem; }
+
+/* Body */
+.body-large  { font-size: 1rem;     line-height: 1.5rem;  font-weight: 400; letter-spacing: 0.03125rem; }
+.body-medium { font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; letter-spacing: 0.015625rem; }
+.body-small  { font-size: 0.75rem;  line-height: 1rem;    font-weight: 400; letter-spacing: 0.025rem; }
+
+/* Label */
+.label-large  { font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; letter-spacing: 0.00625rem; }
+.label-medium { font-size: 0.75rem;  line-height: 1rem;    font-weight: 500; letter-spacing: 0.03125rem; }
+.label-small  { font-size: 0.6875rem; line-height: 1rem;   font-weight: 500; letter-spacing: 0.03125rem; }
 
 .file-input {
     display: none;
@@ -315,9 +379,10 @@ a:hover {
 }
 
 .input:focus, .select:focus {
-    outline: none;
+    outline: 2px solid var(--primary);
+    outline-offset: 0px;
     border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
+    box-shadow: none;
 }
 
 .input {
@@ -475,8 +540,8 @@ a:hover {
 }
 
 .btn-accent:hover {
-    background: #5c0aa8;
-    color: #ffffff;
+    background: color-mix(in srgb, var(--primary-container) 85%, white 15%);
+    color: var(--on-primary-container);
 }
 
 .btn-sm {
@@ -588,13 +653,29 @@ a:hover {
     cursor: pointer;
     opacity: 0.8;
     filter: brightness(0.85) saturate(0.75);
-    transition: opacity var(--duration-standard) var(--ease), 
-                filter var(--duration-standard) var(--ease), 
-                transform var(--duration-standard) var(--ease), 
-                box-shadow var(--duration-standard) var(--ease),
-                border-color var(--duration-standard) var(--ease);
+    transition: opacity var(--duration-medium1) var(--ease-standard), 
+                filter var(--duration-medium1) var(--ease-standard), 
+                transform var(--duration-medium1) var(--ease-decelerate), 
+                box-shadow var(--duration-medium1) var(--ease-standard),
+                border-color var(--duration-short2) var(--ease-standard);
     box-shadow: var(--elevation-1);
 }
+
+/* MD3 State Layer — card hover/focus overlay */
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+    transition: opacity var(--duration-short2) var(--ease-standard);
+}
+
+.card:hover::before { opacity: 0.06; }
+.card:focus-visible::before { opacity: 0.1; }
 
 .card:hover {
     opacity: 0.85;
@@ -634,6 +715,7 @@ a:hover {
     position: relative;
     overflow: hidden;
     border-bottom: 1px solid var(--border);
+    z-index: 1;
 }
 
 .card-display::before {
@@ -666,6 +748,8 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
 }
 
 .card-name span {
@@ -843,7 +927,7 @@ a:hover {
 .rarity-Mítico .card-rarity { background: var(--mythic); color: var(--mythic-text); }
 .rarity-Especial .card-rarity {
     background: linear-gradient(90deg, #51f7cc, #e374ee, #b5f69e);
-    color: #000;
+    color: #000; /* Intentional: ensures contrast on rainbow gradient */
 }
 
 /* ===================================================
@@ -883,7 +967,7 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    color: #c8ffc5;
+    color: var(--collected); /* Hacker/cheat page accent — green matches theme */
 }
 
 .codes-toolbar .toolbar-row {
@@ -1005,7 +1089,7 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     display: grid;
     grid-template-columns: 200px 1fr auto;
     align-items: center;
-    gap: 94px;
+    gap: var(--gap);
     padding: 10px 14px;
     background: var(--surface-container-high);
     border: 1px solid var(--border);
@@ -1147,13 +1231,14 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     left: 50%;
     transform: translateX(-50%) translateY(calc(100% + 40px));
     padding: 12px 24px;
-    background: var(--surface-container-high);
-    border: 1px solid var(--border);
+    background: var(--inverse-surface);
+    color: var(--inverse-on-surface);
+    border: none;
     border-radius: var(--radius-sm);
     font-size: 14px;
     font-weight: 500;
     box-shadow: var(--elevation-3);
-    transition: transform var(--duration-standard) var(--ease);
+    transition: transform var(--duration-medium2) var(--ease-decelerate);
     z-index: 1000;
     pointer-events: none;
     display: flex;
@@ -1166,7 +1251,7 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
 }
 
 .toast-success { border-left: 4px solid var(--collected); }
-.toast-error { border-left: 4px solid var(--missing); }
+.toast-error   { border-left: 4px solid var(--error); }
 
 /* ===================================================
    Footer
