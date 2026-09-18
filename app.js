@@ -16,13 +16,13 @@ const KEYS = {
     season: 'fn_state_season',
 };
 
-const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaça', 'Hacker'];
+const THEME_ORDER = ['Básico', 'Dourado', 'Doce', 'Galáctico', 'Gema', 'Metálico', 'Cubo', 'Rift', 'Pato', 'Trapaceiro', 'Trapaça', 'Hacker de Saque', 'Hacker', 'Caçador de Recompensas'];
 const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
 const STATUS_FILTERS = ['all', 'owned', 'missing'];
 const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 const UI_THEME_LABELS = { Doce: 'Doce' };
-const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaça: 'TRAPAÇA', Hacker: 'HACKER' };
-const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaça: 'Trapaça', Hacker: 'Hacker' };
+const EXPORT_THEME_LABELS = { Básico: 'NORMAL', Doce: 'DOCE', Trapaceiro: 'TRAPACEIRO', Trapaça: 'TRAPAÇA', 'Hacker de Saque': 'HACKER', Hacker: 'HACKER', 'Caçador de Recompensas': 'CAÇADOR' };
+const TRADE_THEME_LABELS = { Básico: 'Base', Doce: 'Doce', Trapaceiro: 'Trapaceiro', Trapaça: 'Trapaça', 'Hacker de Saque': 'Hacker de Saque', Hacker: 'Hacker', 'Caçador de Recompensas': 'Caçador de Recompensas' };
 const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 const CROWN_ICON = '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
@@ -496,7 +496,8 @@ function renderGrid() {
         const card = document.createElement('div');
         card.dataset.id = sprite.id;
 
-        const classes = ['card', `rarity-${sprite.rarity}`, `theme-${sprite.theme}`];
+        const themeClass = `theme-${sprite.theme.replace(/\s+/g, '-')}`;
+        const classes = ['card', `rarity-${sprite.rarity}`, themeClass];
         if (obtained) classes.push('obtained');
         if (mastered) classes.push('mastered');
         card.className = classes.join(' ');
@@ -548,19 +549,22 @@ function buildCardHTML(sprite, obtained, mastered) {
         <div class="card-display">
             ${crownDisplay}
             <img src="${imgPath}" alt="${safeName}" loading="lazy">
-            <div class="card-season">${safeSeasonName}</div>
-            <div class="card-rarity">${safeRarity}</div>
+            <div class="card-tags">
+                <div class="card-rarity">${safeRarity}</div>
+                <div class="card-season">${safeSeasonName}</div>
+            </div>
         </div>
         <div class="card-name"><span>${safeName}</span></div>`;
 }
 
 function fitCardNames() {
-    dom.grid.querySelectorAll('.card-name span').forEach(span => {
-        const parent = span.parentElement;
-        if (!parent || parent.clientWidth === 0) return;
-        let size = 14;
+    dom.grid.querySelectorAll('.card-name').forEach(cardName => {
+        const span = cardName.querySelector('span');
+        if (!span || cardName.clientWidth === 0) return;
+        const maxH = cardName.clientHeight - 4;
+        let size = 12;
         span.style.fontSize = size + 'px';
-        while (span.scrollWidth > parent.clientWidth && size > 8) {
+        while ((span.scrollHeight > maxH || span.scrollWidth > cardName.clientWidth - 4) && size > 9) {
             size -= 0.5;
             span.style.fontSize = size + 'px';
         }
@@ -613,8 +617,15 @@ function getRarityGradient(rarity, theme) {
         Cube: ['#4c1d95', '#1e0b3d'],
         Rift: ['#154b5e', '#04161c'],
         Quack: ['#322554', '#12091f'],
+        Trapaceiro: ['#441359', '#15051c'],
         Trapaça: ['#441359', '#15051c'],
+        'Hacker de Saque': ['#114030', '#051b14'],
         Hacker: ['#114030', '#051b14'],
+        'Caçador de Recompensas': ['#3b1c1c', '#170606'],
+        Básico: ['#1c2436', '#0c0f17'], Dourado: ['#61460b', '#241a02'],
+        Doce: ['#6b183f', '#260514'], Galáctico: ['#1f1145', '#080314'],
+        Gema: ['#114c47', '#041a18'], Metálico: ['#204454', '#09171f'],
+        Pato: ['#322554', '#12091f'], Cubo: ['#4c1d95', '#1e0b3d'],
     };
     return themes[theme] || themes.Basic;
 }

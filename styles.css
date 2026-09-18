@@ -59,26 +59,37 @@
     --gap-lg: 20px;
 
     /* ── Shape Scale (MD3) ── */
-    --radius-xs:   4px;    /* corner-extra-small */
-    --radius-sm:   8px;    /* corner-small */
-    --radius:     12px;    /* corner-medium */
-    --radius-lg:  16px;    /* corner-large */
-    --radius-xl:  20px;    /* corner-large-increased */
-    --radius-2xl: 28px;    /* corner-extra-large  */
-    --radius-3xl: 48px;    /* corner-extra-extra-large */
-    --radius-pill: 9999px; /* corner-full */
+    --radius-xs: 4px;
+    /* corner-extra-small */
+    --radius-sm: 8px;
+    /* corner-small */
+    --radius: 12px;
+    /* corner-medium */
+    --radius-lg: 16px;
+    /* corner-large */
+    --radius-xl: 20px;
+    /* corner-large-increased */
+    --radius-2xl: 28px;
+    /* corner-extra-large  */
+    --radius-3xl: 48px;
+    /* corner-extra-extra-large */
+    --radius-pill: 9999px;
+    /* corner-full */
 
     /* ── Motion Tokens (MD3) ── */
-    --duration-short1:   50ms;
-    --duration-short2:  100ms;
-    --duration-short:   150ms;   /* legacy alias */
+    --duration-short1: 50ms;
+    --duration-short2: 100ms;
+    --duration-short: 150ms;
+    /* legacy alias */
     --duration-medium1: 250ms;
-    --duration-standard: 250ms;  /* legacy alias */
+    --duration-standard: 250ms;
+    /* legacy alias */
     --duration-medium2: 300ms;
-    --duration-long1:   400ms;
+    --duration-long1: 400ms;
 
-    --ease-standard:   cubic-bezier(0.2, 0, 0, 1);
-    --ease:            cubic-bezier(0.2, 0, 0, 1); /* legacy alias */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease: cubic-bezier(0.2, 0, 0, 1);
+    /* legacy alias */
     --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
     --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
 
@@ -115,7 +126,9 @@
    Reset & Base
    =================================================== */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -146,7 +159,8 @@ button {
     touch-action: manipulation;
 }
 
-input, select {
+input,
+select {
     font: inherit;
     color: inherit;
 }
@@ -178,29 +192,108 @@ a:hover {
    =================================================== */
 
 /* Display */
-.display-large  { font-size: 3.5625rem; line-height: 4rem;    font-weight: 400; letter-spacing: -0.015625rem; }
-.display-medium { font-size: 2.8125rem; line-height: 3.25rem; font-weight: 400; }
-.display-small  { font-size: 2.25rem;   line-height: 2.75rem; font-weight: 400; }
+.display-large {
+    font-size: 3.5625rem;
+    line-height: 4rem;
+    font-weight: 400;
+    letter-spacing: -0.015625rem;
+}
+
+.display-medium {
+    font-size: 2.8125rem;
+    line-height: 3.25rem;
+    font-weight: 400;
+}
+
+.display-small {
+    font-size: 2.25rem;
+    line-height: 2.75rem;
+    font-weight: 400;
+}
 
 /* Headline */
-.headline-large  { font-size: 2rem;    line-height: 2.5rem;  font-weight: 400; }
-.headline-medium { font-size: 1.75rem; line-height: 2.25rem; font-weight: 400; }
-.headline-small  { font-size: 1.5rem;  line-height: 2rem;    font-weight: 400; }
+.headline-large {
+    font-size: 2rem;
+    line-height: 2.5rem;
+    font-weight: 400;
+}
+
+.headline-medium {
+    font-size: 1.75rem;
+    line-height: 2.25rem;
+    font-weight: 400;
+}
+
+.headline-small {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 400;
+}
 
 /* Title */
-.title-large  { font-size: 1.375rem; line-height: 1.75rem; font-weight: 400; }
-.title-medium { font-size: 1rem;     line-height: 1.5rem;  font-weight: 500; letter-spacing: 0.009375rem; }
-.title-small  { font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; letter-spacing: 0.00625rem; }
+.title-large {
+    font-size: 1.375rem;
+    line-height: 1.75rem;
+    font-weight: 400;
+}
+
+.title-medium {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.009375rem;
+}
+
+.title-small {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.00625rem;
+}
 
 /* Body */
-.body-large  { font-size: 1rem;     line-height: 1.5rem;  font-weight: 400; letter-spacing: 0.03125rem; }
-.body-medium { font-size: 0.875rem; line-height: 1.25rem; font-weight: 400; letter-spacing: 0.015625rem; }
-.body-small  { font-size: 0.75rem;  line-height: 1rem;    font-weight: 400; letter-spacing: 0.025rem; }
+.body-large {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.03125rem;
+}
+
+.body-medium {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.015625rem;
+}
+
+.body-small {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.025rem;
+}
 
 /* Label */
-.label-large  { font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; letter-spacing: 0.00625rem; }
-.label-medium { font-size: 0.75rem;  line-height: 1rem;    font-weight: 500; letter-spacing: 0.03125rem; }
-.label-small  { font-size: 0.6875rem; line-height: 1rem;   font-weight: 500; letter-spacing: 0.03125rem; }
+.label-large {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.00625rem;
+}
+
+.label-medium {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.03125rem;
+}
+
+.label-small {
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.03125rem;
+}
 
 .file-input {
     display: none;
@@ -359,7 +452,8 @@ a:hover {
 
 /* ── Material Outlined Input & Select ── */
 
-.input, .select {
+.input,
+.select {
     height: 44px;
     padding: 0 16px;
     background: var(--surface);
@@ -374,11 +468,13 @@ a:hover {
     color: var(--text-muted);
 }
 
-.input:hover, .select:hover {
+.input:hover,
+.select:hover {
     border-color: var(--text);
 }
 
-.input:focus, .select:focus {
+.input:focus,
+.select:focus {
     outline: 2px solid var(--primary);
     outline-offset: 0px;
     border-color: var(--primary);
@@ -622,13 +718,33 @@ a:hover {
     flex-shrink: 0;
 }
 
-.dot-collected { background: var(--collected); }
-.dot-missing { background: var(--missing); }
-.dot-unmastered { background: var(--unmastered); }
-.dot-mastered { background: var(--mastered); }
-.dot-trade { background: linear-gradient(135deg, var(--mastered), var(--collected)); }
-.dot-backup { background: var(--text-muted); }
-.dot-text { background: var(--text-soft); }
+.dot-collected {
+    background: var(--collected);
+}
+
+.dot-missing {
+    background: var(--missing);
+}
+
+.dot-unmastered {
+    background: var(--unmastered);
+}
+
+.dot-mastered {
+    background: var(--mastered);
+}
+
+.dot-trade {
+    background: linear-gradient(135deg, var(--mastered), var(--collected));
+}
+
+.dot-backup {
+    background: var(--text-muted);
+}
+
+.dot-text {
+    background: var(--text-soft);
+}
 
 /* ===================================================
    Sprite Grid
@@ -653,11 +769,11 @@ a:hover {
     cursor: pointer;
     opacity: 0.8;
     filter: brightness(0.85) saturate(0.75);
-    transition: opacity var(--duration-medium1) var(--ease-standard), 
-                filter var(--duration-medium1) var(--ease-standard), 
-                transform var(--duration-medium1) var(--ease-decelerate), 
-                box-shadow var(--duration-medium1) var(--ease-standard),
-                border-color var(--duration-short2) var(--ease-standard);
+    transition: opacity var(--duration-medium1) var(--ease-standard),
+        filter var(--duration-medium1) var(--ease-standard),
+        transform var(--duration-medium1) var(--ease-decelerate),
+        box-shadow var(--duration-medium1) var(--ease-standard),
+        border-color var(--duration-short2) var(--ease-standard);
     box-shadow: var(--elevation-1);
 }
 
@@ -674,8 +790,13 @@ a:hover {
     transition: opacity var(--duration-short2) var(--ease-standard);
 }
 
-.card:hover::before { opacity: 0.06; }
-.card:focus-visible::before { opacity: 0.1; }
+.card:hover::before {
+    opacity: 0.06;
+}
+
+.card:focus-visible::before {
+    opacity: 0.1;
+}
 
 .card:hover {
     opacity: 0.85;
@@ -744,7 +865,8 @@ a:hover {
 .card-name {
     text-align: center;
     background: var(--surface-container-highest);
-    min-height: 38px;
+    height: 44px;
+    padding: 4px 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -753,15 +875,19 @@ a:hover {
 }
 
 .card-name span {
-    display: block;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
-    line-height: 1.3;
+    line-height: 1.25;
     color: var(--text);
+    overflow: hidden;
 }
 
 /* Obtained accent lines */
@@ -787,9 +913,20 @@ a:hover {
     border-radius: var(--radius-xs);
 }
 
-.card-badge.collected { background: var(--collected); color: #003300; }
-.card-badge.mastered-badge { background: var(--mastered); color: #332600; }
-.card-badge.unreleased-badge { background: var(--unreleased-color); color: #fff; }
+.card-badge.collected {
+    background: var(--collected);
+    color: #003300;
+}
+
+.card-badge.mastered-badge {
+    background: var(--mastered);
+    color: #332600;
+}
+
+.card-badge.unreleased-badge {
+    background: var(--unreleased-color);
+    color: #fff;
+}
 
 /* Crown SVG icon styling */
 .crown-icon {
@@ -832,6 +969,7 @@ a:hover {
     .card-crown {
         opacity: 0.85;
     }
+
     .card-crown .crown-icon {
         fill: var(--mastered);
     }
@@ -853,56 +991,116 @@ a:hover {
     fill: var(--mastered);
 }
 
-/* Rarity tag */
-.card-rarity {
+/* Bottom Tags Container (Rarity + Season) */
+.card-tags {
     position: absolute;
     bottom: -1px;
     left: -1px;
+    right: -1px;
     z-index: 3;
-    padding: 3px 14px 3px 6px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    pointer-events: none;
+    line-height: 1;
+}
+
+/* Rarity tag */
+.card-rarity {
+    padding: 3px 12px 3px 6px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 0 100%);
+    flex-shrink: 0;
+    z-index: 2;
 }
 
 /* Season tag */
 .card-season {
-    position: absolute;
-    bottom: -1px;
-    right: -1px;
-    z-index: 3;
-    padding: 3px 14px 3px 60px;
+    padding: 3px 8px 3px 12px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     background-color: var(--surface-container-high);
     color: var(--text);
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 0 100%);
+    flex: 1;
+    text-align: right;
+    margin-left: -58px;
+    white-space: nowrap;
 }
 
 /* ===================================================
    Rarity Backgrounds
    =================================================== */
 
-.rarity-Raro .card-display { background: linear-gradient(180deg, var(--rare), var(--rare-deep)); }
-.rarity-Épico .card-display { background: linear-gradient(180deg, var(--epic), var(--epic-deep)); }
-.rarity-Lendário .card-display { background: linear-gradient(180deg, var(--legendary), var(--legendary-deep)); }
-.rarity-Mítico .card-display { background: linear-gradient(180deg, var(--mythic), var(--mythic-deep)); }
+.rarity-Raro .card-display {
+    background: linear-gradient(180deg, var(--rare), var(--rare-deep));
+}
 
-.rarity-Especial.theme-Básico .card-display { background: linear-gradient(180deg, #1c2436, #0c0f17); }
-.rarity-Especial.theme-Dourado .card-display { background: linear-gradient(180deg, #61460b, #241a02); }
-.rarity-Especial.theme-Doce .card-display { background: linear-gradient(180deg, #6b183f, #260514); }
-.rarity-Especial.theme-Galáctico .card-display { background: linear-gradient(180deg, #1f1145, #080314); }
-.rarity-Especial.theme-Gema .card-display { background: linear-gradient(180deg, #114c47, #041a18); }
-.rarity-Especial.theme-Metálico .card-display { background: linear-gradient(180deg, #204454, #09171f); }
-.rarity-Especial.theme-Pato .card-display { background: linear-gradient(180deg, #322554, #12091f); }
-.rarity-Especial.theme-Cubo .card-display { background: linear-gradient(180deg, #4c1d95, #1e0b3d); }
-.rarity-Especial.theme-Rift .card-display { background: linear-gradient(180deg, #154b5e, #04161c); }
-.rarity-Especial.theme-Trapaça .card-display { background: linear-gradient(180deg, #441359, #15051c); }
-.rarity-Especial.theme-Hacker .card-display { background: linear-gradient(180deg, #114030, #051b14); }
+.rarity-Épico .card-display {
+    background: linear-gradient(180deg, var(--epic), var(--epic-deep));
+}
+
+.rarity-Lendário .card-display {
+    background: linear-gradient(180deg, var(--legendary), var(--legendary-deep));
+}
+
+.rarity-Mítico .card-display {
+    background: linear-gradient(180deg, var(--mythic), var(--mythic-deep));
+}
+
+.rarity-Especial.theme-Básico .card-display {
+    background: linear-gradient(180deg, #1c2436, #0c0f17);
+}
+
+.rarity-Especial.theme-Dourado .card-display {
+    background: linear-gradient(180deg, #61460b, #241a02);
+}
+
+.rarity-Especial.theme-Doce .card-display {
+    background: linear-gradient(180deg, #6b183f, #260514);
+}
+
+.rarity-Especial.theme-Galáctico .card-display {
+    background: linear-gradient(180deg, #1f1145, #080314);
+}
+
+.rarity-Especial.theme-Gema .card-display {
+    background: linear-gradient(180deg, #114c47, #041a18);
+}
+
+.rarity-Especial.theme-Metálico .card-display {
+    background: linear-gradient(180deg, #204454, #09171f);
+}
+
+.rarity-Especial.theme-Pato .card-display {
+    background: linear-gradient(180deg, #322554, #12091f);
+}
+
+.rarity-Especial.theme-Cubo .card-display {
+    background: linear-gradient(180deg, #4c1d95, #1e0b3d);
+}
+
+.rarity-Especial.theme-Rift .card-display {
+    background: linear-gradient(180deg, #154b5e, #04161c);
+}
+
+.rarity-Especial.theme-Trapaça .card-display,
+.rarity-Especial.theme-Trapaceiro .card-display {
+    background: linear-gradient(180deg, #441359, #15051c);
+}
+
+.rarity-Especial.theme-Hacker .card-display,
+.rarity-Especial.theme-Hacker-de-Saque .card-display {
+    background: linear-gradient(180deg, #114030, #051b14);
+}
+
+.rarity-Especial.theme-Caçador-de-Recompensas .card-display {
+    background: linear-gradient(180deg, #3b1c1c, #170606);
+}
 
 /* Special rarity rainbow overlay */
 .rarity-Especial .card-display::after {
@@ -910,24 +1108,40 @@ a:hover {
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-        rgba(81, 247, 204, 0.2) 0%,
-        rgba(125, 169, 252, 0.15) 28%,
-        rgba(227, 116, 238, 0.25) 62%,
-        rgba(255, 182, 161, 0.15) 85%,
-        rgba(181, 246, 158, 0.2) 100%
-    );
+            rgba(81, 247, 204, 0.2) 0%,
+            rgba(125, 169, 252, 0.15) 28%,
+            rgba(227, 116, 238, 0.25) 62%,
+            rgba(255, 182, 161, 0.15) 85%,
+            rgba(181, 246, 158, 0.2) 100%);
     pointer-events: none;
     z-index: 1;
 }
 
 /* Rarity tag colors */
-.rarity-Raro .card-rarity { background: var(--rare); color: var(--rare-text); }
-.rarity-Épico .card-rarity { background: var(--epic); color: var(--epic-text); }
-.rarity-Lendário .card-rarity { background: var(--legendary); color: var(--legendary-text); }
-.rarity-Mítico .card-rarity { background: var(--mythic); color: var(--mythic-text); }
+.rarity-Raro .card-rarity {
+    background: var(--rare);
+    color: var(--rare-text);
+}
+
+.rarity-Épico .card-rarity {
+    background: var(--epic);
+    color: var(--epic-text);
+}
+
+.rarity-Lendário .card-rarity {
+    background: var(--legendary);
+    color: var(--legendary-text);
+}
+
+.rarity-Mítico .card-rarity {
+    background: var(--mythic);
+    color: var(--mythic-text);
+}
+
 .rarity-Especial .card-rarity {
     background: linear-gradient(90deg, #51f7cc, #e374ee, #b5f69e);
-    color: #000; /* Intentional: ensures contrast on rainbow gradient */
+    color: #000;
+    /* Intentional: ensures contrast on rainbow gradient */
 }
 
 /* ===================================================
@@ -935,26 +1149,79 @@ a:hover {
    =================================================== */
 
 body.low-fidelity .card-display::before,
-body.low-fidelity .rarity-Especial .card-display::after { display: none; }
+body.low-fidelity .rarity-Especial .card-display::after {
+    display: none;
+}
 
-body.low-fidelity .rarity-Raro .card-display { background: var(--rare); }
-body.low-fidelity .rarity-Épico .card-display { background: var(--epic); }
-body.low-fidelity .rarity-Lendário .card-display { background: var(--legendary); }
-body.low-fidelity .rarity-Mítico .card-display { background: var(--mythic); }
+body.low-fidelity .rarity-Raro .card-display {
+    background: var(--rare);
+}
 
-body.low-fidelity .rarity-Especial.theme-Básico .card-display { background: #1c2436; }
-body.low-fidelity .rarity-Especial.theme-Dourado .card-display { background: #61460b; }
-body.low-fidelity .rarity-Especial.theme-Doce .card-display { background: #6b183f; }
-body.low-fidelity .rarity-Especial.theme-Galáctico .card-display { background: #1f1145; }
-body.low-fidelity .rarity-Especial.theme-Gema .card-display { background: #114c47; }
-body.low-fidelity .rarity-Especial.theme-Metálico .card-display { background: #204454; }
-body.low-fidelity .rarity-Especial.theme-Pato .card-display { background: #322554; }
-body.low-fidelity .rarity-Especial.theme-Cubo .card-display { background: #4c1d95; }
-body.low-fidelity .rarity-Especial.theme-Rift .card-display { background: #154b5e; }
-body.low-fidelity .rarity-Especial.theme-Trapaça .card-display { background: #441359; }
-body.low-fidelity .rarity-Especial.theme-Hacker .card-display { background: #114030; }
+body.low-fidelity .rarity-Épico .card-display {
+    background: var(--epic);
+}
 
-body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
+body.low-fidelity .rarity-Lendário .card-display {
+    background: var(--legendary);
+}
+
+body.low-fidelity .rarity-Mítico .card-display {
+    background: var(--mythic);
+}
+
+body.low-fidelity .rarity-Especial.theme-Básico .card-display {
+    background: #1c2436;
+}
+
+body.low-fidelity .rarity-Especial.theme-Dourado .card-display {
+    background: #61460b;
+}
+
+body.low-fidelity .rarity-Especial.theme-Doce .card-display {
+    background: #6b183f;
+}
+
+body.low-fidelity .rarity-Especial.theme-Galáctico .card-display {
+    background: #1f1145;
+}
+
+body.low-fidelity .rarity-Especial.theme-Gema .card-display {
+    background: #114c47;
+}
+
+body.low-fidelity .rarity-Especial.theme-Metálico .card-display {
+    background: #204454;
+}
+
+body.low-fidelity .rarity-Especial.theme-Pato .card-display {
+    background: #322554;
+}
+
+body.low-fidelity .rarity-Especial.theme-Cubo .card-display {
+    background: #4c1d95;
+}
+
+body.low-fidelity .rarity-Especial.theme-Rift .card-display {
+    background: #154b5e;
+}
+
+body.low-fidelity .rarity-Especial.theme-Trapaça .card-display,
+body.low-fidelity .rarity-Especial.theme-Trapaceiro .card-display {
+    background: #441359;
+}
+
+body.low-fidelity .rarity-Especial.theme-Hacker .card-display,
+body.low-fidelity .rarity-Especial.theme-Hacker-de-Saque .card-display {
+    background: #114030;
+}
+
+body.low-fidelity .rarity-Especial.theme-Caçador-de-Recompensas .card-display {
+    background: #3b1c1c;
+}
+
+body.low-fidelity .rarity-Especial .card-rarity {
+    background: #51f7cc;
+}
 
 /* ==========================================================================
    Codes Subpage
@@ -967,7 +1234,8 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     align-items: center;
     gap: 8px;
     text-decoration: none;
-    color: var(--collected); /* Hacker/cheat page accent — green matches theme */
+    color: var(--collected);
+    /* Hacker/cheat page accent — green matches theme */
 }
 
 .codes-toolbar .toolbar-row {
@@ -1211,10 +1479,12 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
         opacity: 0;
         transform: translate(-50%, 0) scale(0.85);
     }
+
     20% {
         opacity: 1;
         transform: translate(calc(-50% + var(--target-x, 0px) * 0.2), calc(var(--target-y, -40px) * 0.2)) scale(1.05);
     }
+
     100% {
         opacity: 0;
         transform: translate(calc(-50% + var(--target-x, 0px)), var(--target-y, -40px)) scale(0.9);
@@ -1250,8 +1520,13 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
     transform: translateX(-50%) translateY(0);
 }
 
-.toast-success { border-left: 4px solid var(--collected); }
-.toast-error   { border-left: 4px solid var(--error); }
+.toast-success {
+    border-left: 4px solid var(--collected);
+}
+
+.toast-error {
+    border-left: 4px solid var(--error);
+}
 
 /* ===================================================
    Footer
@@ -1283,20 +1558,59 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
    =================================================== */
 
 @media (max-width: 768px) {
-    .app { padding: var(--gap); }
+    .app {
+        padding: var(--gap);
+    }
 
-    .header { flex-direction: column; align-items: stretch; gap: var(--gap); }
-    .brand { justify-content: center; }
-    .progress-group { flex-direction: column; gap: var(--gap); }
-    .progress-item { min-width: 0; }
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--gap);
+    }
 
-    .toolbar-row { flex-wrap: wrap; gap: 8px; }
-    .input { width: 100%; flex: 1; min-width: 120px; }
-    .select { flex: 1; min-width: 120px; }
-    .pills { flex: 1; }
-    .pill { flex: 1; text-align: center; }
-    .switches { width: 100%; gap: 12px; }
-    
+    .brand {
+        justify-content: center;
+    }
+
+    .progress-group {
+        flex-direction: column;
+        gap: var(--gap);
+    }
+
+    .progress-item {
+        min-width: 0;
+    }
+
+    .toolbar-row {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .input {
+        width: 100%;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .select {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .pills {
+        flex: 1;
+    }
+
+    .pill {
+        flex: 1;
+        text-align: center;
+    }
+
+    .switches {
+        width: 100%;
+        gap: 12px;
+    }
+
     .actions {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1304,10 +1618,17 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
         margin-left: 0;
         gap: var(--gap);
     }
-    
+
     .actions .btn,
-    .actions .dropdown { width: 100%; min-width: 0; }
-    .actions .dropdown .btn { width: 100%; }
+    .actions .dropdown {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .actions .dropdown .btn {
+        width: 100%;
+    }
+
     .actions .dropdown-menu {
         left: 0;
         right: auto;
@@ -1315,7 +1636,10 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
         max-width: calc(100vw - var(--gap) * 2);
     }
 
-    .grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+        gap: 12px;
+    }
 
     /* Codes responsive adjustments */
     .codes-toolbar .toolbar-row {
@@ -1323,15 +1647,18 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
         align-items: stretch;
         gap: 12px;
     }
+
     .codes-search-input {
         width: 100%;
         max-width: 100%;
     }
+
     .codes-actions {
         width: 100%;
         justify-content: flex-start;
         flex-wrap: wrap;
     }
+
     .code-row {
         grid-template-columns: 160px 1fr auto;
         gap: 12px;
@@ -1339,29 +1666,43 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
 }
 
 @media (max-width: 640px) {
-    .toolbar-row { align-items: stretch; }
-    .switch { min-height: 36px; }
-    .btn, .input, .select { min-height: 44px; }
+    .toolbar-row {
+        align-items: stretch;
+    }
+
+    .switch {
+        min-height: 36px;
+    }
+
+    .btn,
+    .input,
+    .select {
+        min-height: 44px;
+    }
 
     .codes-actions {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
     }
+
     .codes-progress-badge {
         grid-column: 1 / -1;
         justify-content: center;
     }
+
     .code-row {
         grid-template-columns: 1fr auto;
         gap: 10px;
         padding: 12px;
     }
+
     .code-reward {
         grid-column: 1 / -1;
         order: 2;
         padding-top: 4px;
     }
+
     .code-card-actions {
         grid-column: 2;
         order: 1;
@@ -1369,45 +1710,70 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
 }
 
 @media (max-width: 480px) {
-    html, body {
+
+    html,
+    body {
         max-width: 100vw;
         overflow-x: hidden;
     }
+
     .app {
         width: 100vw;
         max-width: 100vw;
         overflow-x: hidden;
     }
-    .brand h1 { font-size: 20px; }
-    
+
+    .brand h1 {
+        font-size: 20px;
+    }
+
     .toolbar-row:first-child {
         width: 100%;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: var(--gap);
     }
-    .toolbar-row:first-child > * {
+
+    .toolbar-row:first-child>* {
         min-width: 0;
         max-width: 100%;
     }
+
     .toolbar-row:first-child .input,
     .toolbar-row:first-child .pills {
         grid-column: 1 / -1;
     }
-    .toolbar-row:first-child .pills { width: 100%; }
+
+    .toolbar-row:first-child .pills {
+        width: 100%;
+    }
+
     .toolbar-row:first-child .select {
         width: 100%;
         min-width: 0;
     }
-    
-    .switches { gap: 10px; }
+
+    .switches {
+        gap: 10px;
+    }
+
     .switch {
         gap: 6px;
         font-size: 13px;
     }
-    .pill { padding-inline: 12px; }
-    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .card-name span { font-size: 10px; }
+
+    .pill {
+        padding-inline: 12px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .card-name span {
+        font-size: 10px;
+    }
 
     .code-row {
         display: flex;
@@ -1415,27 +1781,38 @@ body.low-fidelity .rarity-Especial .card-rarity { background: #51f7cc; }
         align-items: stretch;
         gap: 10px;
     }
+
     .code-value {
         width: 100%;
         justify-content: center;
     }
+
     .code-card-actions {
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
     }
+
     .code-card-actions .btn {
         width: 100%;
     }
 }
 
 @media (max-width: 380px) {
-    .actions { grid-template-columns: 1fr; }
-    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .actions {
+        grid-template-columns: 1fr;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
