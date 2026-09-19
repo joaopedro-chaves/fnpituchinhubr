@@ -1,0 +1,31 @@
+export const RARITIES = {
+    'Raro': { slug: 'raro', gradient: ['#104273', '#081a35'], tag: ['#004A8E', '#00FFFB'] },
+    'Épico': { slug: 'epico', gradient: ['#4d1566', '#1e052c'], tag: ['#511D7F', '#ED2BFF'] },
+    'Lendário': { slug: 'lendario', gradient: ['#743e0a', '#301702'], tag: ['#8E4122', '#FBC568'] },
+    'Mítico': { slug: 'mitico', gradient: ['#70531C', '#2E2107'], tag: ['#80622A', '#fff1A9'] },
+    'Especial': { slug: 'especial', gradient: null, tag: ['#51f7cc', '#000000'] },
+}
+
+export const THEME = {
+    'Básico': { order: 0, slug: 'basico', gradient: ['#1c2436', '#0c0f17'], exportLabel: 'NORMAL' },
+    'Dourado': { order: 1, slug: 'dourado', gradient: ['#61460b', '#241a02'], exportLabel: 'DOURADO' },
+    'Doce': { order: 2, slug: 'doce', gradient: ['#6b183f', '#260514'], exportLabel: 'DOCE' },
+    'Galático': { order: 3, slug: 'galactico', gradient: ['#1f1145', '#080314'], exportLabel: 'GALÁTICO' },
+    'Gema': { order: 4, slug: 'gema', gradient: ['#114c47', '#041a18'], exportLabel: 'GEMA' },
+    'Metálico': { order: 5, slug: 'metalico', gradient: ['#204454', '#09171f'], exportLabel: 'METÁLICO' },
+    'Cubo': { order: 6, slug: 'cubo', gradient: ['#4c1d95', '#1e0b3d'], exportLabel: 'CUBO' },
+    'Pato': { order: 7, slug: 'pato', gradient: ['#322554', '#12091f'], exportLabel: 'PATO' },
+    'Trapaciero': { order: 8, slug: 'trapaciero', gradient: ['#441359', '#15051c'], exportLabel: 'TRAPACEIRO' },
+    'Hacker de Saque': { order: 9, slug: 'hacker', gradient: ['#114030', '#051b14'], exportLabel: 'HACKER' },
+    'Caçador de Recompensas': { order: 10, slug: 'cacador', gradient: ['#3b1c1c', '#170606'], exportLabel: 'CAÇADOR' },
+}
+
+export function gradientFor(sprite) {
+    const rarity = RARITIES[sprite.rarity];
+    if (!rarity) throw new Error(`Raridade desconhecida no sprite: ${sprite.id} | ${sprite.rarity}`);
+    if (rarity.gradient) return rarity.gradient;
+
+    const theme = THEME[sprite.theme];
+    if (!theme) throw new Error(`Tema desconhecido no sprite: ${sprite.id} | ${sprite.theme}`);
+    return theme.gradient;
+}
