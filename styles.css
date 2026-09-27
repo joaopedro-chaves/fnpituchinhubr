@@ -1090,7 +1090,7 @@ a:hover {
 
 .rarity-Especial.theme-Trapaça .card-display,
 .rarity-Especial.theme-Trapaceiro .card-display {
-    background: linear-gradient(180deg, #441359, #15051c);
+    background: linear-gradient(180deg, #295913, #0f360a);
 }
 
 .rarity-Especial.theme-Hacker .card-display,
@@ -1207,7 +1207,7 @@ body.low-fidelity .rarity-Especial.theme-Rift .card-display {
 
 body.low-fidelity .rarity-Especial.theme-Trapaça .card-display,
 body.low-fidelity .rarity-Especial.theme-Trapaceiro .card-display {
-    background: #441359;
+    background: #155913;
 }
 
 body.low-fidelity .rarity-Especial.theme-Hacker .card-display,
