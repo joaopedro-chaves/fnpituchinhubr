@@ -126,7 +126,7 @@ function saveCollection() {
 }
 
 function isIOS() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
@@ -144,7 +144,7 @@ function load() {
     state.filters.status = STATUS_FILTERS.includes(savedStatus) ? savedStatus : 'all';
 
     state.settings.hideMastered = localStorage.getItem(KEYS.hideMastered) === 'true';
-    
+
     let savedSort = localStorage.getItem(KEYS.sortOrder);
     if (!savedSort) {
         const legacyGroup = localStorage.getItem('fn_state_group_theme');
@@ -166,19 +166,19 @@ function applyStateToDOM() {
     dom.showUnreleased.checked = state.settings.showUnreleased;
     dom.lowFidelity.checked = state.settings.lowFidelity;
     document.body.classList.toggle('low-fidelity', state.settings.lowFidelity);
-   
+
     if (isIOS()) {
-            if (dom.exportModeSwitch) dom.exportModeSwitch.hidden = true;
-        } else {
-            dom.openExports.checked = !state.settings.openExports;
-            const switchLabel = dom.exportModeSwitch.querySelector('span');
-            if (switchLabel) {
-                switchLabel.textContent = dom.openExports.checked ? 'Download Exports' : 'Open Exports';
-            }
+        if (dom.exportModeSwitch) dom.exportModeSwitch.hidden = true;
+    } else {
+        dom.openExports.checked = !state.settings.openExports;
+        const switchLabel = dom.exportModeSwitch.querySelector('span');
+        if (switchLabel) {
+            switchLabel.textContent = dom.openExports.checked ? 'Download Exports' : 'Open Exports';
         }
+    }
 
 
-   
+
     dom.statusPills.querySelectorAll('.pill').forEach(pill => {
         const match =
             (pill.dataset.status === 'all' && state.filters.status === 'all') ||
@@ -221,7 +221,7 @@ function decodeBits(code) {
 function compressCollection(sprites, obtained, mastered) {
     let obtainedBits = '';
     let masteredBits = '';
-    
+
     sprites.forEach(s => {
         obtainedBits += obtained.includes(s.id) ? '1' : '0';
         masteredBits += mastered.includes(s.id) ? '1' : '0';
@@ -238,7 +238,7 @@ function compressCollection(sprites, obtained, mastered) {
 
 function decompressCollection(sprites, code) {
     if (!code) return { obtained: [], mastered: [] };
-    
+
     const parts = code.split('~');
     if (parts.length > 2) {
         return { obtained: [], mastered: [] };
@@ -313,9 +313,9 @@ function getSeasonData(season) {
 
 function getReleasedSprites() {
     return baseSprites.filter(sprite => {
-            if (sprite.unreleased) return false;
-            if (state.filters.season !== 'all' && (sprite.season || 'none') !== state.filters.season) return false;
-            return true;
+        if (sprite.unreleased) return false;
+        if (state.filters.season !== 'all' && (sprite.season || 'none') !== state.filters.season) return false;
+        return true;
     });
 }
 
@@ -520,7 +520,7 @@ function renderGrid() {
 
 function buildCardHTML(sprite, obtained, mastered) {
     const rarityLabel = sprite.rarity === 'Mythic' ? 'MYTHIC' : sprite.rarity.toUpperCase();
-    const imgPath = `sprites/${encodeURIComponent(sprite.id)}.png`;
+    const imgPath = `sprites/${encodeURIComponent(sprite.id)}.webp`;
     const safeName = escapeHTML(sprite.name);
     const safeRarity = escapeHTML(rarityLabel);
     const seasonData = getSeasonData(sprite.season);
@@ -799,7 +799,7 @@ function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
         if (isGrayed) {
             try {
                 ctx.filter = 'grayscale(100%) brightness(48%)';
-            } catch {}
+            } catch { }
         }
         const maxDim = w * 0.82;
         const ratio = Math.min(maxDim / img.width, maxDim / img.height);
@@ -941,7 +941,7 @@ function exportImage(mode) {
     const releasedSprites = getReleasedSprites();
     const imagesToLoad = [
         { id: 'mascot', src: 'siteimages/staticsprite.png' },
-        ...releasedSprites.map(sprite => ({ id: sprite.id, src: `sprites/${encodeURIComponent(sprite.id)}.png` })),
+        ...releasedSprites.map(sprite => ({ id: sprite.id, src: `sprites/${encodeURIComponent(sprite.id)}.webp` })),
     ];
 
     toast('Gerando imagem...', 'info');
@@ -1011,7 +1011,7 @@ function exportImage(mode) {
             canvasW = Math.max(layout.minCanvasW, gridWidth + layout.border * 2 + layout.sidePad * 2);
             useCompactHeader = canvasW < layout.compactHeaderW;
             headerH = useCompactHeader ? layout.compactHeaderH : layout.headerH;
-            
+
             canvasH = layout.border * 2 + headerH + layout.sidePad + gridHeight + layout.sidePad + layout.footerH;
             startGridY = layout.border + headerH + layout.sidePad;
         }
@@ -1237,7 +1237,7 @@ function exportImage(mode) {
 
         // Export mode
         const shouldOpenInNewTab = isIOS() || state.settings.openExports;
-        
+
         if (shouldOpenInNewTab) {
             canvas.toBlob((blob) => {
                 if (!blob) {
