@@ -1,6 +1,6 @@
 A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortnite
 
-![Elemental sprites](siteimages/staticsprite.png)
+![Elemental sprites](https://github.com/joaopedro-chaves/fnpituchinhubr/blob/main/siteimages/staticsprite.webp)
 
 > Modificação do projeto [fnsprites](https://github.com/staticvacant/fnsprites) para português e organização do layout (material design).
 
