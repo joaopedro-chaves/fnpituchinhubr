@@ -68,28 +68,13 @@ export function buildCardHTML(sprite, obtained, mastered, viewMode = false) {
     return `${badge}${crownAction}
         <div class="card-display">
             ${crownDisplay}
-            <img src="${imgPath}" alt="${safeName}" loading="lazy">
+            <img src="${imgPath}" alt="${safeName}" loading="eager" fetchpriority="high" width="80" height="80">
             <div class="card-tags">
                 <div class="card-rarity">${safeRarity}</div>
                 <div class="card-season">${safeSeasonName}</div>
             </div>
         </div>
         <div class="card-name"><span>${safeName}</span></div>`;
-}
-
-export function fitCardNames(gridEl) {
-    if (!gridEl) return;
-    gridEl.querySelectorAll('.card-name').forEach(cardName => {
-        const span = cardName.querySelector('span');
-        if (!span || cardName.clientWidth === 0) return;
-        const maxH = cardName.clientHeight - 4;
-        let size = 12;
-        span.style.fontSize = size + 'px';
-        while ((span.scrollHeight > maxH || span.scrollWidth > cardName.clientWidth - 4) && size > 9) {
-            size -= 0.5;
-            span.style.fontSize = size + 'px';
-        }
-    });
 }
 
 export function renderGrid(dom, state, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
@@ -128,7 +113,6 @@ export function renderGrid(dom, state, sprites = (typeof baseSprites !== 'undefi
 
     dom.grid.innerHTML = '';
     dom.grid.appendChild(frag);
-    fitCardNames(dom.grid);
     updateProgress(dom, state, sprites);
 }
 

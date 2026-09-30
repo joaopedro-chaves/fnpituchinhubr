@@ -598,8 +598,10 @@ a:hover {
 .actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
     margin-left: auto;
+    min-height: 40px;
 }
 
 .btn {
@@ -754,6 +756,7 @@ a:hover {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
     gap: 16px;
+    min-height: 400px;
 }
 
 /* ===================================================
@@ -1542,6 +1545,8 @@ body.low-fidelity .rarity-Especial .card-rarity {
     color: var(--text-muted);
     border-top: 1px solid var(--border);
     margin-top: 60px;
+    min-height: 58px;
+    box-sizing: border-box;
 }
 
 .footer a {
