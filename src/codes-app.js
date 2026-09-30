@@ -195,7 +195,7 @@ function renderCodes() {
             row.className = `code-row ${isRedeemed ? 'redeemed' : ''}`;
 
             const thumbnailHtml = item.internalreward
-                ? `<img src="sprites/${encodeURIComponent(item.internalreward)}.png" class="code-reward-icon" alt="" width="32" height="32" loading="lazy">`
+                ? `<img src="sprites/${encodeURIComponent(item.internalreward)}.webp" class="code-reward-icon" alt="" width="32" height="32" loading="lazy">`
                 : '';
 
             row.innerHTML = `
