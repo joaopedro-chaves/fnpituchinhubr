@@ -46,8 +46,8 @@ export const dom = {
     exportModeSwitch: document.getElementById('exportModeSwitch'),
     exportDropdown: document.getElementById('exportDropdown'),
     exportToggle: document.getElementById('exportToggle'),
-    copyDropdown: document.getElementById('copyDropdown'),
-    copyToggle: document.getElementById('copyToggle'),
+    settingsDropdown: document.getElementById('settingsDropdown'),
+    settingsToggle: document.getElementById('settingsToggle'),
     shareBtn: document.getElementById('shareBtn'),
     copyTradeTextBtn: document.getElementById('copyTradeTextBtn'),
     copyTradeGridBtn: document.getElementById('copyTradeGridBtn'),
@@ -126,12 +126,8 @@ export function applyStateToDOM() {
 
     if (isIOS()) {
         if (dom.exportModeSwitch) dom.exportModeSwitch.hidden = true;
-    } else if (dom.openExports && dom.exportModeSwitch) {
-        dom.openExports.checked = !state.settings.openExports;
-        const switchLabel = dom.exportModeSwitch.querySelector('span');
-        if (switchLabel) {
-            switchLabel.textContent = dom.openExports.checked ? 'Download Exports' : 'Open Exports';
-        }
+    } else if (dom.openExports) {
+        dom.openExports.checked = state.settings.openExports;
     }
 
     if (dom.statusPills) {
@@ -270,26 +266,22 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
     switchKeys.forEach(key => {
         if (!dom[key]) return;
         dom[key].addEventListener('change', () => {
-            if (key === 'openExports') {
-                state.settings.openExports = !dom.openExports.checked;
-                persist(KEYS.openExports, state.settings.openExports);
-                applyStateToDOM();
-            } else {
-                state.settings[key] = dom[key].checked;
-                persist(KEYS[key], state.settings[key]);
-                if (key === 'lowFidelity') {
-                    document.body.classList.toggle('low-fidelity', dom[key].checked);
-                }
+            state.settings[key] = dom[key].checked;
+            persist(KEYS[key], state.settings[key]);
+            if (key === 'lowFidelity') {
+                document.body.classList.toggle('low-fidelity', dom[key].checked);
+            }
+            if (key !== 'openExports') {
                 renderGrid(dom, state, sprites);
             }
         });
     });
 
-    /* Export dropdown */
+    /* Export dropdown (handles images, copy trades, backup, import) */
     if (dom.exportToggle && dom.exportDropdown) {
         dom.exportToggle.addEventListener('click', e => {
             e.stopPropagation();
-            setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
+            setDropdownOpen(dom.settingsDropdown, dom.settingsToggle, false);
             setDropdownOpen(dom.exportDropdown, dom.exportToggle, !dom.exportDropdown.classList.contains('open'));
         });
 
@@ -301,21 +293,32 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
         });
     }
 
-    /* Copy dropdown */
-    if (dom.copyToggle && dom.copyDropdown) {
-        dom.copyToggle.addEventListener('click', e => {
+    /* Settings dropdown */
+    if (dom.settingsToggle && dom.settingsDropdown) {
+        dom.settingsToggle.addEventListener('click', e => {
             e.stopPropagation();
             setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
-            setDropdownOpen(dom.copyDropdown, dom.copyToggle, !dom.copyDropdown.classList.contains('open'));
+            setDropdownOpen(
+                dom.settingsDropdown,
+                dom.settingsToggle,
+                !dom.settingsDropdown.classList.contains('open')
+            );
         });
+
+        const menu = dom.settingsDropdown.querySelector('.dropdown-menu');
+        if (menu) {
+            menu.addEventListener('click', e => {
+                e.stopPropagation();
+            });
+        }
     }
 
     document.addEventListener('click', e => {
         if (dom.exportDropdown && !dom.exportDropdown.contains(e.target)) {
             setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
         }
-        if (dom.copyDropdown && !dom.copyDropdown.contains(e.target)) {
-            setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
+        if (dom.settingsDropdown && !dom.settingsDropdown.contains(e.target)) {
+            setDropdownOpen(dom.settingsDropdown, dom.settingsToggle, false);
         }
     });
 
@@ -350,6 +353,7 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
                 return;
             }
             dom.importInput.click();
+            setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
         });
 
         dom.importInput.addEventListener('change', e => {
@@ -395,7 +399,7 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
                 'Lista de trocas copiada para a área de transferência!',
                 'Falha ao copiar lista de trocas'
             );
-            setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
+            setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
         });
     }
 
@@ -407,7 +411,7 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
                 'Grelha de trocas copiada para a área de transferência!',
                 'Falha ao copiar grelha de trocas'
             );
-            setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
+            setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
         });
     }
 

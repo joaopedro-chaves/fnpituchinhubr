@@ -85,19 +85,12 @@
                 </div>
             </div>
             <div class="toolbar-row">
-                <div class="switches">
-                    <label class="switch"><input type="checkbox" id="hideMastered"><span>Ocultar
-                            dominados</span></label>
-                    <label class="switch"><input type="checkbox" id="showUnreleased"><span>Não lançados</span></label>
-                    <label class="switch"><input type="checkbox" id="lowFidelity"><span>Baixo Desempenho</span></label>
-                    <label class="switch" id="exportModeSwitch"><input type="checkbox" id="openExports"><span>Baixar
-                            exportações</span></label>
-                </div>
                 <div class="actions">
                     <div class="dropdown" id="exportDropdown">
                         <button type="button" class="btn" id="exportToggle" aria-haspopup="true"
                             aria-expanded="false">Exportar</button>
-                        <div class="dropdown-menu" aria-label="Opções de exportação">
+                        <div class="dropdown-menu" aria-label="Opções de exportação e dados">
+                            <div class="dropdown-section-title">Imagens</div>
                             <button type="button" data-export="collected"><span
                                     class="dot dot-collected"></span>Coleção</button>
                             <button type="button" data-export="missing"><span
@@ -108,25 +101,39 @@
                                     class="dot dot-mastered"></span>Dominados</button>
                             <button type="button" data-export="trade"><span class="dot dot-trade"></span>Trocar</button>
                             <hr class="dropdown-divider">
+                            <div class="dropdown-section-title">Trocas</div>
+                            <button type="button" id="copyTradeTextBtn"><span class="dot dot-text"></span>Lista de
+                                trocas (texto)</button>
+                            <button type="button" id="copyTradeGridBtn"><span class="dot dot-text"></span>Grade de
+                                trocas (texto)</button>
+                            <hr class="dropdown-divider">
+                            <div class="dropdown-section-title">Dados</div>
                             <button type="button" id="exportBackupBtn"><span class="dot dot-backup"></span>Backup dos
+                                dados (JSON)</button>
+                            <button type="button" id="importBtn"><span class="dot dot-collected"></span>Importar
                                 dados (JSON)</button>
                         </div>
                     </div>
-                    <button type="button" class="btn" id="importBtn">Importar</button>
                     <input type="file" id="importInput" class="file-input" accept=".json">
-                    <div class="dropdown" id="copyDropdown">
-                        <button type="button" class="btn" id="copyToggle" aria-haspopup="true"
-                            aria-expanded="false">Copiar lista de trocas</button>
-                        <div class="dropdown-menu" aria-label="Opções de cópia">
-                            <button type="button" id="copyTradeTextBtn"><span class="dot dot-text"></span>Lista de
-                                trocas (texto)</button>
-                            <button type="button" id="copyTradeGridBtn"><span class="dot dot-backup"></span>Grade de
-                                trocas (texto)</button>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-accent" id="shareBtn">Compartilhar</button>
+                    <button type="button" class="btn" id="shareBtn">Compartilhar</button>
                     <a href="./codes.html" style="font-family: 'Roboto Mono'; font-weight:bold;" class="btn btn-codes"
                         id="codesBtn">Trapaças</a>
+                    <div class="dropdown" id="settingsDropdown">
+                        <button type="button" class="btn" id="settingsToggle" aria-haspopup="true"
+                            aria-expanded="false">Configurações</button>
+                        <div class="dropdown-menu" aria-label="Opções de configuração">
+                            <div class="switches">
+                                <label class="switch"><input type="checkbox" id="hideMastered"><span>Ocultar
+                                        dominados</span></label>
+                                <label class="switch"><input type="checkbox" id="showUnreleased"><span>Não
+                                        lançados</span></label>
+                                <label class="switch"><input type="checkbox" id="lowFidelity"><span>Baixo
+                                        Desempenho</span></label>
+                                <label class="switch" id="exportModeSwitch"><input type="checkbox"
+                                        id="openExports"><span>Abrir exportações</span></label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>

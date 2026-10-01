@@ -18,6 +18,7 @@ export const THEME = {
     'Trapaceiro': { order: 8, slug: 'trapaceiro', gradient: ['#441359', '#15051c'], exportLabel: 'TRAPACEIRO' },
     'Hacker de Saque': { order: 9, slug: 'hacker', gradient: ['#114030', '#051b14'], exportLabel: 'HACKER' },
     'Caçador de Recompensas': { order: 10, slug: 'cacador', gradient: ['#3b1c1c', '#170606'], exportLabel: 'CAÇADOR' },
+    'Doce ou Travessura': { order: 11, slug: 'doce-ou-travessura', gradient: ['#592510', '#240a02'], exportLabel: 'DOCE OU TRAVESSURA' },
 }
 
 export function gradientFor(sprite) {

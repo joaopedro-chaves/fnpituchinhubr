@@ -57,7 +57,7 @@ export function setDropdownOpen(dropdown, toggle, open) {
 export function closeDropdowns(dom) {
     if (!dom) return;
     setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
-    setDropdownOpen(dom.copyDropdown, dom.copyToggle, false);
+    setDropdownOpen(dom.settingsDropdown, dom.settingsToggle, false);
 }
 
 export function drawRoundRect(ctx, x, y, width, height, radius = 8) {
