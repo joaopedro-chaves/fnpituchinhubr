@@ -417,8 +417,8 @@ export function bindEvents(sprites = (typeof baseSprites !== 'undefined' ? baseS
 
     /* Share */
     if (dom.shareBtn) {
-        dom.shareBtn.addEventListener('click', () => {
-            const code = compressCollection(sprites, state.obtained, state.mastered);
+        dom.shareBtn.addEventListener('click', async () => {
+            const code = await compressCollection(state.obtained, state.mastered);
             const url = `${location.origin}${location.pathname}?c=${code}`;
             copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
         });
@@ -445,7 +445,7 @@ export function updateCodesNotification() {
     }
 }
 
-export function init() {
+export async function init() {
     const sprites = typeof baseSprites !== 'undefined' ? baseSprites : [];
     if (!sprites || sprites.length === 0) {
         console.error('baseSprites is not defined.');
@@ -457,7 +457,7 @@ export function init() {
 
     if (shareCode) {
         state.viewMode = true;
-        const decoded = decompressCollection(sprites, shareCode);
+        const decoded = await decompressCollection(sprites, shareCode);
         state.obtained = decoded.obtained;
         state.mastered = decoded.mastered;
         if (dom.viewBanner) dom.viewBanner.hidden = false;

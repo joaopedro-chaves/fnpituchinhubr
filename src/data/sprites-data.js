@@ -152,6 +152,7 @@ const baseSprites = [
     { id: "bush_hacker", name: "Arbusto Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "bush_hunter", name: "Arbusto Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "bush_tricktreat", name: "Arbusto Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "bush_quack", name: "Arbusto Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "jonesy_basic", name: "Jonesy", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "jonesy_gold", name: "Jonesy Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -159,6 +160,7 @@ const baseSprites = [
     { id: "jonesy_hacker", name: "Jonesy Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jonesy_hunter", name: "Jonesy Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jonesy_tricktreat", name: "Jonesy Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "jonesy_quack", name: "Jonesy Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "adventure_basic", name: "Aventureiro", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "adventure_gold", name: "Aventureiro Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -166,6 +168,7 @@ const baseSprites = [
     { id: "adventure_hacker", name: "Aventureiro Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "adventure_hunter", name: "Aventureiro Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "adventure_tricktreat", name: "Aventureiro Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "adventure_quack", name: "Aventureiro Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "8bit_basic", name: "8-Bit", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "8bit_gold", name: "8-Bit Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -222,6 +225,7 @@ const baseSprites = [
     { id: "klombo_hacker", name: "Klimbo Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "klombo_hunter", name: "Klimbo Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "klombo_tricktreat", name: "Klimbo Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_quack", name: "Klimbo Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "crown_basic", name: "Coroa", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
     { id: "crown_gold", name: "Coroa Dourada", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -315,6 +319,21 @@ const baseSprites = [
     { id: "spooky_hacker", name: "Disparada Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "spooky_hunter", name: "Disparada Caçadora de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "spooky_tricktreat", name: "Disparada Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "spooky_gem", name: "Disparada de Gema", theme: "Gema", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    { id: "honey_basic", name: "Mel", theme: "Básico", rarity: "Épico", unreleased: false, season: "C7T4" },
+    { id: "honey_gold", name: "Mel Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "honey_cheat", name: "Mel Trapaceiro", theme: "Trapaceiro", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "honey_hacker", name: "Mel Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "honey_hunter", name: "Mel Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "honey_tricktreat", name: "Mel Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    { id: "onewish_basic", name: "Desejo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
+    { id: "onewish_gold", name: "Desejo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "onewish_cheat", name: "Desejo Trapaceiro", theme: "Trapaceiro", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "onewish_hacker", name: "Desejo Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "onewish_hunter", name: "Desejo Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "onewish_tricktreat", name: "Desejo Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
 ];
 
 if (typeof window !== 'undefined') {
