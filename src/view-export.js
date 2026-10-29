@@ -4,6 +4,7 @@
 
 import { EXPORT_LAYOUT, TRACKER_URL } from './share-order.js';
 import { toast, isIOS, drawRoundRect } from './dom-utils.js';
+import { getSpriteImageUrl, getMascotImageUrl } from './assets/spriteImages.js';
 import {
     getReleasedSprites,
     sortSprites,
@@ -377,8 +378,8 @@ export function exportImage(mode, state, sprites = (typeof baseSprites !== 'unde
 
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const imagesToLoad = [
-        { id: 'mascot', src: 'siteimages/staticsprite.png' },
-        ...releasedSprites.map(sprite => ({ id: sprite.id, src: `sprites/${encodeURIComponent(sprite.id)}.webp` })),
+        { id: 'mascot', src: getMascotImageUrl() },
+        ...releasedSprites.map(sprite => ({ id: sprite.id, src: getSpriteImageUrl(sprite.id) })),
     ];
 
     toast('Gerando imagem...', 'info');

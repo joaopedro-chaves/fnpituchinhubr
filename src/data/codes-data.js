@@ -1,5 +1,5 @@
 // display strings
-const codeCategories = {
+export const codeCategories = {
     cat1: "Elementais",
     cat2: "Telas e Itens do Lobby",
     cat3: "Recursos Consumíveis",
@@ -8,10 +8,10 @@ const codeCategories = {
 };
 
 // category ordering
-const CATEGORY_ORDER = ["cat1", "cat2", "cat3", "cat4", "cat5"];
+export const CATEGORY_ORDER = ["cat1", "cat2", "cat3", "cat4", "cat5"];
 
 // code data sheet
-const baseCodes = [
+export const baseCodes = [
     // --- cat1 - Sprites
     { code: "Born2Play", reward: "Elemental Aventura", internalreward: "adventure_cheat", category: "cat1", active: true },
     { code: "8BitBlast", reward: "Elemental 8-Bit", internalreward: "8bit_cheat", category: "cat1", active: true },
