@@ -15,6 +15,21 @@ Devido ao encerramento da funcionalidade de elementais por parte da Epic Games, 
 
 Caso contrário, o projeto será atualizado.
 
+## Desenvolvimento (React + Vite)
+
+Esta branch (`react`) contém a versão em React do projeto. Veja o passo a passo da migração, com comparativos "Antes vs. Depois", em [MIGRACAO_REACT.md](./MIGRACAO_REACT.md).
+
+```bash
+npm install        # instala as dependências
+npm run dev        # servidor de desenvolvimento com HMR
+npm run build      # build de produção em dist/
+npm run preview    # serve o build localmente
+npm run lint       # ESLint
+npm test           # testes (Vitest)
+```
+
+Rotas: `#/` (catálogo) e `#/codes` (códigos e trapaças). O antigo `codes.html` redireciona para `#/codes`.
+
 ## Otimizações e Design
 
 O design foi otimizado para uma experiência mais agradável e moderna, com um layout mais limpo e organizado. Foram utilizadas as diretrizes do Material Design para criar uma interface intuitiva e responsiva, que funciona bem em diferentes dispositivos.

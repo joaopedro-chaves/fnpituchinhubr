@@ -10,33 +10,44 @@ A aplicação anteriormente baseada em manipulação imperativa do DOM (`documen
 
 ```text
 fnpituchinhubr/
-├── index.html                  # Entrada principal montando <div id="root"></div> e /src/main.jsx
-├── codes.html                  # Entrada secundária compatível com links diretos para Trapaças
-├── package.json                # Scripts do Vite (dev, build, preview) e dependências React
-├── vite.config.js              # Configuração do bundler Vite e múltiplos pontos de entrada
+├── index.html                  # Entrada única: <div id="root"></div> + /src/main.jsx
+├── public/
+│   └── codes.html              # Redirecionador do link antigo para a rota #/codes
+├── package.json                # Scripts: dev, build, preview, lint, test
+├── vite.config.js              # Vite + plugin React + configuração do Vitest
+├── eslint.config.js            # ESLint 9 (flat config) com regras de React e Hooks
 ├── styles.css                  # Folha de estilos global preservada integralmente
 ├── sprites/                    # Centenas de imagens .webp dos pituchinhos
 ├── siteimages/                 # Ícone estático da marca (staticsprite.webp)
+├── .github/workflows/
+│   ├── ci.yml                  # CI: lint + testes + build
+│   └── release-sprites.yml     # Automação de lançamento de sprites (já existente)
 └── src/
     ├── main.jsx                # Bootstrap do React (createRoot)
-    ├── App.jsx                 # Componente raiz (orquestra rotas, estado e ações de exportação)
-    ├── assets/
-    │   └── spriteImages.js     # Mapeamento dinâmico de imagens .webp com import.meta.glob
+    ├── App.jsx                 # Somente as rotas (HashRouter): "/" e "/codes"
+    ├── pages/
+    │   └── CatalogPage.jsx     # Página do catálogo: liga hook, filtros, grade e exportações
     ├── components/
-    │   ├── Header.jsx          # Cabeçalho e barras de progresso reativas (Coleção e Dominados)
-    │   ├── FilterBar.jsx       # Barra de busca, selects de filtro/ordenação, pílulas e menus
-    │   ├── SpriteCard.jsx      # Componente reutilizável de cartão de pituchinho
-    │   └── CodesPage.jsx       # Página completa de Códigos de Trapaça e Recompensas
+    │   ├── Header.jsx          # Cabeçalho e barras de progresso reativas
+    │   ├── FilterBar.jsx       # Busca, selects, pílulas e menus
+    │   ├── SpriteCard.jsx      # Cartão reutilizável de pituchinho
+    │   └── CodesPage.jsx       # Página de Códigos de Trapaça e Recompensas
     ├── hooks/
-    │   └── useTrackerState.js  # Hook customizado com useState, useMemo e persistência localStorage
+    │   └── useTrackerState.js  # Estado (useState/useMemo) + persistência (useEffect)
+    ├── assets/
+    │   └── spriteImages.js     # Mapeamento de imagens .webp com import.meta.glob
     ├── data/
-    │   ├── sprites-data.js     # Catálogo estático exportado via ES Modules (`export const baseSprites`)
-    │   └── codes-data.js       # Lista de códigos exportada via ES Modules (`export const baseCodes`)
-    ├── query.js                # Funções puras de filtragem, ordenação e contagem (100% reaproveitadas)
-    ├── share-order.js          # Constantes de ordenação, chaves de localStorage e layout
-    ├── share-codec.js          # Compressão/descompressão de links compartilháveis (?c=...)
-    ├── view-export.js          # Geração de imagens em Canvas 2D e textos de troca
-    └── dom-utils.js            # Utilitários de toast, área de transferência e Canvas
+    │   ├── sprites-data.js     # `export const baseSprites`
+    │   └── codes-data.js       # `export const baseCodes`
+    ├── taxonomy.js             # FONTE ÚNICA de temas e raridades (ordem, rótulos, cores)
+    ├── query.js                # Funções puras de filtro, ordenação, contagem e validação
+    ├── share-order.js          # Chaves de localStorage, layout de exportação, filtros
+    ├── share-codec.js          # Links compartilháveis (?c=...) v1 e v2
+    ├── share-legacy-order.js   # Ordem congelada do formato v1 (não editar)
+    ├── view-export.js          # Imagens em Canvas 2D e textos de troca
+    ├── dom-utils.js            # Toast, área de transferência e Canvas
+    ├── query.test.js           # Testes de filtros, ordenação e integridade dos dados
+    └── share-codec.test.js     # Testes do codec de compartilhamento
 ```
 
 ---
@@ -57,6 +68,10 @@ npm run build
 
 # 4. Testar localmente o build de produção
 npm run preview
+
+# 5. Verificar qualidade do código
+npm run lint
+npm test
 ```
 
 ---
@@ -248,3 +263,171 @@ export function getSpriteImageUrl(spriteId) {
 
 **Por que a mudança?**
 - Garante que todas as imagens `.webp` sejam reconhecidas pelo grafo de dependências do Vite durante o `vite build`, funcionando perfeitamente tanto nos cartões `<SpriteCard />` quanto na exportação em `<canvas>` (`src/view-export.js`).
+
+---
+
+## 4. Refinamentos Pós-Migração
+
+Depois da migração inicial, uma análise do projeto apontou 8 pontos de melhoria. Todos foram aplicados e estão registrados abaixo.
+
+| # | Problema | Solução | Onde |
+|---|---|---|---|
+| 1 | ~1.000 linhas de código morto do Vanilla JS | Arquivos removidos | `main.js`, `view-grid.js`, `app.js`, `codes-app.js` |
+| 2 | Efeitos colaterais dentro de atualizadores de estado | Atualizadores puros + persistência em `useEffect` | `useTrackerState.js` |
+| 3 | 279 imagens com `loading="eager"` e `fetchPriority="high"` | Prioridade só para os primeiros 24 cards | `SpriteCard.jsx`, `CatalogPage.jsx` |
+| 4 | Coleção local "piscava" antes da compartilhada | Modo somente leitura já nasce vazio quando há `?c=` | `useTrackerState.js` |
+| 5 | Temas e raridades duplicados em 3 arquivos | `taxonomy.js` como fonte única | `taxonomy.js`, `share-order.js`, `query.js`, `view-export.js` |
+| 6 | Sprite placeholder com campos vazios | Componente tolerante + validação de dados em teste | `SpriteCard.jsx`, `getSpriteDataIssues` |
+| 7 | Navegação improvisada com `#codes` e `pathname` | `react-router-dom` com `HashRouter` | `App.jsx`, `public/codes.html` |
+| 8 | Sem ESLint, testes, CI ou README atualizado | ESLint 9, Vitest, workflow de CI e README | `eslint.config.js`, `*.test.js`, `ci.yml` |
+
+### 4.1. Código morto removido
+
+O app React não importa mais nenhum destes arquivos, então foram apagados. Além deles, saíram os helpers de DOM que só serviam ao Vanilla JS (`escapeHTML`, `setDropdownOpen`, `closeDropdowns`) e o fallback global `typeof baseSprites !== 'undefined'` dos parâmetros padrão.
+
+**Por que:** código que ninguém chama confunde quem está estudando o projeto ("qual destes arquivos manda?") e faz o ESLint e a revisão perderem tempo.
+
+### 4.2. Atualizadores puros e persistência em `useEffect`
+
+#### Antes
+```javascript
+setObtained(prev => {
+    const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+    persistValue(KEYS.obtained, next);              // efeito colateral dentro do atualizador
+    if (prev.includes(id)) setMastered(/* ... */);  // setState dentro de setState
+    return next;
+});
+```
+
+#### Depois
+```javascript
+// obtained e mastered no MESMO estado: a atualização é atômica
+setCollection(prev =>
+    prev.obtained.includes(id)
+        ? { obtained: prev.obtained.filter(x => x !== id),
+            mastered: prev.mastered.filter(x => x !== id) }
+        : { ...prev, obtained: [...prev.obtained, id] }
+);
+
+// A gravação acontece em um efeito, depois da renderização
+useEffect(() => {
+    if (viewMode) return;   // nunca sobrescreve a coleção local ao ver um link
+    persistValue(KEYS.obtained, collection.obtained);
+    persistValue(KEYS.mastered, collection.mastered);
+}, [collection, viewMode]);
+```
+
+**Por que:** o React pode executar a função passada a `setState` mais de uma vez (o `StrictMode` faz isso de propósito em desenvolvimento). Por isso ela precisa ser **pura**: só calcula o próximo estado. Gravar no `localStorage` é um efeito colateral e pertence ao `useEffect`. Juntar `obtained` e `mastered` em um só estado também elimina o `setState` aninhado.
+
+### 4.3. Carregamento de imagens
+
+```jsx
+// SpriteCard.jsx
+<img
+    loading={priority ? 'eager' : 'lazy'}
+    fetchPriority={priority ? 'high' : 'auto'}
+    /* ... */
+/>
+
+// CatalogPage.jsx — só os 24 primeiros cards (acima da dobra) têm prioridade
+<SpriteCard priority={index < PRIORITY_CARDS} /* ... */ />
+```
+
+**Por que:** pedir prioridade alta para as 279 imagens equivale a não priorizar nenhuma. Agora o navegador carrega primeiro o que o usuário vê e adia o resto.
+
+### 4.4. Coleção compartilhada sem "piscar"
+
+#### Antes
+O estado nascia com a coleção salva localmente e, só depois que a decodificação assíncrona do `?c=` terminava, era trocado pela coleção compartilhada. Por um instante o usuário via os próprios dados dentro do link de outra pessoa.
+
+#### Depois
+```javascript
+const [initial] = useState(() => {
+    const shareCode = getShareCode();
+    return {
+        shareCode,
+        collection: shareCode ? EMPTY_COLLECTION : getStoredCollection(sprites),
+    };
+});
+const [viewMode, setViewMode] = useState(Boolean(initial.shareCode));
+const [loadingShared, setLoadingShared] = useState(Boolean(initial.shareCode));
+```
+
+**Por que:** a decisão "estou em modo compartilhado?" é tomada de forma síncrona, na primeira renderização. A grade expõe `aria-busy` enquanto a coleção é decodificada.
+
+### 4.5. Taxonomia única (`taxonomy.js`)
+
+#### Antes
+Ordem e rótulos de tema/raridade estavam em `share-order.js` (`THEME_ORDER`, `EXPORT_THEME_LABELS`...), cores duplicadas em `taxonomy.js` e de novo em `getRarityGradient` e `getRarityTagColors` de `view-export.js`, com temas legados (`Rift`, `Trapaça`, `Hacker`) e tabelas em inglês que os dados nunca usam.
+
+#### Depois
+```javascript
+// taxonomy.js — o único lugar a editar para criar um tema novo
+export const THEME = {
+    'Básico': { order: 0, gradient: [...], exportLabel: 'NORMAL', tradeLabel: 'Base' },
+    'Dourado': { order: 1, gradient: [...], exportLabel: 'DOURADO' },
+    // ...
+};
+export const THEME_ORDER = byOrder(THEME);        // derivado
+export const RARITY_ORDER = byOrder(RARITIES);    // derivado
+```
+
+`query.js` (`getExportThemeLabel`, `getTradeThemeLabel`) e `view-export.js` (cores do card exportado) agora leem desse módulo.
+
+**Por que:** com uma fonte única, adicionar um tema não exige lembrar de três arquivos. Durante a unificação apareceu um erro de digitação (`'GALÁTICO'`, faltava o C) que passaria a aparecer nas imagens exportadas; foi corrigido para `'GALÁCTICO'`, o texto que o app já gerava antes.
+
+### 4.6. Sprites incompletos e validação de dados
+
+- `SpriteCard` tolera `name`, `theme` e `rarity` vazios (usa o `id` como nome), então um placeholder como `chesthunter_basic` não quebra a tela se for exibido com "Não lançados" ligado.
+- `getSpriteDataIssues(sprites)` em `query.js` valida os dados: ids únicos e, para sprites **lançados**, nome preenchido, tema e raridade conhecidos.
+- Um teste roda essa validação nos dados reais. Se alguém lançar um sprite sem preencher os campos, o `npm test` e o CI falham antes do deploy.
+
+### 4.7. Rotas com `react-router-dom`
+
+#### Antes
+```javascript
+// App.jsx — navegação manual
+const [currentPage, setCurrentPage] = useState(getInitialPage);
+window.history.pushState({}, '', '#codes');
+if (window.location.pathname.endsWith('/codes.html')) { /* ... */ }
+```
+
+#### Depois
+```jsx
+// App.jsx
+<HashRouter>
+    <Routes>
+        <Route path="/" element={<CatalogPage />} />
+        <Route path="/codes" element={<CodesPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+</HashRouter>
+
+// Em qualquer componente
+const navigate = useNavigate();
+navigate('/codes');
+```
+
+**Por que `HashRouter`:** o site é estático no GitHub Pages, sem servidor para reescrever URLs. As rotas ficam em `#/` e `#/codes`, e o link de compartilhamento (`?c=...`) continua na query string real.
+
+**Compatibilidade:** o antigo `codes.html` virou `public/codes.html`, uma página mínima que redireciona para `#/codes`. Links e favoritos antigos continuam funcionando e o Vite voltou a ter uma única entrada.
+
+### 4.8. Qualidade: ESLint, Vitest e CI
+
+| Ferramenta | Comando | O que cobre |
+|---|---|---|
+| ESLint 9 + `react` + `react-hooks` | `npm run lint` | Erros comuns, regras dos Hooks, variáveis não usadas |
+| Vitest | `npm test` | 23 testes: filtros, ordenação, contagens, rótulos, integridade dos dados e codec de compartilhamento (v1, v2, `2r.`, entradas inválidas) |
+| GitHub Actions | `.github/workflows/ci.yml` | Roda lint, testes e build a cada push na branch `react` e em pull requests |
+
+> **Nota:** o ESLint está fixado na versão 9 porque `eslint-plugin-react` ainda não declara suporte ao ESLint 10. O lint ajudou na própria refatoração: apontou os fallbacks `baseSprites` herdados do Vanilla JS e um bloco `catch` vazio.
+
+### 4.9. Verificação
+
+| Verificação | Resultado |
+|---|---|
+| `npm run lint` | Sem erros |
+| `npm test` | 23 de 23 testes passando |
+| `npm run build` | 337 módulos; JS 370 KB (108 KB gzip), CSS 28 KB; `dist/codes.html` gerado |
+
+> **Limitação:** a verificação cobre lint, testes unitários e build. Os componentes React e a navegação não têm testes automatizados e não foram exercitados em um navegador. Vale clicar pelo app (`npm run dev`): coletar, dominar, filtrar, compartilhar, abrir `?c=...` e ir para Trapaças.

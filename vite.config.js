@@ -1,9 +1,5 @@
-import { resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
     plugins: [react()],
@@ -11,11 +7,9 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        rollupOptions: {
-            input: {
-                main: resolve(__dirname, 'index.html'),
-                codes: resolve(__dirname, 'codes.html'),
-            },
-        },
+    },
+    test: {
+        environment: 'node',
+        include: ['src/**/*.test.js'],
     },
 });

@@ -1,6 +1,10 @@
 /* ===================================================
-   Constants & Ordering Definitions
+   Constantes de Persistência, Layout e Ordenação
+   ===================================================
+   Temas e raridades (ordem, rótulos, cores) vivem em taxonomy.js.
    =================================================== */
+
+export { THEME_ORDER, RARITY_ORDER } from './taxonomy.js';
 
 export const KEYS = {
     obtained: 'fn_obtained_sprites',
@@ -16,58 +20,11 @@ export const KEYS = {
     season: 'fn_state_season',
 };
 
-export const THEME_ORDER = [
-    'Básico',
-    'Dourado',
-    'Doce',
-    'Galáctico',
-    'Gema',
-    'Metálico',
-    'Cubo',
-    'Rift',
-    'Pato',
-    'Trapaceiro',
-    'Trapaça',
-    'Hacker de Saque',
-    'Hacker',
-    'Caçador de Recompensas',
-    'Doce ou Travessura',
-];
-
-export const RARITY_ORDER = ['Mítico', 'Lendário', 'Épico', 'Raro', 'Especial'];
-
 export const STATUS_FILTERS = ['all', 'owned', 'missing'];
 
 export const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 
-export const UI_THEME_LABELS = { Doce: 'Doce' };
-
-export const EXPORT_THEME_LABELS = {
-    Básico: 'NORMAL',
-    Doce: 'DOCE',
-    Trapaceiro: 'TRAPACEIRO',
-    Trapaça: 'TRAPAÇA',
-    'Hacker de Saque': 'HACKER',
-    Hacker: 'HACKER',
-    'Caçador de Recompensas': 'CAÇADOR',
-    'Doce ou Travessura': 'DOCE OU TRAVESSURA',
-};
-
-export const TRADE_THEME_LABELS = {
-    Básico: 'Base',
-    Doce: 'Doce',
-    Trapaceiro: 'Trapaceiro',
-    Trapaça: 'Trapaça',
-    'Hacker de Saque': 'Hacker de Saque',
-    Hacker: 'Hacker',
-    'Caçador de Recompensas': 'Caçador de Recompensas',
-    'Doce ou Travessura': 'Doce ou Travessura',
-};
-
 export const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
-
-export const CROWN_ICON =
-    '<svg class="crown-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19h20v2H2v-2zM2 5l5 3.5L12 2l5 6.5L22 5v12H2V5z"/></svg>';
 
 export const EXPORT_LAYOUT = {
     border: 8,

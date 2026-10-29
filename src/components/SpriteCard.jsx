@@ -15,14 +15,17 @@ export function SpriteCard({
     obtained,
     mastered,
     viewMode = false,
+    priority = false,
     onToggleObtained,
     onToggleMastery,
 }) {
     const [imgError, setImgError] = useState(false);
 
-    const rarityLabel = sprite.rarity === 'Mythic' ? 'MYTHIC' : sprite.rarity.toUpperCase();
+    // Sprites "não lançados" podem ser placeholders sem tema/raridade/nome
+    const rarityLabel = (sprite.rarity || '').toUpperCase();
+    const displayName = sprite.name || sprite.id;
     const seasonData = getSeasonData(sprite.season);
-    const themeClass = `theme-${sprite.theme.replace(/\s+/g, '-')}`;
+    const themeClass = `theme-${(sprite.theme || '').replace(/\s+/g, '-')}`;
 
     const classes = ['card', `rarity-${sprite.rarity}`, themeClass];
     if (obtained) classes.push('obtained');
@@ -53,13 +56,13 @@ export function SpriteCard({
         <div
             className={classes.join(' ')}
             data-id={sprite.id}
-            data-name={sprite.name}
+            data-name={displayName}
             tabIndex={!viewMode ? 0 : undefined}
             role={!viewMode ? 'button' : undefined}
             aria-pressed={!viewMode ? String(obtained) : undefined}
             aria-label={
                 !viewMode
-                    ? `${obtained ? 'Remove' : 'Mark'} ${sprite.name} ${obtained ? 'from' : 'as part of'} your collection`
+                    ? `${obtained ? 'Remove' : 'Mark'} ${displayName} ${obtained ? 'from' : 'as part of'} your collection`
                     : undefined
             }
             onClick={handleCardClick}
@@ -80,7 +83,7 @@ export function SpriteCard({
                     className="card-crown"
                     type="button"
                     title="Toggle mastery"
-                    aria-label={`Mark ${sprite.name} as mastered`}
+                    aria-label={`Mark ${displayName} as mastered`}
                     onClick={handleCrownClick}
                 >
                     <CrownIcon />
@@ -96,9 +99,9 @@ export function SpriteCard({
 
                 <img
                     src={getSpriteImageUrl(sprite.id)}
-                    alt={sprite.name}
-                    loading="eager"
-                    fetchPriority="high"
+                    alt={displayName}
+                    loading={priority ? 'eager' : 'lazy'}
+                    fetchPriority={priority ? 'high' : 'auto'}
                     width="80"
                     height="80"
                     style={imgError ? { opacity: 0.2 } : undefined}
@@ -112,7 +115,7 @@ export function SpriteCard({
             </div>
 
             <div className="card-name">
-                <span>{sprite.name}</span>
+                <span>{displayName}</span>
             </div>
         </div>
     );

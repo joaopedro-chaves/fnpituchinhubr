@@ -22,16 +22,6 @@ export function isIOS() {
     );
 }
 
-export function escapeHTML(value) {
-    return String(value).replace(/[&<>'"]/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;',
-    }[char]));
-}
-
 export function copyText(text, successMsg, errorMsg) {
     if (!navigator.clipboard?.writeText) {
         toast(errorMsg, 'error');
@@ -46,18 +36,6 @@ export function copyText(text, successMsg, errorMsg) {
         .catch(() => {
             toast(errorMsg, 'error');
         });
-}
-
-export function setDropdownOpen(dropdown, toggle, open) {
-    if (!dropdown || !toggle) return;
-    dropdown.classList.toggle('open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-}
-
-export function closeDropdowns(dom) {
-    if (!dom) return;
-    setDropdownOpen(dom.exportDropdown, dom.exportToggle, false);
-    setDropdownOpen(dom.settingsDropdown, dom.settingsToggle, false);
 }
 
 export function drawRoundRect(ctx, x, y, width, height, radius = 8) {

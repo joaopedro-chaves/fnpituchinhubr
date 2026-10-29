@@ -5,6 +5,7 @@
 import { EXPORT_LAYOUT, TRACKER_URL } from './share-order.js';
 import { toast, isIOS, drawRoundRect } from './dom-utils.js';
 import { getSpriteImageUrl, getMascotImageUrl } from './assets/spriteImages.js';
+import { RARITIES, THEME } from './taxonomy.js';
 import {
     getReleasedSprites,
     sortSprites,
@@ -21,63 +22,18 @@ import {
 } from './query.js';
 
 export function getRarityGradient(rarity, theme) {
-    const map = {
-        Rare: ['#104273', '#081a35'],
-        Epic: ['#4d1566', '#1e052c'],
-        Legendary: ['#743e0a', '#301702'],
-        Mythic: ['#70531c', '#2e2107'],
-        Raro: ['#104273', '#081a35'],
-        Épico: ['#4d1566', '#1e052c'],
-        Lendário: ['#743e0a', '#301702'],
-        Mítico: ['#70531c', '#2e2107'],
-    };
-    if (rarity !== 'Special' && rarity !== 'Especial') return map[rarity] || map.Rare;
-
-    const themes = {
-        Basic: ['#1c2436', '#0c0f17'],
-        Gold: ['#61460b', '#241a02'],
-        Candy: ['#6b183f', '#260514'],
-        Galaxy: ['#1f1145', '#080314'],
-        Gem: ['#114c47', '#041a18'],
-        Holofoil: ['#204454', '#09171f'],
-        Cube: ['#4c1d95', '#1e0b3d'],
-        Rift: ['#154b5e', '#04161c'],
-        Quack: ['#322554', '#12091f'],
-        Trapaceiro: ['#441359', '#15051c'],
-        Trapaça: ['#441359', '#15051c'],
-        'Hacker de Saque': ['#114030', '#051b14'],
-        Hacker: ['#114030', '#051b14'],
-        'Caçador de Recompensas': ['#3b1c1c', '#170606'],
-        'Doce ou Travessura': ['#592510', '#240a02'],
-        Básico: ['#1c2436', '#0c0f17'],
-        Dourado: ['#61460b', '#241a02'],
-        Doce: ['#6b183f', '#260514'],
-        Galáctico: ['#1f1145', '#080314'],
-        Gema: ['#114c47', '#041a18'],
-        Metálico: ['#204454', '#09171f'],
-        Pato: ['#322554', '#12091f'],
-        Cubo: ['#4c1d95', '#1e0b3d'],
-    };
-    return themes[theme] || themes.Basic;
+    const rarityInfo = RARITIES[rarity];
+    if (rarityInfo?.gradient) return rarityInfo.gradient;
+    // Raridade "Especial" não tem gradiente próprio: usa o do tema
+    if (rarityInfo) return (THEME[theme] || THEME['Básico']).gradient;
+    return RARITIES['Raro'].gradient;
 }
 
 export function getRarityTagColors(rarity) {
-    const map = {
-        Rare: ['#004A8E', '#00FFFB'],
-        Epic: ['#511D7F', '#ED2BFF'],
-        Legendary: ['#8E4122', '#FBC568'],
-        Mythic: ['#80622A', '#FFF1A9'],
-        Special: ['#51f7cc', '#000000'],
-        Raro: ['#004A8E', '#00FFFB'],
-        Épico: ['#511D7F', '#ED2BFF'],
-        Lendário: ['#8E4122', '#FBC568'],
-        Mítico: ['#80622A', '#FFF1A9'],
-        Especial: ['#51f7cc', '#000000'],
-    };
-    return map[rarity] || map.Rare;
+    return (RARITIES[rarity] || RARITIES['Raro']).tag;
 }
 
-export function getExportConfig(mode, state, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function getExportConfig(mode, state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     let rawItems = [];
 
@@ -198,8 +154,8 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
         return;
     }
 
-    const rarity = sprite.rarity || 'Rare';
-    const theme = sprite.theme || 'Basic';
+    const rarity = sprite.rarity || 'Raro';
+    const theme = sprite.theme || 'Básico';
     const innerH = h - 22; // 100 - 22 = 78
 
     const isMastered = cardState === 'mastered';
@@ -226,7 +182,7 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     ctx.fillRect(x, y, w, innerH);
 
     /* Special rainbow overlay */
-    if (rarity === 'Special' || rarity === 'Especial') {
+    if (rarity === 'Especial') {
         const rainbow = ctx.createLinearGradient(x, y, x + w, y + innerH);
         rainbow.addColorStop(0, 'rgba(81,247,204,0.25)');
         rainbow.addColorStop(0.5, 'rgba(227,116,238,0.35)');
@@ -259,7 +215,9 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
         if (isGrayed) {
             try {
                 ctx.filter = 'grayscale(100%) brightness(48%)';
-            } catch {}
+            } catch {
+                /* ctx.filter não suportado neste navegador: segue sem o efeito */
+            }
         }
         const maxDim = w * 0.82;
         const ratio = Math.min(maxDim / img.width, maxDim / img.height);
@@ -305,7 +263,7 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     drawRoundRect(ctx, x, y, w, innerH, 8);
     ctx.clip();
 
-    if (rarity === 'Special' || rarity === 'Especial') {
+    if (rarity === 'Especial') {
         const tg = ctx.createLinearGradient(x, y + innerH - 12, x + w * 0.6, y + innerH - 12);
         tg.addColorStop(0, '#51f7cc');
         tg.addColorStop(0.5, '#e374ee');
@@ -327,7 +285,7 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     ctx.font = '900 8.5px "Roboto", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(rarity === 'Mythic' || rarity === 'Mítico' ? 'MYTHIC' : rarity.toUpperCase(), x + 4, y + innerH - 6);
+    ctx.fillText(rarity === 'Mítico' ? 'MYTHIC' : rarity.toUpperCase(), x + 4, y + innerH - 6);
 
     /* Name/Theme footer */
     ctx.fillStyle = 'rgba(15,20,29,0.9)';
@@ -372,7 +330,7 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
     }
 }
 
-export function exportImage(mode, state, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function exportImage(mode, state, sprites = []) {
     const config = getExportConfig(mode, state, sprites);
     if (!config) return;
 
@@ -719,7 +677,7 @@ export function exportImage(mode, state, sprites = (typeof baseSprites !== 'unde
     });
 }
 
-export function generateTradeText(state, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function generateTradeText(state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const charKeys = getFamilyKeys(releasedSprites);
     const familyThemeMap = getFamilyThemeMap(releasedSprites);
@@ -757,7 +715,7 @@ export function generateTradeText(state, sprites = (typeof baseSprites !== 'unde
     return sections.join('\n\n');
 }
 
-export function generateTradeGridText(state, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function generateTradeGridText(state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const activeThemes = getActiveThemes(releasedSprites);
     const charKeys = getFamilyKeys(releasedSprites);

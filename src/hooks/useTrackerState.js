@@ -11,6 +11,8 @@ import {
     sortSprites,
 } from '../query.js';
 
+const EMPTY_COLLECTION = { obtained: [], mastered: [] };
+
 function readStoredArray(key) {
     try {
         const value = JSON.parse(localStorage.getItem(key));
@@ -28,7 +30,11 @@ function persistValue(key, value) {
     }
 }
 
-function getInitialCollection(sprites) {
+function getShareCode() {
+    return new URLSearchParams(window.location.search).get('c');
+}
+
+function getStoredCollection(sprites) {
     const validIds = getSpriteIdSet(sprites);
     const obtained = uniqueValidIds(readStoredArray(KEYS.obtained), validIds);
     const mastered = uniqueValidIds(readStoredArray(KEYS.mastered), validIds).filter(id =>
@@ -71,134 +77,129 @@ function getInitialSettings() {
     };
 }
 
+/**
+ * Estado do rastreador.
+ *
+ * - `collection` guarda obtained + mastered em um único estado, assim
+ *   "remover da coleção" atualiza os dois de forma atômica e pura
+ *   (sem chamar setState dentro de outro setState).
+ * - Toda gravação no localStorage acontece em `useEffect`, nunca dentro
+ *   dos atualizadores, que precisam ser funções puras.
+ */
 export function useTrackerState(sprites) {
-    const initialCollection = useMemo(() => getInitialCollection(sprites), [sprites]);
+    // Lido uma única vez: se a URL tem ?c=..., já nasce em modo somente leitura
+    // com coleção vazia, evitando "piscar" a coleção local antes da compartilhada.
+    const [initial] = useState(() => {
+        const shareCode = getShareCode();
+        return {
+            shareCode,
+            collection: shareCode ? EMPTY_COLLECTION : getStoredCollection(sprites),
+        };
+    });
 
-    const [obtained, setObtained] = useState(initialCollection.obtained);
-    const [mastered, setMastered] = useState(initialCollection.mastered);
-    const [viewMode, setViewMode] = useState(false);
+    const [viewMode, setViewMode] = useState(Boolean(initial.shareCode));
+    const [loadingShared, setLoadingShared] = useState(Boolean(initial.shareCode));
+    const [collection, setCollection] = useState(initial.collection);
     const [filters, setFilters] = useState(() => getInitialFilters(sprites));
-    const [settings, setSettings] = useState(() => getInitialSettings());
+    const [settings, setSettings] = useState(getInitialSettings);
 
-    // Verifica se há código compartilhado (?c=...) na URL
+    const { obtained, mastered } = collection;
+
+    // Decodifica a coleção compartilhada (?c=...) enquanto estiver em modo somente leitura
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const shareCode = params.get('c');
-        if (!shareCode) return;
+        if (!viewMode || !initial.shareCode) return;
 
         let cancelled = false;
-        setViewMode(true);
-
-        decompressCollection(sprites, shareCode).then(decoded => {
+        decompressCollection(sprites, initial.shareCode).then(decoded => {
             if (cancelled) return;
-            setObtained(decoded.obtained);
-            setMastered(decoded.mastered);
+            setCollection(decoded);
+            setLoadingShared(false);
         });
 
         return () => {
             cancelled = true;
         };
-    }, [sprites]);
+    }, [viewMode, initial.shareCode, sprites]);
 
-    // Sincroniza classe global de baixo desempenho no body
+    // Persistência: coleção (nunca sobrescreve a coleção local em modo compartilhado)
+    useEffect(() => {
+        if (viewMode) return;
+        persistValue(KEYS.obtained, collection.obtained);
+        persistValue(KEYS.mastered, collection.mastered);
+    }, [collection, viewMode]);
+
+    // Persistência: filtros e configurações
+    useEffect(() => {
+        Object.entries(filters).forEach(([key, value]) => persistValue(KEYS[key], value));
+    }, [filters]);
+
+    useEffect(() => {
+        Object.entries(settings).forEach(([key, value]) => persistValue(KEYS[key], value));
+    }, [settings]);
+
+    // Classe global de baixo desempenho no body
     useEffect(() => {
         document.body.classList.toggle('low-fidelity', settings.lowFidelity);
+        return () => document.body.classList.remove('low-fidelity');
     }, [settings.lowFidelity]);
 
-    // Temas disponíveis ordenados
     const activeThemes = useMemo(() => getActiveThemes(sprites), [sprites]);
 
     // Estado consolidado compatível com as funções puras de query.js e view-export.js
     const trackerState = useMemo(
-        () => ({
-            obtained,
-            mastered,
-            viewMode,
-            filters,
-            settings,
-        }),
+        () => ({ obtained, mastered, viewMode, filters, settings }),
         [obtained, mastered, viewMode, filters, settings]
     );
 
-    // Lista de sprites filtrada e ordenada dinamicamente com useMemo
     const visibleSprites = useMemo(() => {
         const filtered = filterSprites(sprites, trackerState);
         return sortSprites(filtered, settings.sortOrder);
     }, [sprites, trackerState, settings.sortOrder]);
 
-    // Estatísticas de progresso (Coleção e Dominados) com useMemo
     const progressStats = useMemo(() => {
         const released = getReleasedSprites(sprites, filters.season);
         return getCollectionCounts(released, trackerState);
     }, [sprites, filters.season, trackerState]);
 
-    // Alterna estado "Coletado" de um sprite
     const toggleObtained = useCallback(
         id => {
             if (viewMode) return;
-            setObtained(prevObtained => {
-                const isAlreadyObtained = prevObtained.includes(id);
-                const nextObtained = isAlreadyObtained
-                    ? prevObtained.filter(item => item !== id)
-                    : [...prevObtained, id];
-
-                persistValue(KEYS.obtained, nextObtained);
-
-                if (isAlreadyObtained) {
-                    setMastered(prevMastered => {
-                        const nextMastered = prevMastered.filter(item => item !== id);
-                        persistValue(KEYS.mastered, nextMastered);
-                        return nextMastered;
-                    });
+            setCollection(prev => {
+                if (prev.obtained.includes(id)) {
+                    // Remover da coleção também remove de "dominados"
+                    return {
+                        obtained: prev.obtained.filter(item => item !== id),
+                        mastered: prev.mastered.filter(item => item !== id),
+                    };
                 }
-
-                return nextObtained;
+                return { ...prev, obtained: [...prev.obtained, id] };
             });
         },
         [viewMode]
     );
 
-    // Alterna estado "Dominado" (Coroa) de um sprite já coletado
     const toggleMastery = useCallback(
         id => {
             if (viewMode) return;
-            setObtained(currentObtained => {
-                if (!currentObtained.includes(id)) return currentObtained;
-
-                setMastered(prevMastered => {
-                    const isAlreadyMastered = prevMastered.includes(id);
-                    const nextMastered = isAlreadyMastered
-                        ? prevMastered.filter(item => item !== id)
-                        : [...prevMastered, id];
-                    persistValue(KEYS.mastered, nextMastered);
-                    return nextMastered;
-                });
-
-                return currentObtained;
+            setCollection(prev => {
+                if (!prev.obtained.includes(id)) return prev;
+                const mastered = prev.mastered.includes(id)
+                    ? prev.mastered.filter(item => item !== id)
+                    : [...prev.mastered, id];
+                return { ...prev, mastered };
             });
         },
         [viewMode]
     );
 
-    // Atualiza um filtro individual (search, theme, season, status)
     const updateFilter = useCallback((key, value) => {
-        setFilters(prev => {
-            const next = { ...prev, [key]: value };
-            if (KEYS[key]) persistValue(KEYS[key], value);
-            return next;
-        });
+        setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
-    // Atualiza uma configuração individual (sortOrder, hideMastered, showUnreleased, lowFidelity, openExports)
     const updateSetting = useCallback((key, value) => {
-        setSettings(prev => {
-            const next = { ...prev, [key]: value };
-            if (KEYS[key]) persistValue(KEYS[key], value);
-            return next;
-        });
+        setSettings(prev => ({ ...prev, [key]: value }));
     }, []);
 
-    // Importa backup JSON validando IDs
     const importCollection = useCallback(
         (rawObtained, rawMastered) => {
             if (viewMode) return false;
@@ -207,31 +208,28 @@ export function useTrackerState(sprites) {
             const obtainedSet = new Set(cleanObtained);
             const cleanMastered = uniqueValidIds(rawMastered, validIds).filter(id => obtainedSet.has(id));
 
-            setObtained(cleanObtained);
-            setMastered(cleanMastered);
-            persistValue(KEYS.obtained, cleanObtained);
-            persistValue(KEYS.mastered, cleanMastered);
+            setCollection({ obtained: cleanObtained, mastered: cleanMastered });
             return true;
         },
         [sprites, viewMode]
     );
 
-    // Sai do modo somente leitura (coleção compartilhada) e volta para a coleção local
+    // Sai do modo somente leitura e volta para a coleção salva localmente
     const exitViewMode = useCallback(() => {
         const url = new URL(window.location.href);
         url.searchParams.delete('c');
         window.history.replaceState({}, '', url.toString());
 
-        const local = getInitialCollection(sprites);
         setViewMode(false);
-        setObtained(local.obtained);
-        setMastered(local.mastered);
+        setLoadingShared(false);
+        setCollection(getStoredCollection(sprites));
     }, [sprites]);
 
     return {
         obtained,
         mastered,
         viewMode,
+        loadingShared,
         filters,
         settings,
         trackerState,

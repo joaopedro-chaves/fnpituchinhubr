@@ -2,20 +2,14 @@
    Sprite Querying, Filtering & Sorting
    =================================================== */
 
-import {
-    THEME_ORDER,
-    RARITY_ORDER,
-    UI_THEME_LABELS,
-    EXPORT_THEME_LABELS,
-    TRADE_THEME_LABELS,
-    getOrderedIndex,
-} from './share-order.js';
+import { THEME_ORDER, RARITY_ORDER, getOrderedIndex } from './share-order.js';
+import { THEME, RARITIES } from './taxonomy.js';
 
 export function getFamilyKey(sprite) {
     return sprite.id.split('_')[0];
 }
 
-export function getSpriteIdSet(sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function getSpriteIdSet(sprites = []) {
     return new Set(sprites.map(sprite => sprite.id));
 }
 
@@ -26,7 +20,7 @@ export function getSeasonData(season) {
 }
 
 export function getReleasedSprites(
-    sprites = (typeof baseSprites !== 'undefined' ? baseSprites : []),
+    sprites = [],
     seasonFilter = 'all'
 ) {
     return sprites.filter(sprite => {
@@ -53,7 +47,7 @@ export function getActiveThemes(sprites) {
         .sort((a, b) => getOrderedIndex(THEME_ORDER, a) - getOrderedIndex(THEME_ORDER, b));
 }
 
-export function getCharName(charKey, sprites = (typeof baseSprites !== 'undefined' ? baseSprites : [])) {
+export function getCharName(charKey, sprites = []) {
     const basicSprite = sprites.find(sprite => sprite.id === `${charKey}_basic`);
     return basicSprite ? basicSprite.name : charKey.charAt(0).toUpperCase() + charKey.slice(1);
 }
@@ -63,15 +57,41 @@ export function getDisplayName(name) {
 }
 
 export function getUiThemeLabel(theme) {
-    return UI_THEME_LABELS[theme] || theme;
+    return theme;
 }
 
 export function getExportThemeLabel(theme) {
-    return EXPORT_THEME_LABELS[theme] || theme.toUpperCase();
+    return THEME[theme]?.exportLabel || theme.toUpperCase();
 }
 
 export function getTradeThemeLabel(theme) {
-    return TRADE_THEME_LABELS[theme] || theme;
+    return THEME[theme]?.tradeLabel || theme;
+}
+
+/**
+ * Valida os dados de sprites e devolve uma lista de problemas legíveis.
+ * Sprites lançados precisam de nome, tema e raridade conhecidos
+ * (sprites `unreleased` podem ser placeholders incompletos).
+ */
+export function getSpriteDataIssues(sprites) {
+    const issues = [];
+    const seen = new Set();
+
+    sprites.forEach(sprite => {
+        if (!sprite.id) {
+            issues.push('Sprite sem id');
+            return;
+        }
+        if (seen.has(sprite.id)) issues.push(`${sprite.id}: id duplicado`);
+        seen.add(sprite.id);
+
+        if (sprite.unreleased) return;
+        if (!sprite.name) issues.push(`${sprite.id}: nome vazio`);
+        if (!THEME[sprite.theme]) issues.push(`${sprite.id}: tema desconhecido "${sprite.theme}"`);
+        if (!RARITIES[sprite.rarity]) issues.push(`${sprite.id}: raridade desconhecida "${sprite.rarity}"`);
+    });
+
+    return issues;
 }
 
 export function isObtained(state, id) {

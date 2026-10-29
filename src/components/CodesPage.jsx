@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { baseCodes, codeCategories, CATEGORY_ORDER } from '../data/codes-data.js';
 import { getSpriteImageUrl } from '../assets/spriteImages.js';
 
@@ -59,7 +60,8 @@ function copyCodeToClipboard(text, anchorElement) {
     }
 }
 
-export function CodesPage({ onBack }) {
+export function CodesPage() {
+    const navigate = useNavigate();
     const [redeemed, setRedeemed] = useState(readRedeemedCodes);
     const [hideRedeemed, setHideRedeemed] = useState(readHideRedeemed);
     const [searchQuery, setSearchQuery] = useState('');
@@ -128,7 +130,7 @@ export function CodesPage({ onBack }) {
                     <h1>Códigos e Trapaças</h1>
                 </div>
                 <div className="actions" style={{ gridTemplateColumns: 'repeat(1, minmax(0, 1fr))' }}>
-                    <button type="button" className="btn btn-accent" onClick={onBack}>
+                    <button type="button" className="btn btn-accent" onClick={() => navigate('/')}>
                         <svg
                             width="18"
                             height="18"
