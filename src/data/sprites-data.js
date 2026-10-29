@@ -334,6 +334,11 @@ const baseSprites = [
     { id: "onewish_hacker", name: "Desejo Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "onewish_hunter", name: "Desejo Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "onewish_tricktreat", name: "Desejo Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+
+    // ============================ C7T5 ============================ //
+
+    { id: "chesthunter_basic", name: "", theme: "", rarity: "", unreleased: true, season: "C7T5" },
+
 ];
 
 if (typeof window !== 'undefined') {

@@ -9,6 +9,12 @@ A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortni
 > Aqui está o site do repositório:
 https://joaopedro-chaves.github.io/fnpituchinhubr/
 
+## Arquivamento do projeto
+
+Devido ao encerramento da funcionalidade de elementais por parte da Epic Games, este repositório irá ficar arquivado em 01.01.2027 e não será mais atualizado.
+
+Caso contrário, o projeto será atualizado.
+
 ## Otimizações e Design
 
 O design foi otimizado para uma experiência mais agradável e moderna, com um layout mais limpo e organizado. Foram utilizadas as diretrizes do Material Design para criar uma interface intuitiva e responsiva, que funciona bem em diferentes dispositivos.
