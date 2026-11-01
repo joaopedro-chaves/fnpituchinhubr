@@ -1,5 +1,5 @@
 // DEVELOPER DATA SHEET: Add new sprites, change rarities, or toggle unreleased states here.
-const baseSprites = [
+export const baseSprites = [
     // ============================ C7T3 ============================
 
     { id: "water_basic", name: "Água", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T3" },

@@ -1,2 +1,7 @@
 Optimazer task/
 inbox_release/
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
