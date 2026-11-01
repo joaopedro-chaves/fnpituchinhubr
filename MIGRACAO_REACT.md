@@ -431,3 +431,52 @@ navigate('/codes');
 | `npm run build` | 337 módulos; JS 370 KB (108 KB gzip), CSS 28 KB; `dist/codes.html` gerado |
 
 > **Limitação:** a verificação cobre lint, testes unitários e build. Os componentes React e a navegação não têm testes automatizados e não foram exercitados em um navegador. Vale clicar pelo app (`npm run dev`): coletar, dominar, filtrar, compartilhar, abrir `?c=...` e ir para Trapaças.
+
+---
+
+## 5. Erros Encontrados na Integração/Deploy e Soluções
+
+Durante o merge das novidades da temporada `C7T5` e a publicação no GitHub Pages, três problemas ocorreram e foram solucionados:
+
+### 5.1. `TypeError: Cannot read properties of undefined (reading 'indexOf')` no CI (Vitest)
+
+* **Sintoma:** 3 testes falhando em `src/query.test.js` (`sortSprites` por raridade, `sortSprites` por tema e `getActiveThemes`) na linha `order.indexOf(value)` de `src/share-order.js`.
+* **Causa:** Ao resolver o conflito de merge entre a branch `main` (que adicionou os temas `Valioso` e `Amaldiçoado`) e a branch `react` em `src/taxonomy.js`, o bloco que derivava e exportava `THEME_ORDER` e `RARITY_ORDER` foi removido acidentalmente. Como `src/share-order.js` reexportava essas constantes (`export { THEME_ORDER, RARITY_ORDER } from './taxonomy.js'`), ambas passaram a ser `undefined`.
+* **Solução:** Restaurada a função `byOrder` e as exportações `THEME_ORDER` e `RARITY_ORDER` em `src/taxonomy.js`:
+  ```javascript
+  const byOrder = table =>
+      Object.entries(table)
+          .sort(([, a], [, b]) => a.order - b.order)
+          .map(([name]) => name);
+
+  export const THEME_ORDER = byOrder(THEME);
+  export const RARITY_ORDER = byOrder(RARITIES);
+  ```
+
+### 5.2. `main.jsx:1 Failed to load resource: the server responded with a status of 404 ()`
+
+* **Sintoma:** Página em branco ao abrir no GitHub Pages com erro 404 para `main.jsx`.
+* **Causa:**
+  1. O GitHub Pages estava configurado no modo *"Deploy from a branch"*, servindo o `index.html` bruto da raiz do repositório sem executar o build do Vite (`npm run build`). Navegadores não interpretam arquivos `.jsx` nem resolvem pacotes do `node_modules` diretamente.
+  2. Além disso, `<script type="module" src="/src/main.jsx"></script>` no `index.html` bruto aponta para a raiz do domínio (`https://joaopedro-chaves.github.io/src/main.jsx`), fora do subcaminho `/fnpituchinhubr/`.
+* **Solução:**
+  1. Configurado o workflow `.github/workflows/main.yml` com `actions/configure-pages@v5`, `actions/upload-pages-artifact@v3` e `actions/deploy-pages@v4` para compilar o projeto (`npm run build`) e publicar a pasta `./dist` (que já usa `base: './'` no `vite.config.js`).
+  2. Alterada a fonte do GitHub Pages (**Settings → Pages → Source**) para **GitHub Actions**.
+
+### 5.3. Erro 404 em todas as imagens `.webp` (`staticsprite.webp`, `water_basic.webp`, etc.)
+
+* **Sintoma:** Após publicar o build do React, a interface carregava normalmente, mas todas as imagens retornavam `GET https://joaopedro-chaves.github.io/fnpituchinhubr/sprites/...webp 404 (Not Found)`.
+* **Causa:** Em `src/assets/spriteImages.js`, o mapeamento com `import.meta.glob` estava protegido por uma verificação de tipo em tempo de execução:
+  ```javascript
+  // Problemático:
+  const spriteModules =
+      typeof import.meta.glob === 'function'
+          ? import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' })
+          : {};
+  ```
+  No Vite, `import.meta.glob(...)` não é uma função real em runtime, e sim uma **macro substituída estaticamente na compilação**. O Vite substituía a chamada `import.meta.glob(...)` pelo objeto com as URLs empacotadas (`./assets/water_basic-XXXX.webp`), mas **não** substituía `typeof import.meta.glob === 'function'`. No navegador, `typeof import.meta.glob` avaliava como `'undefined'` (`false`), descartando todo o mapa de imagens e caindo no fallback `sprites/${spriteId}.webp` (que não existe em `dist/`, pois todas as imagens foram empacotadas em `dist/assets/`).
+* **Solução:** Removida a verificação `typeof import.meta.glob === 'function'` em `src/assets/spriteImages.js`, chamando `import.meta.glob` diretamente:
+  ```javascript
+  const spriteModules = import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' });
+  const siteImageModules = import.meta.glob('/siteimages/*.webp', { eager: true, import: 'default' });
+  ```
