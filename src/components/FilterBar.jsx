@@ -341,41 +341,41 @@ export function FilterBar({
                         <div className="modal-body" aria-label="Opções de configuração">
                             <div className="switches">
                                 <label className="switch">
+                                    <span>Ocultar dominados</span>
                                     <input
                                         type="checkbox"
                                         id="hideMastered"
                                         checked={settings.hideMastered}
                                         onChange={e => onSettingChange('hideMastered', e.target.checked)}
                                     />
-                                    <span>Ocultar dominados</span>
                                 </label>
                                 <label className="switch">
+                                    <span>Não lançados</span>
                                     <input
                                         type="checkbox"
                                         id="showUnreleased"
                                         checked={settings.showUnreleased}
                                         onChange={e => onSettingChange('showUnreleased', e.target.checked)}
                                     />
-                                    <span>Não lançados</span>
                                 </label>
                                 <label className="switch">
+                                    <span>Baixo Desempenho</span>
                                     <input
                                         type="checkbox"
                                         id="lowFidelity"
                                         checked={settings.lowFidelity}
                                         onChange={e => onSettingChange('lowFidelity', e.target.checked)}
                                     />
-                                    <span>Baixo Desempenho</span>
                                 </label>
                                 {!isIOS() && (
                                     <label className="switch" id="exportModeSwitch">
+                                        <span>Abrir exportações</span>
                                         <input
                                             type="checkbox"
                                             id="openExports"
                                             checked={settings.openExports}
                                             onChange={e => onSettingChange('openExports', e.target.checked)}
                                         />
-                                        <span>Abrir exportações</span>
                                     </label>
                                 )}
                             </div>
