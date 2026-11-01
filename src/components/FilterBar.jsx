@@ -21,7 +21,6 @@ export function FilterBar({
     onExportBackup,
     onImportBackupFile,
     onShare,
-    onOpenCodes,
 }) {
     const [openDropdown, setOpenDropdown] = useState(null); // 'export' | 'settings' | null
     const exportRef = useRef(null);
@@ -262,16 +261,6 @@ export function FilterBar({
 
                     <button type="button" className="btn" id="shareBtn" onClick={onShare}>
                         Compartilhar
-                    </button>
-
-                    <button
-                        type="button"
-                        style={{ fontFamily: "'Roboto Mono'", fontWeight: 'bold' }}
-                        className="btn btn-codes"
-                        id="codesBtn"
-                        onClick={onOpenCodes}
-                    >
-                        Trapaças
                     </button>
 
                     <div

@@ -1,5 +1,4 @@
 import { useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { baseSprites } from '../data/sprites-data.js';
 import { useTrackerState } from '../hooks/useTrackerState.js';
 import { Header } from '../components/Header.jsx';
@@ -13,7 +12,6 @@ import { toast, copyText } from '../dom-utils.js';
 const PRIORITY_CARDS = 24;
 
 export function CatalogPage() {
-    const navigate = useNavigate();
 
     const {
         obtained,
@@ -138,7 +136,6 @@ export function CatalogPage() {
                     onExportBackup={handleExportBackup}
                     onImportBackupFile={handleImportBackupFile}
                     onShare={handleShare}
-                    onOpenCodes={() => navigate('/codes')}
                 />
 
                 <main
