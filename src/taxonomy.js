@@ -29,7 +29,18 @@ export const THEME = {
     'Doce ou Travessura': { order: 11, slug: 'doce-ou-travessura', gradient: ['#592510', '#240a02'], exportLabel: 'DOCE OU TRAVESSURA' },
     'Valioso': { order: 12, slug: 'valioso', gradient: ['#396562', '#240a02'], exportLabel: 'VALIOSO' },
     'Amaldiçoado': { order: 13, slug: 'amaldicoado', gradient: ['#114c47', '#041a18'], exportLabel: 'AMALDIÇOADO' },
-}
+};
+
+const byOrder = table =>
+    Object.entries(table)
+        .sort(([, a], [, b]) => a.order - b.order)
+        .map(([name]) => name);
+
+/** Nomes dos temas na ordem de exibição. */
+export const THEME_ORDER = byOrder(THEME);
+
+/** Nomes das raridades da mais rara para a mais comum. */
+export const RARITY_ORDER = byOrder(RARITIES);
 
 export function gradientFor(sprite) {
     const rarity = RARITIES[sprite.rarity];
