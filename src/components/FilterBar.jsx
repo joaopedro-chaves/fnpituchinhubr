@@ -22,51 +22,36 @@ export function FilterBar({
     onImportBackupFile,
     onShare,
 }) {
-    const [openDropdown, setOpenDropdown] = useState(null); // 'export' | 'settings' | null
-    const exportRef = useRef(null);
-    const settingsRef = useRef(null);
+    const [activePopup, setActivePopup] = useState(null); // 'export' | 'settings' | null
     const fileInputRef = useRef(null);
 
-    // Fecha dropdowns ao clicar fora ou pressionar Escape
+    // Fecha popup ao pressionar Escape e previne rolagem do fundo
     useEffect(() => {
-        const handleDocumentClick = e => {
-            if (
-                openDropdown === 'export' &&
-                exportRef.current &&
-                !exportRef.current.contains(e.target)
-            ) {
-                setOpenDropdown(null);
-            }
-            if (
-                openDropdown === 'settings' &&
-                settingsRef.current &&
-                !settingsRef.current.contains(e.target)
-            ) {
-                setOpenDropdown(null);
-            }
-        };
+        if (!activePopup) return;
 
         const handleKeyDown = e => {
             if (e.key === 'Escape') {
-                setOpenDropdown(null);
+                setActivePopup(null);
             }
         };
 
-        document.addEventListener('click', handleDocumentClick);
         document.addEventListener('keydown', handleKeyDown);
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
         return () => {
-            document.removeEventListener('click', handleDocumentClick);
             document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = originalOverflow;
         };
-    }, [openDropdown]);
+    }, [activePopup]);
 
     const handleExportAction = mode => {
         onExportImage(mode);
-        setOpenDropdown(null);
+        setActivePopup(null);
     };
 
     const handleTriggerImport = () => {
-        setOpenDropdown(null);
+        setActivePopup(null);
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -166,25 +151,84 @@ export function FilterBar({
 
             <div className="toolbar-row">
                 <div className="actions">
-                    <div
-                        ref={exportRef}
-                        className={`dropdown${openDropdown === 'export' ? ' open' : ''}`}
-                        id="exportDropdown"
+                    <button
+                        type="button"
+                        className="btn"
+                        id="exportToggle"
+                        aria-haspopup="dialog"
+                        aria-expanded={String(activePopup === 'export')}
+                        onClick={() => setActivePopup('export')}
                     >
-                        <button
-                            type="button"
-                            className="btn"
-                            id="exportToggle"
-                            aria-haspopup="true"
-                            aria-expanded={String(openDropdown === 'export')}
-                            onClick={e => {
-                                e.stopPropagation();
-                                setOpenDropdown(prev => (prev === 'export' ? null : 'export'));
-                            }}
-                        >
-                            Exportar
-                        </button>
-                        <div className="dropdown-menu" aria-label="Opções de exportação e dados">
+                        Exportar
+                    </button>
+
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        id="importInput"
+                        className="file-input"
+                        accept=".json"
+                        onChange={handleFileChange}
+                    />
+
+                    <button type="button" className="btn" id="shareBtn" onClick={onShare}>
+                        Compartilhar
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn"
+                        id="settingsToggle"
+                        aria-haspopup="dialog"
+                        aria-expanded={String(activePopup === 'settings')}
+                        onClick={() => setActivePopup('settings')}
+                    >
+                        Configurações
+                    </button>
+                </div>
+            </div>
+
+            {/* Popup Modal Centralizado: Exportar */}
+            {activePopup === 'export' && (
+                <div
+                    className="modal-backdrop"
+                    onClick={() => setActivePopup(null)}
+                    role="presentation"
+                >
+                    <div
+                        className="modal-popup"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="exportPopupTitle"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="modal-header">
+                            <h3 id="exportPopupTitle" className="modal-title">
+                                Exportar
+                            </h3>
+                            <button
+                                type="button"
+                                className="modal-close-btn"
+                                onClick={() => setActivePopup(null)}
+                                aria-label="Fechar"
+                            >
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="modal-body" aria-label="Opções de exportação e dados">
                             <div className="dropdown-section-title">Imagens</div>
                             <button type="button" onClick={() => handleExportAction('collected')}>
                                 <span className="dot dot-collected" />
@@ -206,6 +250,7 @@ export function FilterBar({
                                 <span className="dot dot-trade" />
                                 Trocar
                             </button>
+
                             <hr className="dropdown-divider" />
                             <div className="dropdown-section-title">Trocas</div>
                             <button
@@ -213,7 +258,7 @@ export function FilterBar({
                                 id="copyTradeTextBtn"
                                 onClick={() => {
                                     onCopyTradeText();
-                                    setOpenDropdown(null);
+                                    setActivePopup(null);
                                 }}
                             >
                                 <span className="dot dot-text" />
@@ -224,12 +269,13 @@ export function FilterBar({
                                 id="copyTradeGridBtn"
                                 onClick={() => {
                                     onCopyTradeGrid();
-                                    setOpenDropdown(null);
+                                    setActivePopup(null);
                                 }}
                             >
                                 <span className="dot dot-text" />
                                 Grade de trocas (texto)
                             </button>
+
                             <hr className="dropdown-divider" />
                             <div className="dropdown-section-title">Dados</div>
                             <button
@@ -237,7 +283,7 @@ export function FilterBar({
                                 id="exportBackupBtn"
                                 onClick={() => {
                                     onExportBackup();
-                                    setOpenDropdown(null);
+                                    setActivePopup(null);
                                 }}
                             >
                                 <span className="dot dot-backup" />
@@ -249,43 +295,50 @@ export function FilterBar({
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
 
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        id="importInput"
-                        className="file-input"
-                        accept=".json"
-                        onChange={handleFileChange}
-                    />
-
-                    <button type="button" className="btn" id="shareBtn" onClick={onShare}>
-                        Compartilhar
-                    </button>
-
+            {/* Popup Modal Centralizado: Configurações */}
+            {activePopup === 'settings' && (
+                <div
+                    className="modal-backdrop"
+                    onClick={() => setActivePopup(null)}
+                    role="presentation"
+                >
                     <div
-                        ref={settingsRef}
-                        className={`dropdown${openDropdown === 'settings' ? ' open' : ''}`}
-                        id="settingsDropdown"
+                        className="modal-popup"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="settingsPopupTitle"
+                        onClick={e => e.stopPropagation()}
                     >
-                        <button
-                            type="button"
-                            className="btn"
-                            id="settingsToggle"
-                            aria-haspopup="true"
-                            aria-expanded={String(openDropdown === 'settings')}
-                            onClick={e => {
-                                e.stopPropagation();
-                                setOpenDropdown(prev => (prev === 'settings' ? null : 'settings'));
-                            }}
-                        >
-                            Configurações
-                        </button>
-                        <div
-                            className="dropdown-menu"
-                            aria-label="Opções de configuração"
-                            onClick={e => e.stopPropagation()}
-                        >
+                        <div className="modal-header">
+                            <h3 id="settingsPopupTitle" className="modal-title">
+                                Configurações
+                            </h3>
+                            <button
+                                type="button"
+                                className="modal-close-btn"
+                                onClick={() => setActivePopup(null)}
+                                aria-label="Fechar"
+                            >
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="modal-body" aria-label="Opções de configuração">
                             <div className="switches">
                                 <label className="switch">
                                     <input
@@ -329,7 +382,7 @@ export function FilterBar({
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </nav>
     );
 }
