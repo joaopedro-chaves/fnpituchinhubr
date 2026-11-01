@@ -6,15 +6,9 @@
    tanto em modo de desenvolvimento (`vite`) quanto em produção (`vite build`).
    =================================================== */
 
-const spriteModules =
-    typeof import.meta.glob === 'function'
-        ? import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' })
-        : {};
+const spriteModules = import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' });
 
-const siteImageModules =
-    typeof import.meta.glob === 'function'
-        ? import.meta.glob('/siteimages/*.webp', { eager: true, import: 'default' })
-        : {};
+const siteImageModules = import.meta.glob('/siteimages/*.webp', { eager: true, import: 'default' });
 
 /**
  * Retorna a URL processada pelo Vite para o sprite informado.
