@@ -8,8 +8,6 @@
 
 const spriteModules = import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' });
 
-const siteImageModules = import.meta.glob('/siteimages/*.webp', { eager: true, import: 'default' });
-
 /**
  * Retorna a URL processada pelo Vite para o sprite informado.
  * @param {string} spriteId - ID do sprite (ex.: "water_basic")
@@ -25,10 +23,9 @@ export function getSpriteImageUrl(spriteId) {
 }
 
 /**
- * Retorna a URL do ícone principal da marca (staticsprite.webp).
+ * Retorna a URL do ícone principal da marca (favicon.webp).
  * @returns {string} URL da imagem
  */
 export function getMascotImageUrl() {
-    const key = '/siteimages/staticsprite.webp';
-    return siteImageModules[key] || 'siteimages/staticsprite.webp';
+    return 'favicon.webp';
 }

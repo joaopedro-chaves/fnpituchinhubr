@@ -9,9 +9,9 @@ A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortni
 > Aqui está o site do repositório:
 https://joaopedro-chaves.github.io/fnpituchinhubr/
 
-## Migração para React e TypeScript
+## Migração para React e PWA
 
-O projeto está em processo de migração para React e TypeScript. O motivo é a necessidade de uma melhor organização do código e a adição de novas funcionalidades que o framework oferece.
+O projeto está em processo de migração para React e PWA.
 
 ## Arquivamento do projeto
 
@@ -21,7 +21,7 @@ Caso contrário, o projeto será atualizado.
 
 ## Desenvolvimento (React + Vite)
 
-Esta branch (`react`) contém a versão em React do projeto. Veja o passo a passo da migração, com comparativos "Antes vs. Depois", em [MIGRACAO_REACT.md](./MIGRACAO_REACT.md).
+Veja o passo a passo da migração, com comparativos "Antes vs. Depois", em [MIGRACAO_REACT.md](./MIGRACAO_REACT.md). 
 
 ```bash
 npm install        # instala as dependências
@@ -31,8 +31,6 @@ npm run preview    # serve o build localmente
 npm run lint       # ESLint
 npm test           # testes (Vitest)
 ```
-
-Rotas: `#/` (catálogo) e `#/codes` (códigos e trapaças). O antigo `codes.html` redireciona para `#/codes`.
 
 ## Otimizações e Design
 
