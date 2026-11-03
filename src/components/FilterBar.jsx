@@ -111,6 +111,7 @@ export function FilterBar({
                     <option value="all">Todas Tempo.</option>
                     <option value="C7T3">C7T3</option>
                     <option value="C7T4">C7T4</option>
+                    <option value="C7T5">C7T5</option>
                 </select>
 
                 <label className="sr-only" htmlFor="sortOrder">
