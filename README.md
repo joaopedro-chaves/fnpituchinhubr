@@ -13,12 +13,6 @@ https://joaopedro-chaves.github.io/fnpituchinhubr/
 
 O projeto está em processo de migração para React e PWA.
 
-## Arquivamento do projeto
-
-Devido ao encerramento da funcionalidade de elementais por parte da Epic Games, este repositório irá ficar arquivado em 01.01.2027 e não será mais atualizado.
-
-Caso contrário, o projeto será atualizado.
-
 ## Desenvolvimento (React + Vite)
 
 Veja o passo a passo da migração, com comparativos "Antes vs. Depois", em [MIGRACAO_REACT.md](./MIGRACAO_REACT.md). 
