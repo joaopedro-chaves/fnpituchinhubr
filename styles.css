@@ -138,6 +138,16 @@
     --hud-badge-border: rgba(230, 224, 233, 0.24);
     --hud-badge-text: #ffffff;
     --hud-command-text: #cac4d0;
+
+    /* Cards (Dark - Original) */
+    --card-surface: #232938;
+    --card-title-color: #e2e8f0;
+    --card-season-bg: #9ca3af;
+    --card-season-color: #1e2430;
+    --card-focus-halo: rgba(208, 188, 255, 0.25);
+    --card-shadow: var(--elevation-1);
+    --card-shadow-hover: var(--elevation-2);
+    --card-shadow-obtained-hover: var(--elevation-3);
 }
 
 :root[data-theme="light"] {
@@ -207,6 +217,16 @@
     --hud-badge-border: rgba(29, 27, 32, 0.2);
     --hud-badge-text: #1d1b20;
     --hud-command-text: #49454f;
+
+    /* Cards (Light - M3 Expressive Purple) */
+    --card-surface: var(--surface-container-lowest);
+    --card-title-color: var(--text);
+    --card-season-bg: var(--secondary-container);
+    --card-season-color: var(--on-secondary-container);
+    --card-focus-halo: rgba(103, 80, 164, 0.24);
+    --card-shadow: 0 0 0 1px var(--outline-variant), var(--elevation-1);
+    --card-shadow-hover: 0 0 0 1px var(--outline), var(--elevation-2);
+    --card-shadow-obtained-hover: 0 0 0 1px var(--primary), var(--elevation-3);
 }
 
 /* ===================================================
@@ -1087,7 +1107,7 @@ body.low-fidelity .modal-backdrop {
     position: relative;
     display: flex;
     flex-direction: column;
-    background: #232938;
+    background: var(--card-surface);
     border-radius: var(--radius);
     border: none;
     overflow: visible;
@@ -1097,7 +1117,7 @@ body.low-fidelity .modal-backdrop {
     transition: transform var(--duration-medium1) var(--ease-decelerate),
         box-shadow var(--duration-medium1) var(--ease-standard),
         outline-color var(--duration-short2) var(--ease-standard);
-    box-shadow: var(--elevation-1);
+    box-shadow: var(--card-shadow);
 }
 
 .card-inner {
@@ -1109,7 +1129,7 @@ body.low-fidelity .modal-backdrop {
     flex: 1;
     border-radius: inherit;
     overflow: hidden;
-    background: #232938;
+    background: var(--card-surface);
 }
 
 /* M3 Plain Tooltip (Desktop Hover & Mobile Long-Press - desativado temporariamente)
@@ -1175,18 +1195,18 @@ body.low-fidelity .modal-backdrop {
     outline: 3px solid var(--primary);
     outline-offset: 2px;
     transform: translateY(-4px);
-    box-shadow: 0 0 0 4px rgba(214, 168, 250, 0.25), var(--elevation-3);
+    box-shadow: 0 0 0 4px var(--card-focus-halo), var(--elevation-3);
     z-index: 5;
 }
 
 .card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--elevation-2);
+    box-shadow: var(--card-shadow-hover);
 }
 
 .card.obtained:hover {
     transform: translateY(-4px);
-    box-shadow: var(--elevation-3);
+    box-shadow: var(--card-shadow-obtained-hover);
 }
 
 /* Card display area */
@@ -1274,7 +1294,7 @@ body.low-fidelity .modal-backdrop {
 /* Card metadata footer */
 .card-name {
     position: relative;
-    background: #232938;
+    background: var(--card-surface);
     width: 100%;
     min-height: 36px;
     padding: 8px 10px;
@@ -1290,7 +1310,7 @@ body.low-fidelity .modal-backdrop {
     font-weight: 500;
     letter-spacing: 0.1px;
     line-height: 1.2;
-    color: #e2e8f0;
+    color: var(--card-title-color);
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1306,8 +1326,8 @@ body.low-fidelity .modal-backdrop {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    background-color: #9ca3af;
-    color: #1e2430;
+    background-color: var(--card-season-bg);
+    color: var(--card-season-color);
     border-radius: 5px;
     line-height: 1.25;
     white-space: nowrap;
