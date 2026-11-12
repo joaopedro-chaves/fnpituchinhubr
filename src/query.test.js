@@ -5,6 +5,7 @@ import {
     getReleasedSprites,
     getCollectionCounts,
     getActiveThemes,
+    getActiveSeasons,
     getExportThemeLabel,
     getTradeThemeLabel,
     getSpriteDataIssues,
@@ -19,6 +20,7 @@ import {
     isMastered,
     getDisplayName,
 } from './query.js';
+import { THEME, getCardStyleVars } from './taxonomy.js';
 import { baseSprites } from './data/sprites-data.js';
 import { getSpriteImageUrl } from './assets/spriteImages.js';
 
@@ -148,8 +150,38 @@ describe('contagens e temas', () => {
         expect(getSeasonData('C7T3')).toEqual({ name: 'C7T3' });
         expect(getSeasonData('C7T4')).toEqual({ name: 'C7T4' });
         expect(getSeasonData('C7T5')).toEqual({ name: 'C7T5' });
+        expect(getSeasonData('C7T6')).toEqual({ name: 'C7T6' });
         expect(getSeasonData('outra')).toEqual({ name: 'none' });
         expect(getSeasonData(undefined)).toEqual({ name: 'none' });
+    });
+
+    it('getActiveSeasons extrai temporadas ordenadas dinamicamente', () => {
+        expect(getActiveSeasons(sprites)).toEqual(['C7T3', 'C7T4']);
+        expect(
+            getActiveSeasons([
+                { season: 'C7T5' },
+                { season: 'C7T3' },
+                { season: 'C7T6' },
+                { season: 'C7T4' },
+                { season: 'C7T10' },
+                { season: 'none' },
+            ])
+        ).toEqual(['C7T3', 'C7T4', 'C7T5', 'C7T6', 'C7T10']);
+        expect(getActiveSeasons(baseSprites)).toEqual(['C7T3', 'C7T4', 'C7T5']);
+    });
+
+    it('getCardStyleVars deriva tokens de cor da fonte única sem divergência no modo simples', () => {
+        for (const [themeName, entry] of Object.entries(THEME)) {
+            const vars = getCardStyleVars('Especial', themeName);
+            expect(vars['--card-display-bg']).toBe(
+                `linear-gradient(180deg, ${entry.gradient[0]}, ${entry.gradient[1]})`
+            );
+            expect(vars['--card-low-fidelity-bg']).toBe(entry.gradient[0]);
+        }
+
+        const rareVars = getCardStyleVars('Raro', 'Básico');
+        expect(rareVars['--card-strip-bg']).toContain('#3b82f6');
+        expect(rareVars['--rarity-glow']).toBeTruthy();
     });
 
     it('getFamilyKeys preserva ordem de primeira aparição sem duplicatas', () => {

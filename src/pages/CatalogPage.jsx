@@ -46,6 +46,7 @@ export function CatalogPage() {
         settings,
         trackerState,
         activeThemes,
+        activeSeasons,
         visibleSprites,
         progressStats,
         toggleObtained,
@@ -225,7 +226,7 @@ export function CatalogPage() {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = 'fnsprites-backup.json';
+        link.download = 'pituchinhus-backup.json';
         link.href = url;
         link.click();
         URL.revokeObjectURL(url);
@@ -358,6 +359,7 @@ export function CatalogPage() {
                     filters={filters}
                     settings={settings}
                     activeThemes={activeThemes}
+                    activeSeasons={activeSeasons}
                     viewMode={viewMode}
                     onFilterChange={updateFilter}
                     onSettingChange={updateSetting}
@@ -457,8 +459,8 @@ export function CatalogPage() {
             <footer className="footer">
                 <p>
                     Fortnite and its materials (Sprites and Data) are trademarks and copyrights of
-                    Epic Games, Inc. This website is not endorsed or affilliated with Epic Games,
-                    Inc..
+                    Epic Games, Inc. This website is not endorsed or affiliated with Epic Games,
+                    Inc.
                 </p>
             </footer>
         </>

@@ -70,6 +70,17 @@ fi
 
 echo "Iniciando compressão de $TOTAL imagem(ns) para WebP com qualidade $QUALITY (usando $CONVERTER)..."
 
+ACTIVE_TEMP_FILE=""
+
+cleanup_temp_file() {
+    if [ -n "$ACTIVE_TEMP_FILE" ] && [ -f "$ACTIVE_TEMP_FILE" ]; then
+        rm -f "$ACTIVE_TEMP_FILE"
+    fi
+    ACTIVE_TEMP_FILE=""
+}
+
+trap cleanup_temp_file EXIT INT TERM
+
 compress_image() {
     local src="$1"
     local dir
@@ -87,27 +98,40 @@ compress_image() {
     local in_place=false
     if [ "$src" = "$dest" ]; then
         in_place=true
-        temp_dest="$dir/${basename}_tmp_$$.webp"
+        temp_dest="$dir/.${basename}_tmp_$$.webp"
+        ACTIVE_TEMP_FILE="$temp_dest"
     fi
 
+    local status=0
     case "$CONVERTER" in
         cwebp)
-            cwebp -q "$QUALITY" "$src" -o "$temp_dest" -quiet
+            cwebp -q "$QUALITY" "$src" -o "$temp_dest" -quiet || status=$?
             ;;
         ffmpeg)
-            ffmpeg -y -v error -i "$src" -c:v libwebp -quality "$QUALITY" "$temp_dest"
+            ffmpeg -y -v error -i "$src" -c:v libwebp -quality "$QUALITY" "$temp_dest" || status=$?
             ;;
         python)
-            python3 - <<PY
+            python3 - "$src" "$temp_dest" "$QUALITY" <<'PY' || status=$?
+import sys
 from PIL import Image
-img = Image.open("$src")
-img.save("$temp_dest", "WEBP", quality=int("$QUALITY"))
+
+src, temp_dest, quality_arg = sys.argv[1:4]
+img = Image.open(src)
+img.save(temp_dest, "WEBP", quality=int(quality_arg), method=4)
 PY
             ;;
     esac
 
+    if [ "$status" -ne 0 ]; then
+        if [ "$in_place" = true ]; then
+            cleanup_temp_file
+        fi
+        return "$status"
+    fi
+
     if [ "$in_place" = true ]; then
         mv -f "$temp_dest" "$dest"
+        ACTIVE_TEMP_FILE=""
     fi
 }
 

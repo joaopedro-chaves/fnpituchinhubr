@@ -1,5 +1,6 @@
 import { memo, useState, useCallback } from 'react';
 import { getSeasonData } from '../query.js';
+import { getCardStyleVars } from '../taxonomy.js';
 import { getSpriteImageUrl } from '../assets/spriteImages.js';
 
 const spriteMetaCache = new WeakMap();
@@ -20,6 +21,7 @@ function getSpriteStaticMeta(sprite) {
         displayName,
         seasonName: seasonData.name,
         baseClassName: baseClasses.join(' '),
+        cardStyle: getCardStyleVars(sprite.rarity, sprite.theme),
         imgSrc: getSpriteImageUrl(sprite.id),
         collectLabel: `${displayName} - ${sprite.unreleased ? 'Não lançado' : 'Não coletado'} (clique para coletar)`,
         removeLabel: `${displayName} - Coletado (clique para remover da coleção)`,
@@ -30,11 +32,6 @@ function getSpriteStaticMeta(sprite) {
     spriteMetaCache.set(sprite, cached);
     return cached;
 }
-
-/*
-const LONG_PRESS_DURATION_MS = 400;
-const TOUCH_MOVE_TOLERANCE_PX = 10;
-*/
 
 function CrownIcon() {
     return (
@@ -63,24 +60,6 @@ export const SpriteCard = memo(function SpriteCard({
 
     const [imgError, setImgError] = useState(false);
 
-    /*
-    // Tooltip & Long-Press (desativado temporariamente)
-    const [tooltipVisible, setTooltipVisible] = useState(false);
-
-    const longPressTimerRef = useRef(null);
-    const isLongPressRef = useRef(false);
-    const suppressClickRef = useRef(false);
-    const touchStartCoordsRef = useRef({ x: 0, y: 0 });
-
-    useEffect(() => {
-        return () => {
-            if (longPressTimerRef.current) {
-                clearTimeout(longPressTimerRef.current);
-            }
-        };
-    }, []);
-    */
-
     // Sprites "não lançados" podem ser placeholders sem tema/raridade/nome
     const meta = getSpriteStaticMeta(sprite);
 
@@ -88,72 +67,6 @@ export const SpriteCard = memo(function SpriteCard({
     if (obtained) className += ' obtained';
     if (mastered) className += ' mastered';
     if (isGamepadSelected) className += ' gamepad-selected';
-
-    /*
-    const clearLongPressTimer = () => {
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    };
-
-    const handlePointerEnter = e => {
-        if (e.pointerType === 'mouse') {
-            setTooltipVisible(true);
-        }
-    };
-
-    const handlePointerLeave = e => {
-        if (e.pointerType === 'mouse') {
-            setTooltipVisible(false);
-        }
-    };
-
-    const handleTouchStart = e => {
-        const touch = e.touches?.[0];
-        if (touch) {
-            touchStartCoordsRef.current = { x: touch.clientX, y: touch.clientY };
-        }
-        isLongPressRef.current = false;
-        clearLongPressTimer();
-        longPressTimerRef.current = setTimeout(() => {
-            isLongPressRef.current = true;
-            suppressClickRef.current = true;
-            setTooltipVisible(true);
-        }, LONG_PRESS_DURATION_MS);
-    };
-
-    const handleTouchMove = e => {
-        if (!longPressTimerRef.current) return;
-        const touch = e.touches?.[0];
-        if (!touch) return;
-        const dx = Math.abs(touch.clientX - touchStartCoordsRef.current.x);
-        const dy = Math.abs(touch.clientY - touchStartCoordsRef.current.y);
-        if (dx > TOUCH_MOVE_TOLERANCE_PX || dy > TOUCH_MOVE_TOLERANCE_PX) {
-            clearLongPressTimer();
-        }
-    };
-
-    const handleTouchEndOrCancel = e => {
-        clearLongPressTimer();
-        if (isLongPressRef.current) {
-            isLongPressRef.current = false;
-            setTooltipVisible(false);
-            if (e.cancelable) {
-                e.preventDefault();
-            }
-            setTimeout(() => {
-                suppressClickRef.current = false;
-            }, 350);
-        }
-    };
-
-    const handleContextMenu = e => {
-        if (isLongPressRef.current || tooltipVisible) {
-            e.preventDefault();
-        }
-    };
-    */
 
     const handleCardClick = useCallback(() => {
         if (!viewMode && onToggleObtained) {
@@ -258,29 +171,10 @@ export const SpriteCard = memo(function SpriteCard({
     return (
         <div
             className={className}
+            style={meta.cardStyle}
             data-id={sprite.id}
             data-name={meta.displayName}
-            /*
-            onBlur={() => setTooltipVisible(false)}
-            onPointerEnter={handlePointerEnter}
-            onPointerLeave={handlePointerLeave}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEndOrCancel}
-            onTouchCancel={handleTouchEndOrCancel}
-            onContextMenu={handleContextMenu}
-            */
         >
-            {/* M3 Plain Tooltip (Desktop Hover & Mobile Long-Press - desativado temporariamente)
-            <div
-                className={`m3-card-tooltip${tooltipVisible ? ' visible' : ''}`}
-                role="tooltip"
-                aria-hidden="true"
-            >
-                {meta.displayName}
-            </div>
-            */}
-
             <div className="card-inner">
                 {viewMode ? (
                     cardBody

@@ -219,13 +219,13 @@ export const baseSprites = [
     { id: "jackrabbit_hunter", name: "Jackrabbit Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "jackrabbit_tricktreat", name: "Jackrabbit Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
 
-    { id: "klombo_basic", name: "Klimbo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
-    { id: "klombo_gold", name: "Klimbo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_cheat", name: "Klimbo Trapaceiro", theme: "Trapaceiro", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_hacker", name: "Klimbo Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_hunter", name: "Klimbo Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_tricktreat", name: "Klimbo Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
-    { id: "klombo_quack", name: "Klimbo Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_basic", name: "Klombo", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
+    { id: "klombo_gold", name: "Klombo Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_cheat", name: "Klombo Trapaceiro", theme: "Trapaceiro", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_hacker", name: "Klombo Hacker de Saque", theme: "Hacker de Saque", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_hunter", name: "Klombo Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_tricktreat", name: "Klombo Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
+    { id: "klombo_quack", name: "Klombo Pato", theme: "Pato", rarity: "Especial", unreleased: false, season: "C7T4" },
 
     { id: "crown_basic", name: "Coroa", theme: "Básico", rarity: "Mítico", unreleased: false, season: "C7T4" },
     { id: "crown_gold", name: "Coroa Dourada", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -241,7 +241,7 @@ export const baseSprites = [
     { id: "xray_hunter", name: "Raio-X Caçador de Recompensas", theme: "Caçador de Recompensas", rarity: "Especial", unreleased: false, season: "C7T4" },
     { id: "xray_tricktreat", name: "Raio-X Doce ou Travessura", theme: "Doce ou Travessura", rarity: "Especial", unreleased: false, season: "C7T4" },
 
-    { id: "megaman_basic", name: "Mega Men", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
+    { id: "megaman_basic", name: "Mega Man", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
 
     { id: "overshield_basic", name: "Escudão", theme: "Básico", rarity: "Raro", unreleased: false, season: "C7T4" },
     { id: "overshield_gold", name: "Escudão Dourado", theme: "Dourado", rarity: "Especial", unreleased: false, season: "C7T4" },
@@ -413,7 +413,3 @@ export const baseSprites = [
 
     { id: "zee_basic", name: "Ponto Zé", theme: "Básico", rarity: "Mítico", unreleased: true, season: "C7T5" },
 ];
-
-if (typeof window !== 'undefined') {
-    window.baseSprites = baseSprites;
-}

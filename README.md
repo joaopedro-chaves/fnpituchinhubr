@@ -1,82 +1,77 @@
-A Fortnite Sprites Tracker / Rastreamento de pituchinho/elementais para o Fortnite
+# Rastreador de Pituchinhos (Fortnite Sprites Tracker)
 
 ![Elemental sprites](https://github.com/joaopedro-chaves/fnpituchinhubr/blob/main/public/favicon.webp)
 
-> Modificação do projeto [fnsprites](https://github.com/staticvacant/fnsprites) para português e organização do layout (material design).
+> Adaptação do projeto [fnsprites](https://github.com/staticvacant/fnsprites) para português (pt-BR), com redesign em Material Design 3, exportação em imagem/texto e suporte offline (PWA).
 
-> Criado originalmente por [staticvacant](https://github.com/staticvacant)
+> Criado originalmente por [staticvacant](https://github.com/staticvacant).
 
-> Aqui está o site do repositório:
-https://joaopedro-chaves.github.io/fnpituchinhubr/
+Site publicado: https://joaopedro-chaves.github.io/fnpituchinhubr/
 
-## Migração para React e PWA
+## Visão Geral e Recursos
 
-O projeto já está em React e PWA, e estável, estamos agora trabalhando em melhorias, otimazações e funcionalidades futuras. A lot work do to...
+Aplicação web construída com **React 19**, **Vite 6** e **PWA (`vite-plugin-pwa`)**, utilizando:
+
+- Catálogo filtrável por busca textual, tema/tipo, temporada (`C7T3`, `C7T4`, `C7T5` e futuras), status (`Todos`, `Coletados`, `Faltando`) e ordenação (`Categorias`, `Elementais`, `Nome`, `Raridade`).
+- Marcação de coleção (`Coletado`) e dominação (`Dominado`), com persistência em `localStorage`, backup/restauração em JSON e compartilhamento via URL compactada (`?c=...`).
+- Exportação de cards em PNG (Canvas 2D) para coleção, faltantes, não dominados, dominados e lista de trocas, além de cópia em texto simples ou grade alinhada por família.
+- Suporte a tema escuro/claro, modo de desempenho simples (`low-fidelity`), navegação por teclado/gamepad e modais nativos com `<dialog>`.
+- Assets em formato WebP (sprites otimizados em `256x256`) e cache offline via Service Worker.
 
 ## Desenvolvimento (React + Vite)
 
-Veja o passo a passo da migração, com comparativos "Antes vs. Depois", em [MIGRACAO_REACT.md](./MIGRACAO_REACT.md). 
+Veja o histórico e a arquitetura da migração em [MIGRACAO_REACT.md](./docs/MIGRACAO_REACT.md).
 
 ```bash
 npm install        # instala as dependências
 npm run dev        # servidor de desenvolvimento com HMR
-npm run build      # build de produção em dist/
+npm run build      # build de produção e Service Worker em dist/
 npm run preview    # serve o build localmente
-npm run lint       # ESLint
-npm test           # testes (Vitest)
+npm run lint       # ESLint (React, Hooks e boas práticas)
+npm test           # suíte de testes unitários e de componentes (Vitest)
 ```
 
-## Otimizações e Design
+## Scripts de Manutenção e Assets (`./scripts`)
 
-O design foi otimizado para uma experiência mais agradável e moderna, com um layout mais limpo e organizado. Foram utilizadas as diretrizes do Material Design para criar uma interface intuitiva e responsiva, que funciona bem em diferentes dispositivos.
+### Converter imagens PNG para WebP (`./scripts/convert_webp.sh`)
 
-O site foi traduzido para português do Brasil e a organização dos elementos foi feita de forma mais lógica e agradável. Ainda falta a implementação da funcionalidade i18n (internacionalização) para que o site possa ser traduzido para outros idiomas, (30.09.2026 - isso estar sendo testado internamente).
+Modo interativo:
 
-Houve tambem uma refatorização do script javascript ao qual o projeto utiliza, para que o mesmo ficasse mais organizado e legível, além de adicionar novas funcionalidades no futuro.
+```bash
+./scripts/convert_webp.sh
+```
 
-Webp otimização de imagens, foi uma das mudanças que mais fez diferença no projeto, pois reduziu o tamanho das imagens em mais de 50%, fazendo com que o site carregasse mais rápido. Mais as otimização, conseguiram atingir a pontuação de 95 no google lighthouse, no quesito performance (Teste realizado em 30.09.2026 as 11:42).
+Modo linha de comando:
+
+```bash
+# Converter pasta inteira em escala 2x com qualidade padrão (85)
+./scripts/convert_webp.sh -i ./minhas-imagens -s 2
+
+# Converter uma única imagem definindo pasta de saída, escala e qualidade
+./scripts/convert_webp.sh -i sprite.png -o ./sprites/ -s 0.5 -q 90
+
+# Ver todas as opções disponíveis
+./scripts/convert_webp.sh --help
+```
+
+### Recomprimir imagens para WebP (`./scripts/compress_webp.sh`)
+
+```bash
+./scripts/compress_webp.sh ./sprites 75
+```
+
+### Liberar ou reverter status de lançamento (`scripts/release-sprites.js`)
+
+Utilizado pelo workflow [release-sprites.yml](./.github/workflows/release-sprites.yml) para atualizar o campo `unreleased` em `src/data/sprites-data.js`:
+
+```bash
+node scripts/release-sprites.js --ids="id1,id2" --action=release --dry-run
+```
 
 ## Direitos Autorais
 
-Este projeto utiliza imagens dos jogos Fortnite, os quais são de propriedade da Epic Games, todos os direitos autorais pertencem à Epic Games. Este projeto não tem fins lucrativos e não é afiliado à Epic Games.
+Este projeto utiliza imagens e referências de **Fortnite**, que são marcas registradas e direitos autorais da **Epic Games, Inc.** Este projeto não possui fins lucrativos e não é endossado ou afiliado à Epic Games, Inc.
 
 ## Contribuindo
 
-Este projeto é opensource e qualquer pessoa pode contribuir com ele. Claro, dando o devido crédito aos criadores. 
-
-## Usando o script para converter imagens PNG para WebP
-
-### 1. Modo Interativo (Menu no terminal)
-Basta executar o script sem argumentos:
-
-```bash
-./convert_webp.sh
-```
-
-A pasta ou arquivo de entrada (padrão é a pasta atual).
-A escala desejada:
-1) 1x (Tamanho original)
-2) 2x (Dobro do tamanho)
-3) 4x (4 vezes o tamanho)
-4) 0.5x (Metade do tamanho)
-5) 0.25x (1/4 do tamanho)
-A qualidade WebP (padrão: 85).
-
-### 2. Modo Linha de Comando (Rápido e automatizado)
-
-Converter imagens em 2x:
-```bash
-./convert_webp.sh -i ./minhas-imagens -s 2
-```
-Converter imagens em 4x:
-```bash
-./convert_webp.sh -i ./minhas-imagens -s 4
-```
-Converter uma única imagem definindo pasta de saída e qualidade:
-```bash
-./convert_webp.sh -i sprite.png -o ./sprites/ -s 2 -q 90
-```
-Ver todas as opções disponíveis:
-```bash
-./convert_webp.sh --help
-```
+Este projeto é open source e contribuições são bem-vindas, preservando os créditos originais. Antes de abrir um pull request, execute `npm run lint`, `npm test` e `npm run build`.

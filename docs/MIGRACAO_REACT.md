@@ -1,6 +1,6 @@
 # Documentação da Migração: Vanilla JS para React + Vite
 
-Este documento registra todas as mudanças arquiteturais, organização de pastas e comparativos de código ("Antes vs. Depois") da migração do **Rastreador de Pituchinhos (`fnpituchinhubr`)** para **React com Vite** na branch `react`.
+Este documento registra as mudanças arquiteturais, organização de pastas e comparativos de código ("Antes vs. Depois") da migração inicial do **Rastreador de Pituchinhos (`fnpituchinhubr`)** para **React com Vite** (posteriormente consolidada na branch `main` e estendida com PWA, testes de UI e consolidação de tokens).
 
 ---
 
@@ -12,42 +12,53 @@ A aplicação anteriormente baseada em manipulação imperativa do DOM (`documen
 fnpituchinhubr/
 ├── index.html                  # Entrada única: <div id="root"></div> + /src/main.jsx
 ├── public/
-│   └── codes.html              # Redirecionador do link antigo para a rota #/codes
+│   ├── favicon.webp            # Ícone do site
+│   ├── pwa-192x192.png         # Ícone do manifesto PWA (192x192)
+│   └── pwa-512x512.png         # Ícone do manifesto PWA (512x512)
 ├── package.json                # Scripts: dev, build, preview, lint, test
-├── vite.config.js              # Vite + plugin React + configuração do Vitest
+├── vite.config.js              # Vite + plugin React + VitePWA + Vitest
 ├── eslint.config.js            # ESLint 9 (flat config) com regras de React e Hooks
-├── styles.css                  # Folha de estilos global preservada integralmente
-├── sprites/                    # Centenas de imagens .webp dos pituchinhos
-├── siteimages/                 # Ícone estático da marca (staticsprite.webp)
+├── styles.css                  # Folha de estilos global + variáveis CSS por card
+├── sprites/                    # Imagens .webp dos pituchinhos (otimizadas em 256x256)
+├── scripts/
+│   ├── convert_webp.sh         # Conversão em lote PNG -> WebP (ffmpeg / cwebp / Pillow)
+│   ├── compress_webp.sh        # Compressão de imagens para WebP
+│   └── release-sprites.js      # Automação de lançamento em src/data/sprites-data.js
 ├── .github/workflows/
-│   ├── ci.yml                  # CI: lint + testes + build
-│   └── release-sprites.yml     # Automação de lançamento de sprites (já existente)
+│   ├── main.yml                # CI/CD: lint + testes + build + deploy GitHub Pages
+│   └── release-sprites.yml     # Automação manual/agendada de sprites (Node 22 + CI checks)
 └── src/
-    ├── main.jsx                # Bootstrap do React (createRoot)
-    ├── App.jsx                 # Somente as rotas (HashRouter): "/" e "/codes"
+    ├── main.jsx                # Bootstrap do React (createRoot) + registro PWA
+    ├── App.jsx                 # Raiz da aplicação (<CatalogPage />)
     ├── pages/
-    │   └── CatalogPage.jsx     # Página do catálogo: liga hook, filtros, grade e exportações
+    │   └── CatalogPage.jsx     # Página do catálogo: estado, filtros, grade, modais e exportações
     ├── components/
     │   ├── Header.jsx          # Cabeçalho e barras de progresso reativas
-    │   ├── FilterBar.jsx       # Busca, selects, pílulas e menus
+    │   ├── FilterBar.jsx       # Busca, menus M3 desktop, selects mobile e ações
     │   ├── SpriteCard.jsx      # Cartão reutilizável de pituchinho
-    │   └── CodesPage.jsx       # Página de Códigos de Trapaça e Recompensas
+    │   ├── ModalDialog.jsx     # Invólucro acessível baseado em <dialog> nativo
+    │   ├── ExportModal.jsx     # Modal de exportação/backup/compartilhamento (lazy)
+    │   ├── SettingsModal.jsx   # Modal de configurações (lazy)
+    │   └── ControllerHud.jsx   # Guia de controles para navegação por gamepad
     ├── hooks/
-    │   └── useTrackerState.js  # Estado (useState/useMemo) + persistência (useEffect)
+    │   ├── useTrackerState.js          # Estado, persistência incremental e filtros
+    │   └── useGamepadAndSpatialNav.js  # Navegação espacial e suporte a gamepad
     ├── assets/
     │   └── spriteImages.js     # Mapeamento de imagens .webp com import.meta.glob
     ├── data/
-    │   ├── sprites-data.js     # `export const baseSprites`
-    │   └── codes-data.js       # `export const baseCodes`
-    ├── taxonomy.js             # FONTE ÚNICA de temas e raridades (ordem, rótulos, cores)
-    ├── query.js                # Funções puras de filtro, ordenação, contagem e validação
-    ├── share-order.js          # Chaves de localStorage, layout de exportação, filtros
+    │   └── sprites-data.js     # `export const baseSprites`
+    ├── taxonomy.js             # FONTE ÚNICA de temas, raridades, rótulos e cores (UI e Canvas)
+    ├── query.js                # Funções puras de filtro, ordenação, temporadas, contagem e validação
+    ├── share-order.js          # Chaves de localStorage, layout de exportação e filtros
     ├── share-codec.js          # Links compartilháveis (?c=...) v1 e v2
     ├── share-legacy-order.js   # Ordem congelada do formato v1 (não editar)
     ├── view-export.js          # Imagens em Canvas 2D e textos de troca
-    ├── dom-utils.js            # Toast, área de transferência e Canvas
-    ├── query.test.js           # Testes de filtros, ordenação e integridade dos dados
-    └── share-codec.test.js     # Testes do codec de compartilhamento
+    ├── dom-utils.js            # Toasts empilháveis, área de transferência e Canvas
+    ├── query.test.js           # Testes de query, taxonomia, temporadas e integridade dos dados
+    ├── share-codec.test.js     # Testes do codec de compartilhamento
+    ├── view-export.test.js     # Testes de exportação Canvas e textos de troca
+    ├── useTrackerState.test.js # Testes de persistência, debounce e tema no hook
+    └── render-count.test.js    # Testes de lotes de renderização, modais nativos e acessibilidade
 ```
 
 ---
@@ -372,9 +383,9 @@ export const THEME_ORDER = byOrder(THEME);        // derivado
 export const RARITY_ORDER = byOrder(RARITIES);    // derivado
 ```
 
-`query.js` (`getExportThemeLabel`, `getTradeThemeLabel`) e `view-export.js` (cores do card exportado) agora leem desse módulo.
+`query.js` (`getExportThemeLabel`, `getTradeThemeLabel`), `SpriteCard.jsx` (`getCardStyleVars`) e `view-export.js` (`getRarityGradient`, `getRarityDisplayGradient`, `getRarityStripStyle`, `getRarityTagColors`) agora leem diretamente desse módulo.
 
-**Por que:** com uma fonte única, adicionar um tema não exige lembrar de três arquivos. Durante a unificação apareceu um erro de digitação (`'GALÁTICO'`, faltava o C) que passaria a aparecer nas imagens exportadas; foi corrigido para `'GALÁCTICO'`, o texto que o app já gerava antes.
+**Por que:** com uma fonte única para temas, raridades, rótulos e tokens visuais de card (UI e Canvas 2D), adicionar um tema novo exige editar apenas `THEME` em `src/taxonomy.js`, eliminando duplicação e divergência de cores no CSS.
 
 ### 4.6. Sprites incompletos e validação de dados
 
@@ -382,7 +393,9 @@ export const RARITY_ORDER = byOrder(RARITIES);    // derivado
 - `getSpriteDataIssues(sprites)` em `query.js` valida os dados: ids únicos e, para sprites **lançados**, nome preenchido, tema e raridade conhecidos.
 - Um teste roda essa validação nos dados reais. Se alguém lançar um sprite sem preencher os campos, o `npm test` e o CI falham antes do deploy.
 
-### 4.7. Rotas com `react-router-dom`
+### 4.7. Rotas com `react-router-dom` *(Histórico — posteriormente simplificado)*
+
+> **Nota de atualização:** em refinamento posterior após a migração, a página `/codes`, o redirecionamento `public/codes.html` e a dependência `react-router-dom` foram removidos; hoje `src/App.jsx` renderiza `<CatalogPage />` diretamente em um App Shell PWA único. O comparativo abaixo é mantido como registro histórico da migração inicial.
 
 #### Antes
 ```javascript
@@ -392,7 +405,7 @@ window.history.pushState({}, '', '#codes');
 if (window.location.pathname.endsWith('/codes.html')) { /* ... */ }
 ```
 
-#### Depois
+#### Depois (na ocasião da migração inicial)
 ```jsx
 // App.jsx
 <HashRouter>
@@ -408,29 +421,29 @@ const navigate = useNavigate();
 navigate('/codes');
 ```
 
-**Por que `HashRouter`:** o site é estático no GitHub Pages, sem servidor para reescrever URLs. As rotas ficam em `#/` e `#/codes`, e o link de compartilhamento (`?c=...`) continua na query string real.
-
-**Compatibilidade:** o antigo `codes.html` virou `public/codes.html`, uma página mínima que redireciona para `#/codes`. Links e favoritos antigos continuam funcionando e o Vite voltou a ter uma única entrada.
+**Por que `HashRouter` foi escolhido inicialmente:** o site é estático no GitHub Pages, sem servidor para reescrever URLs.
 
 ### 4.8. Qualidade: ESLint, Vitest e CI
 
 | Ferramenta | Comando | O que cobre |
 |---|---|---|
 | ESLint 9 + `react` + `react-hooks` | `npm run lint` | Erros comuns, regras dos Hooks, variáveis não usadas |
-| Vitest | `npm test` | 23 testes: filtros, ordenação, contagens, rótulos, integridade dos dados e codec de compartilhamento (v1, v2, `2r.`, entradas inválidas) |
-| GitHub Actions | `.github/workflows/ci.yml` | Roda lint, testes e build a cada push na branch `react` e em pull requests |
+| Vitest + Testing Library | `npm test` | 5 suítes (56 testes): query/taxonomia/temporadas, codec de compartilhamento, exportação Canvas/texto, persistência/tema no hook `useTrackerState` e componentes React (lotes, `<dialog>` nativo e acessibilidade) |
+| GitHub Actions | `.github/workflows/main.yml` e `.github/workflows/release-sprites.yml` | Roda `lint`, `npm test` e `build` antes do deploy no Pages e em atualizações automatizadas de sprites (Node 22) |
 
 > **Nota:** o ESLint está fixado na versão 9 porque `eslint-plugin-react` ainda não declara suporte ao ESLint 10. O lint ajudou na própria refatoração: apontou os fallbacks `baseSprites` herdados do Vanilla JS e um bloco `catch` vazio.
 
 ### 4.9. Verificação
 
-| Verificação | Resultado |
-|---|---|
-| `npm run lint` | Sem erros |
-| `npm test` | 23 de 23 testes passando |
-| `npm run build` | 337 módulos; JS 370 KB (108 KB gzip), CSS 28 KB; `dist/codes.html` gerado |
+**Marco histórico da migração inicial (`react`):** `npm run lint` sem erros, `npm test` (`23/23` testes) e `npm run build` com `337` módulos.
 
-> **Limitação:** a verificação cobre lint, testes unitários e build. Os componentes React e a navegação não têm testes automatizados e não foram exercitados em um navegador. Vale clicar pelo app (`npm run dev`): coletar, dominar, filtrar, compartilhar, abrir `?c=...` e ir para Trapaças.
+**Estado atual na `main`:**
+
+| Verificação | Resultado observado |
+|---|---|
+| `npm run lint` | Sem erros nem avisos |
+| `npm test` | 5 arquivos, 56 testes passando |
+| `npm run build` | 388 módulos transformados; CSS 32.67 kB (7.20 kB gzip); PWA com precache de 13 entradas (404.03 KiB) |
 
 ---
 

@@ -76,24 +76,24 @@ describe('view-export (paridade)', () => {
         const state = makeState();
 
         const collected = getExportConfig('collected', state, sampleSprites);
-        expect(collected.filename).toBe('fnsprites-collection');
+        expect(collected.filename).toBe('pituchinhus-collection');
         expect(collected.titleL2).toBe('Minha coleção');
         expect(collected.items.map(s => s.id)).toEqual(['water_basic', 'fire_basic']);
 
         const missing = getExportConfig('missing', state, sampleSprites);
-        expect(missing.filename).toBe('fnsprites-missing');
+        expect(missing.filename).toBe('pituchinhus-missing');
         expect(missing.items.map(s => s.id)).toEqual(['water_gold']);
 
         const unmastered = getExportConfig('unmastered', state, sampleSprites);
-        expect(unmastered.filename).toBe('fnsprites-unmastered');
+        expect(unmastered.filename).toBe('pituchinhus-unmastered');
         expect(unmastered.items.map(s => s.id)).toEqual(['water_basic']);
 
         const mastered = getExportConfig('mastered', state, sampleSprites);
-        expect(mastered.filename).toBe('fnsprites-mastered');
+        expect(mastered.filename).toBe('pituchinhus-mastered');
         expect(mastered.items.map(s => s.id)).toEqual(['fire_basic']);
 
         const trade = getExportConfig('trade', state, sampleSprites);
-        expect(trade.filename).toBe('fnsprites-trade-card');
+        expect(trade.filename).toBe('pituchinhus-trade-card');
         expect(trade.items.map(s => s.id)).toEqual(['water_basic', 'water_gold', 'fire_basic']);
         expect(toastMock).not.toHaveBeenCalled();
     });

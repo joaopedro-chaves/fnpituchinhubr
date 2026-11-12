@@ -52,20 +52,6 @@
     --unmastered: #4fc3f7;
     --unreleased-color: #ef4444;
 
-    /* Rarity Palettes */
-    --rare: #4f83cc;
-    --rare-deep: #0d2c54;
-    --rare-text: #e3f2fd;
-    --epic: #ab47bc;
-    --epic-deep: #320b3c;
-    --epic-text: #f3e5f5;
-    --legendary: #ff7043;
-    --legendary-deep: #4e1d0c;
-    --legendary-text: #fbe9e7;
-    --mythic: #ffa726;
-    --mythic-deep: #4a2800;
-    --mythic-text: #fff3e0;
-
     /* Layout & Component Specs */
     --gap: 12px;
     --gap-lg: 20px;
@@ -1177,42 +1163,6 @@ body.low-fidelity dialog.modal-popup::backdrop {
     outline: none;
 }
 
-/* M3 Plain Tooltip (Desktop Hover & Mobile Long-Press - desativado temporariamente)
-.m3-card-tooltip {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%) translateY(4px) scale(0.96);
-    padding: 5px 10px;
-    background: #2b3140;
-    color: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.2px;
-    white-space: nowrap;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: var(--elevation-2);
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 40;
-    transition: opacity var(--duration-short3) var(--ease-standard),
-        transform var(--duration-short3) var(--ease-decelerate),
-        visibility var(--duration-short3);
-}
-
-.m3-card-tooltip.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0) scale(1);
-}
-*/
-
 /* MD3 State Layer — card hover/focus overlay */
 .card::before {
     content: '';
@@ -1263,6 +1213,7 @@ body.low-fidelity dialog.modal-popup::backdrop {
     align-items: center;
     justify-content: center;
     padding-top: 10px;
+    background: var(--card-display-bg, linear-gradient(180deg, #4b79c4 0%, #2b4c85 75%, #1d3561 100%));
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -1333,6 +1284,7 @@ body.low-fidelity dialog.modal-popup::backdrop {
     letter-spacing: 0.6px;
     line-height: 1.2;
     text-align: left;
+    background: var(--card-strip-bg, linear-gradient(90deg, #3b82f6, #4a78b8));
     color: #ffffff;
     clip-path: polygon(0 18%, 100% 0, 100% 100%, 0% 100%);
     z-index: 2;
@@ -1496,79 +1448,7 @@ body.low-fidelity dialog.modal-popup::backdrop {
    Rarity Backgrounds
    =================================================== */
 
-.rarity-Raro .card-display {
-    background: linear-gradient(180deg, #4b79c4 0%, #2b4c85 75%, #1d3561 100%);
-}
-
-.rarity-Épico .card-display {
-    background: linear-gradient(180deg, #a844c9 0%, #6e2587 75%, #4a155e 100%);
-}
-
-.rarity-Lendário .card-display {
-    background: linear-gradient(180deg, #f06d42 0%, #a84220 75%, #6e260e 100%);
-}
-
-.rarity-Mítico .card-display {
-    background: linear-gradient(180deg, #f59e1d 0%, #a86408 75%, #6e3d00 100%);
-}
-
-.rarity-Especial.theme-Básico .card-display {
-    background: linear-gradient(180deg, #1c2436, #0c0f17);
-}
-
-.rarity-Especial.theme-Dourado .card-display {
-    background: linear-gradient(180deg, #61460b, #241a02);
-}
-
-.rarity-Especial.theme-Doce .card-display {
-    background: linear-gradient(180deg, #6b183f, #260514);
-}
-
-.rarity-Especial.theme-Galáctico .card-display {
-    background: linear-gradient(180deg, #1f1145, #080314);
-}
-
-.rarity-Especial.theme-Gema .card-display {
-    background: linear-gradient(180deg, #114c47, #041a18);
-}
-
-.rarity-Especial.theme-Metálico .card-display {
-    background: linear-gradient(180deg, #204454, #09171f);
-}
-
-.rarity-Especial.theme-Pato .card-display {
-    background: linear-gradient(180deg, #322554, #12091f);
-}
-
-.rarity-Especial.theme-Cubo .card-display {
-    background: linear-gradient(180deg, #4c1d95, #1e0b3d);
-}
-
-.rarity-Especial.theme-Trapaceiro .card-display {
-    background: linear-gradient(180deg, #295913, #0f360a);
-}
-
-.rarity-Especial.theme-Hacker-de-Saque .card-display {
-    background: linear-gradient(180deg, #114030, #051b14);
-}
-
-.rarity-Especial.theme-Caçador-de-Recompensas .card-display {
-    background: linear-gradient(180deg, #3b1c1c, #170606);
-}
-
-.rarity-Especial.theme-Doce-ou-Travessura .card-display {
-    background: linear-gradient(180deg, #592510, #240a02);
-}
-
-.rarity-Especial.theme-Valioso .card-display {
-    background: linear-gradient(180deg, #396562, #240a02);
-}
-
-.rarity-Especial.theme-Amaldiçoado .card-display {
-    background: linear-gradient(180deg, #114c47, #041a18);
-}
-
-/* Special rarity rainbow overlay */
+/* Special rarity rainbow overlay (display/strip base colors come from src/taxonomy.js) */
 .rarity-Especial .card-display::after {
     content: '';
     position: absolute;
@@ -1601,42 +1481,6 @@ body.low-fidelity dialog.modal-popup::backdrop {
     100% {
         background-position: 100% 50%;
     }
-}
-
-.rarity-Raro {
-    --rarity-glow: rgba(59, 130, 246, 0.48);
-}
-
-.rarity-Raro .card-rarity {
-    background: linear-gradient(90deg, #3b82f6, #4a78b8);
-    color: #ffffff;
-}
-
-.rarity-Épico {
-    --rarity-glow: rgba(168, 85, 247, 0.5);
-}
-
-.rarity-Épico .card-rarity {
-    background: linear-gradient(90deg, #9333ea, #a855f7);
-    color: #ffffff;
-}
-
-.rarity-Lendário {
-    --rarity-glow: rgba(249, 115, 22, 0.5);
-}
-
-.rarity-Lendário .card-rarity {
-    background: linear-gradient(90deg, #f97316, #fb923c);
-    color: #ffffff;
-}
-
-.rarity-Mítico {
-    --rarity-glow: rgba(245, 158, 11, 0.5);
-}
-
-.rarity-Mítico .card-rarity {
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-    color: #ffffff;
 }
 
 .rarity-Especial,
@@ -1718,79 +1562,11 @@ body.low-fidelity .card-rarity-wrap::after {
     display: none;
 }
 
-body.low-fidelity .rarity-Raro .card-display {
-    background: var(--rare);
+body.low-fidelity .card-display {
+    background: var(--card-low-fidelity-bg, #4f83cc);
 }
 
-body.low-fidelity .rarity-Épico .card-display {
-    background: var(--epic);
-}
-
-body.low-fidelity .rarity-Lendário .card-display {
-    background: var(--legendary);
-}
-
-body.low-fidelity .rarity-Mítico .card-display {
-    background: var(--mythic);
-}
-
-body.low-fidelity .rarity-Especial.theme-Básico .card-display {
-    background: #1c2436;
-}
-
-body.low-fidelity .rarity-Especial.theme-Dourado .card-display {
-    background: #61460b;
-}
-
-body.low-fidelity .rarity-Especial.theme-Doce .card-display {
-    background: #6b183f;
-}
-
-body.low-fidelity .rarity-Especial.theme-Galáctico .card-display {
-    background: #1f1145;
-}
-
-body.low-fidelity .rarity-Especial.theme-Gema .card-display {
-    background: #114c47;
-}
-
-body.low-fidelity .rarity-Especial.theme-Metálico .card-display {
-    background: #204454;
-}
-
-body.low-fidelity .rarity-Especial.theme-Pato .card-display {
-    background: #322554;
-}
-
-body.low-fidelity .rarity-Especial.theme-Cubo .card-display {
-    background: #4c1d95;
-}
-
-body.low-fidelity .rarity-Especial.theme-Trapaceiro .card-display {
-    background: #155913;
-}
-
-body.low-fidelity .rarity-Especial.theme-Hacker-de-Saque .card-display {
-    background: #114030;
-}
-
-body.low-fidelity .rarity-Especial.theme-Caçador-de-Recompensas .card-display {
-    background: #3b1c1c;
-}
-
-body.low-fidelity .rarity-Especial.theme-Doce-ou-Travessura .card-display {
-    background: #471d0d;
-}
-
-body.low-fidelity .rarity-Especial.theme-Valioso .card-display {
-    background: #396562;
-}
-
-body.low-fidelity .rarity-Especial.theme-Amaldiçoado .card-display {
-    background: #114c47;
-}
-
-body.low-fidelity .rarity-Especial .card-rarity {
+body.low-fidelity :is(.rarity-Especial, .rarity-special) .card-rarity {
     background: #3b82f6;
     animation: none;
 }
@@ -2210,8 +1986,7 @@ body.low-fidelity .controller-hud {
     .card-display img,
     .progress-ring-fill,
     dialog.modal-popup[open],
-    .toast,
-    .m3-card-tooltip {
+    .toast {
         transition: none;
     }
 

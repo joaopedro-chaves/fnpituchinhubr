@@ -165,29 +165,54 @@ convert_file() {
 
     case "$CONVERTER" in
         ffmpeg)
-            local scale_filter=""
+            local -a scale_args=()
             if [ "$SCALE" != "1" ]; then
-                scale_filter="-vf scale=iw*${SCALE}:ih*${SCALE}:flags=lanczos"
+                scale_args=(-vf "scale=iw*${SCALE}:ih*${SCALE}:flags=lanczos")
             fi
-            ffmpeg -y -v error -i "$in_file" $scale_filter -c:v libwebp -quality "$QUALITY" "$out_file"
+            ffmpeg -y -v error -i "$in_file" "${scale_args[@]}" -c:v libwebp -quality "$QUALITY" "$out_file"
             ;;
         cwebp)
-            local resize_opt=""
+            local -a resize_opts=()
             if [ "$SCALE" != "1" ]; then
-                echo "[cwebp] Redimensionando via cwebp..."
+                local dims=""
+                if command -v identify >/dev/null 2>&1; then
+                    dims=$(identify -format "%w %h" "$in_file" 2>/dev/null || true)
+                elif command -v python3 >/dev/null 2>&1; then
+                    dims=$(python3 - "$in_file" <<'PY' 2>/dev/null || true
+import struct, sys
+with open(sys.argv[1], "rb") as f:
+    sig = f.read(24)
+if len(sig) == 24 and sig[:8] == b"\x89PNG\r\n\x1a\n" and sig[12:16] == b"IHDR":
+    w, h = struct.unpack(">II", sig[16:24])
+    print(f"{w} {h}")
+PY
+)
+                fi
+                if [ -z "$dims" ]; then
+                    echo -e "${RED}[ERRO] Não foi possível detectar dimensões para redimensionar '$in_file' com cwebp.${NC}" >&2
+                    return 1
+                fi
+                local w h new_w new_h
+                read -r w h <<< "$dims"
+                new_w=$(awk -v w="$w" -v s="$SCALE" 'BEGIN { v = int(w * s); print (v < 1 ? 1 : v) }')
+                new_h=$(awk -v h="$h" -v s="$SCALE" 'BEGIN { v = int(h * s); print (v < 1 ? 1 : v) }')
+                resize_opts=(-resize "$new_w" "$new_h")
             fi
-            cwebp -q "$QUALITY" "$in_file" -o "$out_file" >/dev/null 2>&1
+            cwebp -q "$QUALITY" "${resize_opts[@]}" "$in_file" -o "$out_file" >/dev/null 2>&1
             ;;
         python)
-            python3 - <<PY
+            python3 - "$in_file" "$out_file" "$SCALE" "$QUALITY" <<'PY'
+import sys
 from PIL import Image
-img = Image.open("$in_file")
-scale = float("$SCALE")
+
+in_file, out_file, scale_arg, quality_arg = sys.argv[1:5]
+img = Image.open(in_file)
+scale = float(scale_arg)
 if scale != 1.0:
-    new_w = int(img.width * scale)
-    new_h = int(img.height * scale)
+    new_w = max(1, int(img.width * scale))
+    new_h = max(1, int(img.height * scale))
     img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-img.save("$out_file", "WEBP", quality=int("$QUALITY"))
+img.save(out_file, "WEBP", quality=int(quality_arg), method=4)
 PY
             ;;
     esac

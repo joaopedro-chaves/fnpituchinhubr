@@ -15,11 +15,35 @@ export function getSpriteIdSet(sprites = []) {
     return new Set(sprites.map(sprite => sprite.id));
 }
 
+const SEASON_CODE_RE = /^C\d+T\d+$/i;
+
+export function isKnownSeason(season) {
+    return typeof season === 'string' && SEASON_CODE_RE.test(season.trim());
+}
+
 export function getSeasonData(season) {
-    if (season === 'C7T3') return { name: 'C7T3' };
-    if (season === 'C7T4') return { name: 'C7T4' };
-    if (season === 'C7T5') return { name: 'C7T5' };
+    const normalized = typeof season === 'string' ? season.trim() : '';
+    if (SEASON_CODE_RE.test(normalized)) {
+        return { name: normalized.toUpperCase() };
+    }
     return { name: 'none' };
+}
+
+/**
+ * Retorna temporadas distintas presentes nos dados em ordem cronológica.
+ * @param {Array} sprites
+ * @returns {string[]}
+ */
+export function getActiveSeasons(sprites = []) {
+    const seen = new Set();
+    for (const s of sprites) {
+        if (isKnownSeason(s?.season)) {
+            seen.add(s.season.trim().toUpperCase());
+        }
+    }
+    return Array.from(seen).sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+    );
 }
 
 export function getReleasedSprites(

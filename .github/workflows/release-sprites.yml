@@ -39,7 +39,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm ci
 
       - name: Atualizar sprites-data.js
         id: update
@@ -54,8 +58,11 @@ jobs:
           fi
           node scripts/release-sprites.js "${ARGS[@]}"
 
-      - name: Validar sintaxe do arquivo
-        run: node --check src/data/sprites-data.js
+      - name: Validar sintaxe, lint e testes
+        run: |
+          node --check src/data/sprites-data.js
+          npm run lint
+          npm test
 
       - name: Commit e push
         if: ${{ !inputs.dry_run && steps.update.outputs.changed_count != '0' }}

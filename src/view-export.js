@@ -5,7 +5,12 @@
 import { EXPORT_LAYOUT, TRACKER_URL } from './share-order.js';
 import { toast, isIOS, drawRoundRect } from './dom-utils.js';
 import { getSpriteImageUrl, getMascotImageUrl } from './assets/spriteImages.js';
-import { RARITIES, THEME } from './taxonomy.js';
+import {
+    getRarityGradient,
+    getRarityDisplayGradient,
+    getRarityStripStyle,
+    getRarityTagColors,
+} from './taxonomy.js';
 import {
     getReleasedSprites,
     sortSprites,
@@ -78,61 +83,12 @@ export function getExportThemePalette(lightTheme = false) {
     return lightTheme ? LIGHT_EXPORT_PALETTE : DARK_EXPORT_PALETTE;
 }
 
-const RARITY_DISPLAY_GRADIENTS = {
-    Raro: ['#4b79c4', '#2b4c85', '#1d3561'],
-    Épico: ['#a844c9', '#6e2587', '#4a155e'],
-    Lendário: ['#f06d42', '#a84220', '#6e260e'],
-    Mítico: ['#f59e1d', '#a86408', '#6e3d00'],
+export {
+    getRarityGradient,
+    getRarityDisplayGradient,
+    getRarityStripStyle,
+    getRarityTagColors,
 };
-
-const RARITY_STRIP_STYLES = {
-    Raro: {
-        colors: ['#3b82f6', '#4a78b8'],
-        glow: 'rgba(59, 130, 246, 0.48)',
-    },
-    Épico: {
-        colors: ['#9333ea', '#a855f7'],
-        glow: 'rgba(168, 85, 247, 0.5)',
-    },
-    Lendário: {
-        colors: ['#f97316', '#fb923c'],
-        glow: 'rgba(249, 115, 22, 0.5)',
-    },
-    Mítico: {
-        colors: ['#f59e0b', '#fbbf24'],
-        glow: 'rgba(245, 158, 11, 0.5)',
-    },
-    Especial: {
-        colors: ['#22c55e', '#06b6d4', '#3b82f6', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#eab308'],
-        glow: 'rgba(168, 85, 247, 0.45)',
-    },
-};
-
-export function getRarityGradient(rarity, theme) {
-    const rarityInfo = RARITIES[rarity];
-    if (rarityInfo?.gradient) return rarityInfo.gradient;
-    // Raridade "Especial" não tem gradiente próprio: usa o do tema
-    if (rarityInfo) return (THEME[theme] || THEME['Básico']).gradient;
-    return RARITIES['Raro'].gradient;
-}
-
-export function getRarityDisplayGradient(rarity, theme) {
-    if (RARITY_DISPLAY_GRADIENTS[rarity]) {
-        return RARITY_DISPLAY_GRADIENTS[rarity];
-    }
-    if (rarity === 'Especial') {
-        return (THEME[theme] || THEME['Básico']).gradient;
-    }
-    return RARITY_DISPLAY_GRADIENTS.Raro;
-}
-
-export function getRarityStripStyle(rarity) {
-    return RARITY_STRIP_STYLES[rarity] || RARITY_STRIP_STYLES.Raro;
-}
-
-export function getRarityTagColors(rarity) {
-    return (RARITIES[rarity] || RARITIES['Raro']).tag;
-}
 
 export function getExportConfig(mode, state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
@@ -156,7 +112,7 @@ export function getExportConfig(mode, state, sprites = []) {
             titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Minha coleção',
             color: '#4ade80',
-            filename: 'fnsprites-collection',
+            filename: 'pituchinhus-collection',
             emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
         missing: {
@@ -164,7 +120,7 @@ export function getExportConfig(mode, state, sprites = []) {
             titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Eu procuro estes!',
             color: '#e57373',
-            filename: 'fnsprites-missing',
+            filename: 'pituchinhus-missing',
             emptyMsg: 'Você não está faltando nenhum pituchinhu!',
         },
         unmastered: {
@@ -172,7 +128,7 @@ export function getExportConfig(mode, state, sprites = []) {
             titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Não Dominados',
             color: '#4fc3f7',
-            filename: 'fnsprites-unmastered',
+            filename: 'pituchinhus-unmastered',
             emptyMsg: 'Você não tem nenhum pituchinhu para exportar!',
         },
         mastered: {
@@ -180,7 +136,7 @@ export function getExportConfig(mode, state, sprites = []) {
             titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Dominados',
             color: '#facc15',
-            filename: 'fnsprites-mastered',
+            filename: 'pituchinhus-mastered',
             emptyMsg: 'Você não tem nenhum pituchinhu dominado!',
         },
         trade: {
@@ -188,7 +144,7 @@ export function getExportConfig(mode, state, sprites = []) {
             titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Lista de Trocas',
             color: '#d0bcff',
-            filename: 'fnsprites-trade-card',
+            filename: 'pituchinhus-trade-card',
             emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
     };

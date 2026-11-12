@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
+import { Fragment, memo, useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
 import { getUiThemeLabel } from '../query.js';
 
 const loadExportModal = () => import('./ExportModal.jsx');
@@ -6,17 +6,12 @@ const loadSettingsModal = () => import('./SettingsModal.jsx');
 const ExportModal = lazy(loadExportModal);
 const SettingsModal = lazy(loadSettingsModal);
 
+const EMPTY_SEASONS = [];
+
 const STATUS_PILLS = [
     { value: 'all', label: 'Todos' },
     { value: 'owned', label: 'Coletados' },
     { value: 'missing', label: 'Faltando' },
-];
-
-const SEASON_OPTIONS = [
-    { value: 'all', label: 'Temporadas' },
-    { value: 'C7T3', label: 'C7T3' },
-    { value: 'C7T4', label: 'C7T4' },
-    { value: 'C7T5', label: 'C7T5' },
 ];
 
 const SORT_OPTIONS = [
@@ -248,6 +243,7 @@ export const FilterBar = memo(function FilterBar({
     filters,
     settings,
     activeThemes,
+    activeSeasons = EMPTY_SEASONS,
     viewMode,
     onFilterChange,
     onSettingChange,
@@ -353,6 +349,17 @@ export const FilterBar = memo(function FilterBar({
         [activeThemes]
     );
 
+    const seasonOptions = useMemo(
+        () => [
+            { value: 'all', label: 'Temporadas' },
+            ...activeSeasons.map(season => ({
+                value: season,
+                label: season,
+            })),
+        ],
+        [activeSeasons]
+    );
+
     const handleToggleThemeMenu = useCallback(
         () => setOpenFilterMenu(prev => (prev === 'theme' ? null : 'theme')),
         []
@@ -371,6 +378,60 @@ export const FilterBar = memo(function FilterBar({
     const handleSelectSortOrder = useCallback(
         val => onSettingChange('sortOrder', val),
         [onSettingChange]
+    );
+
+    const filterConfigs = useMemo(
+        () => [
+            {
+                id: 'themeFilter',
+                mobileId: 'themeFilterMobile',
+                menuKey: 'theme',
+                name: 'theme',
+                label: 'Tipos',
+                value: filters.theme,
+                defaultValue: 'all',
+                options: themeOptions,
+                onToggle: handleToggleThemeMenu,
+                onSelect: handleSelectTheme,
+            },
+            {
+                id: 'seasonFilter',
+                mobileId: 'seasonFilterMobile',
+                menuKey: 'season',
+                name: 'season',
+                label: 'Temporadas',
+                value: filters.season,
+                defaultValue: 'all',
+                options: seasonOptions,
+                onToggle: handleToggleSeasonMenu,
+                onSelect: handleSelectSeason,
+            },
+            {
+                id: 'sortOrder',
+                mobileId: 'sortOrderMobile',
+                menuKey: 'sortOrder',
+                name: 'sortOrder',
+                label: 'Categorias',
+                value: settings.sortOrder,
+                defaultValue: 'theme',
+                options: SORT_OPTIONS,
+                onToggle: handleToggleSortOrderMenu,
+                onSelect: handleSelectSortOrder,
+            },
+        ],
+        [
+            filters.theme,
+            filters.season,
+            settings.sortOrder,
+            themeOptions,
+            seasonOptions,
+            handleToggleThemeMenu,
+            handleToggleSeasonMenu,
+            handleToggleSortOrderMenu,
+            handleSelectTheme,
+            handleSelectSeason,
+            handleSelectSortOrder,
+        ]
     );
 
     return (
@@ -493,92 +554,42 @@ export const FilterBar = memo(function FilterBar({
                 {/* 2ª Linha: Filtros Secundários (M3 Menu no Desktop >=768px / Select Nativo no Mobile <=767px) */}
                 <div className="toolbar-row toolbar-row-filters" ref={filtersRowRef}>
                     {/* Desktop M3 Menus (min-width: 768px) */}
-                    <M3FilterMenu
-                        id="themeFilter"
-                        label="Tipos"
-                        value={filters.theme}
-                        defaultValue="all"
-                        options={themeOptions}
-                        isOpen={openFilterMenu === 'theme'}
-                        onToggle={handleToggleThemeMenu}
-                        onClose={handleCloseFilterMenu}
-                        onSelect={handleSelectTheme}
-                    />
-
-                    <M3FilterMenu
-                        id="seasonFilter"
-                        label="Temporadas"
-                        value={filters.season}
-                        defaultValue="all"
-                        options={SEASON_OPTIONS}
-                        isOpen={openFilterMenu === 'season'}
-                        onToggle={handleToggleSeasonMenu}
-                        onClose={handleCloseFilterMenu}
-                        onSelect={handleSelectSeason}
-                    />
-
-                    <M3FilterMenu
-                        id="sortOrder"
-                        label="Categorias"
-                        value={settings.sortOrder}
-                        defaultValue="theme"
-                        options={SORT_OPTIONS}
-                        isOpen={openFilterMenu === 'sortOrder'}
-                        onToggle={handleToggleSortOrderMenu}
-                        onClose={handleCloseFilterMenu}
-                        onSelect={handleSelectSortOrder}
-                    />
+                    {filterConfigs.map(cfg => (
+                        <M3FilterMenu
+                            key={cfg.id}
+                            id={cfg.id}
+                            label={cfg.label}
+                            value={cfg.value}
+                            defaultValue={cfg.defaultValue}
+                            options={cfg.options}
+                            isOpen={openFilterMenu === cfg.menuKey}
+                            onToggle={cfg.onToggle}
+                            onClose={handleCloseFilterMenu}
+                            onSelect={cfg.onSelect}
+                        />
+                    ))}
 
                     {/* Mobile Native Selects (max-width: 767px) */}
-                    <label className="sr-only" htmlFor="themeFilterMobile">
-                        Tipos
-                    </label>
-                    <select
-                        id="themeFilterMobile"
-                        name="theme"
-                        className="select filter-chip mobile-filter-select"
-                        value={filters.theme}
-                        onChange={e => onFilterChange('theme', e.target.value)}
-                    >
-                        <option value="all">Tipos</option>
-                        {activeThemes.map(theme => (
-                            <option key={theme} value={theme}>
-                                {getUiThemeLabel(theme)}
-                            </option>
-                        ))}
-                    </select>
-
-                    <label className="sr-only" htmlFor="seasonFilterMobile">
-                        Temporadas
-                    </label>
-                    <select
-                        id="seasonFilterMobile"
-                        name="season"
-                        className="select filter-chip mobile-filter-select"
-                        value={filters.season}
-                        onChange={e => onFilterChange('season', e.target.value)}
-                    >
-                        <option value="all">Temporadas</option>
-                        <option value="C7T3">C7T3</option>
-                        <option value="C7T4">C7T4</option>
-                        <option value="C7T5">C7T5</option>
-                    </select>
-
-                    <label className="sr-only" htmlFor="sortOrderMobile">
-                        Categorias
-                    </label>
-                    <select
-                        id="sortOrderMobile"
-                        name="sortOrder"
-                        className="select filter-chip mobile-filter-select"
-                        value={settings.sortOrder}
-                        onChange={e => onSettingChange('sortOrder', e.target.value)}
-                    >
-                        <option value="theme">Categorias</option>
-                        <option value="sprite">Elementais</option>
-                        <option value="name">Nome</option>
-                        <option value="rarity">Raridade</option>
-                    </select>
+                    {filterConfigs.map(cfg => (
+                        <Fragment key={cfg.mobileId}>
+                            <label className="sr-only" htmlFor={cfg.mobileId}>
+                                {cfg.label}
+                            </label>
+                            <select
+                                id={cfg.mobileId}
+                                name={cfg.name}
+                                className="select filter-chip mobile-filter-select"
+                                value={cfg.value}
+                                onChange={e => cfg.onSelect(e.target.value)}
+                            >
+                                {cfg.options.map(opt => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </Fragment>
+                    ))}
                 </div>
             </div>
 
