@@ -1,6 +1,34 @@
-import { useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { getSeasonData } from '../query.js';
 import { getSpriteImageUrl } from '../assets/spriteImages.js';
+
+const spriteMetaCache = new WeakMap();
+
+function getSpriteStaticMeta(sprite) {
+    let cached = spriteMetaCache.get(sprite);
+    if (cached) return cached;
+
+    const rarityLabel = (sprite.rarity || '').toUpperCase();
+    const displayName = sprite.name || sprite.id;
+    const seasonData = getSeasonData(sprite.season);
+    const themeClass = `theme-${(sprite.theme || '').replace(/\s+/g, '-')}`;
+    const baseClasses = ['card', `rarity-${sprite.rarity}`, themeClass];
+    if (sprite.rarity === 'Especial') baseClasses.push('rarity-special');
+
+    cached = {
+        rarityLabel,
+        displayName,
+        seasonName: seasonData.name,
+        baseClassName: baseClasses.join(' '),
+        imgSrc: getSpriteImageUrl(sprite.id),
+        collectLabel: `Mark ${displayName} as part of your collection`,
+        removeLabel: `Remove ${displayName} from your collection`,
+        unmasterLabel: `Remover dominação de ${displayName}`,
+        masterTitleLabel: `Marcar ${displayName} como dominado`,
+    };
+    spriteMetaCache.set(sprite, cached);
+    return cached;
+}
 
 /*
 const LONG_PRESS_DURATION_MS = 400;
@@ -15,7 +43,7 @@ function CrownIcon() {
     );
 }
 
-export function SpriteCard({
+export const SpriteCard = memo(function SpriteCard({
     sprite,
     obtained,
     mastered,
@@ -27,6 +55,10 @@ export function SpriteCard({
     onToggleObtained,
     onToggleMastery,
 }) {
+    if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
+        window.__recordPerfRender?.('spriteCard');
+    }
+
     const [imgError, setImgError] = useState(false);
 
     /*
@@ -48,16 +80,12 @@ export function SpriteCard({
     */
 
     // Sprites "não lançados" podem ser placeholders sem tema/raridade/nome
-    const rarityLabel = (sprite.rarity || '').toUpperCase();
-    const displayName = sprite.name || sprite.id;
-    const seasonData = getSeasonData(sprite.season);
-    const themeClass = `theme-${(sprite.theme || '').replace(/\s+/g, '-')}`;
+    const meta = getSpriteStaticMeta(sprite);
 
-    const classes = ['card', `rarity-${sprite.rarity}`, themeClass];
-    if (sprite.rarity === 'Especial') classes.push('rarity-special');
-    if (obtained) classes.push('obtained');
-    if (mastered) classes.push('mastered');
-    if (isGamepadSelected) classes.push('gamepad-selected');
+    let className = meta.baseClassName;
+    if (obtained) className += ' obtained';
+    if (mastered) className += ' mastered';
+    if (isGamepadSelected) className += ' gamepad-selected';
 
     /*
     const clearLongPressTimer = () => {
@@ -125,50 +153,64 @@ export function SpriteCard({
     };
     */
 
-    const handleCardClick = () => {
+    const handleCardClick = useCallback(() => {
         if (!viewMode && onToggleObtained) {
             onToggleObtained(sprite.id);
         }
-    };
+    }, [viewMode, onToggleObtained, sprite.id]);
 
-    const handleKeyDown = e => {
-        if (viewMode) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            if (onToggleObtained) onToggleObtained(sprite.id);
-        } else if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
-            e.preventDefault();
-            if (onToggleMastery) onToggleMastery(sprite.id);
-        }
-    };
+    const handleKeyDown = useCallback(
+        e => {
+            if (viewMode) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (onToggleObtained) onToggleObtained(sprite.id);
+            } else if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                if (onToggleMastery) onToggleMastery(sprite.id);
+            }
+        },
+        [viewMode, onToggleObtained, onToggleMastery, sprite.id]
+    );
 
-    const handleCrownClick = e => {
-        e.stopPropagation();
-        if (!viewMode && onToggleMastery) {
-            onToggleMastery(sprite.id);
-        }
-    };
+    const handleCrownClick = useCallback(
+        e => {
+            e.stopPropagation();
+            if (!viewMode && onToggleMastery) {
+                onToggleMastery(sprite.id);
+            }
+        },
+        [viewMode, onToggleMastery, sprite.id]
+    );
+
+    const handleFocus = useCallback(() => {
+        if (onCardFocus) onCardFocus(sprite.id);
+    }, [onCardFocus, sprite.id]);
+
+    const handleImgError = useCallback(() => {
+        setImgError(true);
+    }, []);
 
     return (
         <div
-            className={classes.join(' ')}
+            className={className}
             data-id={sprite.id}
-            data-name={displayName}
+            data-name={meta.displayName}
             tabIndex={!viewMode ? tabIndex : undefined}
             role={!viewMode ? 'button' : undefined}
             aria-pressed={!viewMode ? String(obtained) : undefined}
             aria-label={
                 !viewMode
                     ? mastered
-                        ? `Remover dominação de ${displayName}`
-                        : `${obtained ? 'Remove' : 'Mark'} ${displayName} ${obtained ? 'from' : 'as part of'} your collection`
+                        ? meta.unmasterLabel
+                        : obtained
+                          ? meta.removeLabel
+                          : meta.collectLabel
                     : undefined
             }
             onClick={handleCardClick}
             onKeyDown={handleKeyDown}
-            onFocus={() => {
-                if (onCardFocus) onCardFocus(sprite.id);
-            }}
+            onFocus={handleFocus}
             /*
             onBlur={() => setTooltipVisible(false)}
             onPointerEnter={handlePointerEnter}
@@ -186,7 +228,7 @@ export function SpriteCard({
                 role="tooltip"
                 aria-hidden="true"
             >
-                {displayName}
+                {meta.displayName}
             </div>
             */}
 
@@ -206,7 +248,7 @@ export function SpriteCard({
                         className="card-crown"
                         type="button"
                         title="Alternar dominação"
-                        aria-label={`Marcar ${displayName} como dominado`}
+                        aria-label={meta.masterTitleLabel}
                         onClick={handleCrownClick}
                     >
                         <CrownIcon />
@@ -219,7 +261,7 @@ export function SpriteCard({
                             className="card-crown-display"
                             type="button"
                             title={!viewMode ? 'Remover dominação' : undefined}
-                            aria-label={!viewMode ? `Remover dominação de ${displayName}` : undefined}
+                            aria-label={!viewMode ? meta.unmasterLabel : undefined}
                             disabled={viewMode}
                             onClick={handleCrownClick}
                         >
@@ -228,8 +270,8 @@ export function SpriteCard({
                     )}
 
                     <img
-                        src={getSpriteImageUrl(sprite.id)}
-                        alt={displayName}
+                        src={meta.imgSrc}
+                        alt={meta.displayName}
                         loading={priority ? 'eager' : 'lazy'}
                         decoding="async"
                         fetchPriority={priority ? 'high' : 'auto'}
@@ -237,21 +279,21 @@ export function SpriteCard({
                         height="80"
                         draggable="false"
                         style={imgError ? { opacity: 0.2 } : undefined}
-                        onError={() => setImgError(true)}
+                        onError={handleImgError}
                     />
                 </div>
 
                 <div className="card-rarity-wrap">
-                    <div className="card-rarity">{rarityLabel}</div>
+                    <div className="card-rarity">{meta.rarityLabel}</div>
                 </div>
 
                 <div className="card-name">
-                    <span className="card-title">{displayName}</span>
-                    {seasonData.name !== 'none' && (
-                        <span className="card-season">{seasonData.name}</span>
+                    <span className="card-title">{meta.displayName}</span>
+                    {meta.seasonName !== 'none' && (
+                        <span className="card-season">{meta.seasonName}</span>
                     )}
                 </div>
             </div>
         </div>
     );
-}
+});

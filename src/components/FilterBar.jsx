@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { getUiThemeLabel } from '../query.js';
 import { isIOS } from '../dom-utils.js';
 
@@ -6,6 +6,20 @@ const STATUS_PILLS = [
     { value: 'all', label: 'Todos' },
     { value: 'owned', label: 'Coletados' },
     { value: 'missing', label: 'Faltando' },
+];
+
+const SEASON_OPTIONS = [
+    { value: 'all', label: 'Temporadas' },
+    { value: 'C7T3', label: 'C7T3' },
+    { value: 'C7T4', label: 'C7T4' },
+    { value: 'C7T5', label: 'C7T5' },
+];
+
+const SORT_OPTIONS = [
+    { value: 'theme', label: 'Categorias' },
+    { value: 'sprite', label: 'Elementais' },
+    { value: 'name', label: 'Nome' },
+    { value: 'rarity', label: 'Raridade' },
 ];
 
 function SearchIcon() {
@@ -106,7 +120,17 @@ function DropdownArrowIcon({ open }) {
     );
 }
 
-function M3FilterMenu({ id, label, value, defaultValue, options, isOpen, onToggle, onClose, onSelect }) {
+const M3FilterMenu = memo(function M3FilterMenu({
+    id,
+    label,
+    value,
+    defaultValue,
+    options,
+    isOpen,
+    onToggle,
+    onClose,
+    onSelect,
+}) {
     const containerRef = useRef(null);
     const triggerRef = useRef(null);
     const menuRef = useRef(null);
@@ -215,9 +239,9 @@ function M3FilterMenu({ id, label, value, defaultValue, options, isOpen, onToggl
             )}
         </div>
     );
-}
+});
 
-export function FilterBar({
+export const FilterBar = memo(function FilterBar({
     filters,
     settings,
     activeThemes,
@@ -232,6 +256,10 @@ export function FilterBar({
     onImportBackupFile,
     onShare,
 }) {
+    if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
+        window.__recordPerfRender?.('filterBar');
+    }
+
     const [activePopup, setActivePopup] = useState(null); // 'export' | 'settings' | null
     const [openFilterMenu, setOpenFilterMenu] = useState(null); // 'theme' | 'season' | 'sortOrder' | null
     const fileInputRef = useRef(null);
@@ -300,6 +328,37 @@ export function FilterBar({
         }
         e.target.value = '';
     };
+
+    const themeOptions = useMemo(
+        () => [
+            { value: 'all', label: 'Tipos' },
+            ...activeThemes.map(theme => ({
+                value: theme,
+                label: getUiThemeLabel(theme),
+            })),
+        ],
+        [activeThemes]
+    );
+
+    const handleToggleThemeMenu = useCallback(
+        () => setOpenFilterMenu(prev => (prev === 'theme' ? null : 'theme')),
+        []
+    );
+    const handleToggleSeasonMenu = useCallback(
+        () => setOpenFilterMenu(prev => (prev === 'season' ? null : 'season')),
+        []
+    );
+    const handleToggleSortOrderMenu = useCallback(
+        () => setOpenFilterMenu(prev => (prev === 'sortOrder' ? null : 'sortOrder')),
+        []
+    );
+    const handleCloseFilterMenu = useCallback(() => setOpenFilterMenu(null), []);
+    const handleSelectTheme = useCallback(val => onFilterChange('theme', val), [onFilterChange]);
+    const handleSelectSeason = useCallback(val => onFilterChange('season', val), [onFilterChange]);
+    const handleSelectSortOrder = useCallback(
+        val => onSettingChange('sortOrder', val),
+        [onSettingChange]
+    );
 
     return (
         <nav className="toolbar" aria-label="Filtros e ações da coleção">
@@ -411,17 +470,11 @@ export function FilterBar({
                         label="Tipos"
                         value={filters.theme}
                         defaultValue="all"
-                        options={[
-                            { value: 'all', label: 'Tipos' },
-                            ...activeThemes.map(theme => ({
-                                value: theme,
-                                label: getUiThemeLabel(theme),
-                            })),
-                        ]}
+                        options={themeOptions}
                         isOpen={openFilterMenu === 'theme'}
-                        onToggle={() => setOpenFilterMenu(prev => (prev === 'theme' ? null : 'theme'))}
-                        onClose={() => setOpenFilterMenu(null)}
-                        onSelect={val => onFilterChange('theme', val)}
+                        onToggle={handleToggleThemeMenu}
+                        onClose={handleCloseFilterMenu}
+                        onSelect={handleSelectTheme}
                     />
 
                     <M3FilterMenu
@@ -429,16 +482,11 @@ export function FilterBar({
                         label="Temporadas"
                         value={filters.season}
                         defaultValue="all"
-                        options={[
-                            { value: 'all', label: 'Temporadas' },
-                            { value: 'C7T3', label: 'C7T3' },
-                            { value: 'C7T4', label: 'C7T4' },
-                            { value: 'C7T5', label: 'C7T5' },
-                        ]}
+                        options={SEASON_OPTIONS}
                         isOpen={openFilterMenu === 'season'}
-                        onToggle={() => setOpenFilterMenu(prev => (prev === 'season' ? null : 'season'))}
-                        onClose={() => setOpenFilterMenu(null)}
-                        onSelect={val => onFilterChange('season', val)}
+                        onToggle={handleToggleSeasonMenu}
+                        onClose={handleCloseFilterMenu}
+                        onSelect={handleSelectSeason}
                     />
 
                     <M3FilterMenu
@@ -446,18 +494,11 @@ export function FilterBar({
                         label="Categorias"
                         value={settings.sortOrder}
                         defaultValue="theme"
-                        options={[
-                            { value: 'theme', label: 'Categorias' },
-                            { value: 'sprite', label: 'Elementais' },
-                            { value: 'name', label: 'Nome' },
-                            { value: 'rarity', label: 'Raridade' },
-                        ]}
+                        options={SORT_OPTIONS}
                         isOpen={openFilterMenu === 'sortOrder'}
-                        onToggle={() =>
-                            setOpenFilterMenu(prev => (prev === 'sortOrder' ? null : 'sortOrder'))
-                        }
-                        onClose={() => setOpenFilterMenu(null)}
-                        onSelect={val => onSettingChange('sortOrder', val)}
+                        onToggle={handleToggleSortOrderMenu}
+                        onClose={handleCloseFilterMenu}
+                        onSelect={handleSelectSortOrder}
                     />
 
                     {/* Mobile Native Selects (max-width: 767px) */}
@@ -710,4 +751,4 @@ export function FilterBar({
             )}
         </nav>
     );
-}
+});

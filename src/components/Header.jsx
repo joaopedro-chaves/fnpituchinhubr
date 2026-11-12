@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { getMascotImageUrl } from '../assets/spriteImages.js';
 
 const RING_RADIUS = 17;
@@ -38,7 +39,11 @@ function CircularProgress({ ratio, variant }) {
     );
 }
 
-export function Header({ progressStats }) {
+export const Header = memo(function Header({ progressStats }) {
+    if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
+        window.__recordPerfRender?.('header');
+    }
+
     const { total, collected, mastered } = progressStats;
     const collectionRatio = total > 0 ? collected / total : 0;
     const masteryRatio = total > 0 ? mastered / total : 0;
@@ -80,4 +85,4 @@ export function Header({ progressStats }) {
             </div>
         </header>
     );
-}
+});

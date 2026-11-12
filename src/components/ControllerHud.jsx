@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 const HUD_PROFILES = {
     xbox: {
         deviceLabel: 'Xbox',
@@ -68,7 +70,11 @@ function KeyboardIcon() {
     );
 }
 
-export function ControllerHud({ gamepadInfo, inputMode, viewMode }) {
+export const ControllerHud = memo(function ControllerHud({ gamepadInfo, inputMode, viewMode }) {
+    if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
+        window.__recordPerfRender?.('controllerHud');
+    }
+
     if (viewMode) return null;
 
     const isGamepadActive = Boolean(gamepadInfo?.connected);
@@ -109,5 +115,5 @@ export function ControllerHud({ gamepadInfo, inputMode, viewMode }) {
             </div>
         </aside>
     );
-}
+});
 

@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { baseSprites } from '../data/sprites-data.js';
 import { useTrackerState } from '../hooks/useTrackerState.js';
 import { useGamepadAndSpatialNav } from '../hooks/useGamepadAndSpatialNav.js';
@@ -72,27 +72,31 @@ export function CatalogPage() {
         onToggleMastery: toggleMastery,
     });
 
+    const trackerStateRef = useRef(trackerState);
+    useEffect(() => {
+        trackerStateRef.current = trackerState;
+    }, [trackerState]);
+
     const handlePrepareExport = useCallback(() => {
         void loadViewExport().catch(() => {});
     }, []);
 
-    const handleExportImage = useCallback(
-        mode => {
-            if (viewExportModule) {
-                viewExportModule.exportImage(mode, trackerState, baseSprites);
-                return;
-            }
-            loadViewExport()
-                .then(mod => mod.exportImage(mode, trackerState, baseSprites))
-                .catch(() => toast('Erro ao carregar módulo de exportação!', 'error'));
-        },
-        [trackerState]
-    );
+    const handleExportImage = useCallback(mode => {
+        const currentState = trackerStateRef.current;
+        if (viewExportModule) {
+            viewExportModule.exportImage(mode, currentState, baseSprites);
+            return;
+        }
+        loadViewExport()
+            .then(mod => mod.exportImage(mode, currentState, baseSprites))
+            .catch(() => toast('Erro ao carregar módulo de exportação!', 'error'));
+    }, []);
 
     const handleCopyTradeText = useCallback(() => {
+        const currentState = trackerStateRef.current;
         if (viewExportModule) {
             copyText(
-                viewExportModule.generateTradeText(trackerState, baseSprites),
+                viewExportModule.generateTradeText(currentState, baseSprites),
                 'Lista de trocas copiada para a área de transferência!',
                 'Falha ao copiar lista de trocas'
             );
@@ -101,18 +105,19 @@ export function CatalogPage() {
         loadViewExport()
             .then(mod => {
                 copyText(
-                    mod.generateTradeText(trackerState, baseSprites),
+                    mod.generateTradeText(currentState, baseSprites),
                     'Lista de trocas copiada para a área de transferência!',
                     'Falha ao copiar lista de trocas'
                 );
             })
             .catch(() => toast('Falha ao copiar lista de trocas', 'error'));
-    }, [trackerState]);
+    }, []);
 
     const handleCopyTradeGrid = useCallback(() => {
+        const currentState = trackerStateRef.current;
         if (viewExportModule) {
             copyText(
-                viewExportModule.generateTradeGridText(trackerState, baseSprites),
+                viewExportModule.generateTradeGridText(currentState, baseSprites),
                 'Grelha de trocas copiada para a área de transferência!',
                 'Falha ao copiar grelha de trocas'
             );
@@ -121,16 +126,17 @@ export function CatalogPage() {
         loadViewExport()
             .then(mod => {
                 copyText(
-                    mod.generateTradeGridText(trackerState, baseSprites),
+                    mod.generateTradeGridText(currentState, baseSprites),
                     'Grelha de trocas copiada para a área de transferência!',
                     'Falha ao copiar grelha de trocas'
                 );
             })
             .catch(() => toast('Falha ao copiar grelha de trocas', 'error'));
-    }, [trackerState]);
+    }, []);
 
     const handleExportBackup = useCallback(() => {
-        const data = { obtained, mastered };
+        const current = trackerStateRef.current;
+        const data = { obtained: current.obtained, mastered: current.mastered };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -139,7 +145,7 @@ export function CatalogPage() {
         link.click();
         URL.revokeObjectURL(url);
         toast('Backup exportado com sucesso!', 'success');
-    }, [obtained, mastered]);
+    }, []);
 
     const handleImportBackupFile = useCallback(
         file => {
@@ -167,10 +173,21 @@ export function CatalogPage() {
     );
 
     const handleShare = useCallback(async () => {
-        const code = await compressCollection(obtained, mastered);
+        const current = trackerStateRef.current;
+        const code = await compressCollection(current.obtained, current.mastered);
         const url = `${window.location.origin}${window.location.pathname}?c=${code}`;
         copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
-    }, [obtained, mastered]);
+    }, []);
+
+    const handleMainKeyDown = useCallback(
+        e => {
+            if (e.key === 'Enter' || e.key === 'd' || e.key === 'D') {
+                handleCardKeyNavigate();
+            }
+            handleGridKeyDown(e);
+        },
+        [handleCardKeyNavigate, handleGridKeyDown]
+    );
 
     return (
         <>
@@ -218,12 +235,7 @@ export function CatalogPage() {
                     role="grid"
                     aria-label="Coleção de pituchinhos"
                     aria-busy={loadingShared}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === 'd' || e.key === 'D') {
-                            handleCardKeyNavigate();
-                        }
-                        handleGridKeyDown(e);
-                    }}
+                    onKeyDown={handleMainKeyDown}
                 >
                     {visibleSprites.map((sprite, index) => {
                         const isActiveCard = activeCardId
