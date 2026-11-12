@@ -2,17 +2,47 @@
    DOM & UI Utility Functions
    =================================================== */
 
-export function toast(message, type = 'info') {
+export function toast(message, type = 'info', options = {}) {
     const el = document.createElement('div');
-    el.className = `toast toast-${type}`;
-    el.textContent = message;
-    document.body.appendChild(el);
-    requestAnimationFrame(() => el.classList.add('visible'));
-    setTimeout(() => {
+    const hasAction = Boolean(options?.actionLabel);
+    el.className = `toast toast-${type}${hasAction ? ' has-action' : ''}`;
+    el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+
+    const textEl = document.createElement('span');
+    textEl.className = 'toast-message';
+    textEl.textContent = message;
+    el.appendChild(textEl);
+
+    let dismissed = false;
+    let autoHideTimer = null;
+    const dismiss = () => {
+        if (dismissed) return;
+        dismissed = true;
+        if (autoHideTimer !== null) {
+            clearTimeout(autoHideTimer);
+            autoHideTimer = null;
+        }
         el.classList.remove('visible');
         el.addEventListener('transitionend', () => el.remove(), { once: true });
         setTimeout(() => el.remove(), 500);
-    }, 2500);
+    };
+
+    if (hasAction) {
+        const actionBtn = document.createElement('button');
+        actionBtn.type = 'button';
+        actionBtn.className = 'toast-action';
+        actionBtn.textContent = options.actionLabel;
+        actionBtn.addEventListener('click', () => {
+            options.onAction?.();
+            dismiss();
+        });
+        el.appendChild(actionBtn);
+    }
+
+    document.body.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('visible'));
+    autoHideTimer = setTimeout(dismiss, 2500);
 }
 
 export function isIOS() {
@@ -22,7 +52,7 @@ export function isIOS() {
     );
 }
 
-export function copyText(text, successMsg, errorMsg) {
+export function copyText(text, successMsg, errorMsg, successOptions) {
     if (!navigator.clipboard?.writeText) {
         toast(errorMsg, 'error');
         return;
@@ -31,7 +61,7 @@ export function copyText(text, successMsg, errorMsg) {
     navigator.clipboard
         .writeText(text)
         .then(() => {
-            toast(successMsg, 'success');
+            toast(successMsg, 'success', successOptions);
         })
         .catch(() => {
             toast(errorMsg, 'error');

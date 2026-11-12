@@ -233,7 +233,9 @@ export function CatalogPage() {
             const { compressCollection } = await import('../share-codec.js');
             const code = await compressCollection(current.obtained, current.mastered);
             const url = `${window.location.origin}${window.location.pathname}?c=${code}`;
-            copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
+            copyText(url, 'Link compartilhado!', 'Falha ao compartilhar', {
+                actionLabel: 'Fechar',
+            });
         } catch (err) {
             toast('Falha ao compartilhar', 'error');
             console.error(err);

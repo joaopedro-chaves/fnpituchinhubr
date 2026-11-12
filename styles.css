@@ -1745,44 +1745,87 @@ body.low-fidelity .rarity-Especial .card-rarity {
 }
 
 /* ===================================================
-   Toast Notifications
+   Toast / Snackbar Notifications (Material Design 3)
    =================================================== */
 
 .toast {
     position: fixed;
-    bottom: 28px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(calc(100% + 40px));
-    padding: 12px 24px;
+    min-width: min(288px, calc(100vw - 32px));
+    max-width: min(440px, calc(100vw - 32px));
+    min-height: 48px;
+    padding: 12px 16px;
     background: var(--inverse-surface);
     color: var(--inverse-on-surface);
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-xs);
     font-size: 14px;
-    font-weight: 500;
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: 0.25px;
     box-shadow: var(--elevation-3);
-    transition: transform var(--duration-medium2) var(--ease-decelerate);
+    transition: transform var(--duration-medium2) var(--ease-decelerate),
+        opacity var(--duration-medium2) var(--ease-decelerate);
+    opacity: 0;
     z-index: 1000;
     pointer-events: none;
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.toast.has-action {
+    padding: 6px 8px 6px 16px;
 }
 
 .toast.visible {
     transform: translateX(-50%) translateY(0);
+    opacity: 1;
 }
 
-.toast-success {
-    border-left: 4px solid var(--collected);
+.toast-message {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-action {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 6px 12px;
+    border-radius: var(--radius-xs);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    color: var(--inverse-primary);
+    background: transparent;
+    pointer-events: auto;
+    transition: background-color var(--duration-short2) var(--ease-standard);
+}
+
+.toast-action:hover {
+    background-color: rgba(103, 80, 164, 0.12);
+}
+
+:root[data-theme="light"] .toast-action:hover {
+    background-color: rgba(208, 188, 255, 0.14);
+}
+
+.toast-success,
+.toast-gamepad {
+    background: var(--inverse-surface);
+    color: var(--inverse-on-surface);
 }
 
 .toast-error {
-    border-left: 4px solid var(--error);
+    background: var(--error-container);
+    color: var(--on-error-container);
 }
 
-.toast-gamepad {
-    border-left: 4px solid var(--inverse-primary);
+.toast-error .toast-action {
+    color: var(--on-error-container);
 }
 
 /* ===================================================
