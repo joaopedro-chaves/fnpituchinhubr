@@ -35,14 +35,16 @@ export function getRarityTagColors(rarity) {
 
 export function getExportConfig(mode, state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
+    const obtainedSet = new Set(state?.obtained || []);
+    const masteredSet = new Set(state?.mastered || []);
     let rawItems = [];
 
-    if (mode === 'collected') rawItems = releasedSprites.filter(sprite => isObtained(state, sprite.id));
-    else if (mode === 'missing') rawItems = releasedSprites.filter(sprite => !isObtained(state, sprite.id));
+    if (mode === 'collected') rawItems = releasedSprites.filter(sprite => obtainedSet.has(sprite.id));
+    else if (mode === 'missing') rawItems = releasedSprites.filter(sprite => !obtainedSet.has(sprite.id));
     else if (mode === 'unmastered')
-        rawItems = releasedSprites.filter(sprite => isObtained(state, sprite.id) && !isMastered(state, sprite.id));
+        rawItems = releasedSprites.filter(sprite => obtainedSet.has(sprite.id) && !masteredSet.has(sprite.id));
     else if (mode === 'mastered')
-        rawItems = releasedSprites.filter(sprite => isObtained(state, sprite.id) && isMastered(state, sprite.id));
+        rawItems = releasedSprites.filter(sprite => obtainedSet.has(sprite.id) && masteredSet.has(sprite.id));
     else if (mode === 'trade') rawItems = releasedSprites;
 
     const items = mode === 'trade' ? rawItems : sortSprites(rawItems, state.settings.sortOrder);
@@ -698,6 +700,8 @@ export function generateTradeText(state, sprites = []) {
     const charKeys = getFamilyKeys(releasedSprites);
     const familyThemeMap = getFamilyThemeMap(releasedSprites);
     const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
+    const obtainedSet = new Set(state?.obtained || []);
+    const masteredSet = new Set(state?.mastered || []);
 
     const buildSection = (title, selectSprites) => {
         const lines = [];
@@ -716,10 +720,10 @@ export function generateTradeText(state, sprites = []) {
     };
 
     const sections = [
-        buildSection('LOOKING FOR', items => items.filter(sprite => !isObtained(state, sprite.id))),
-        buildSection('HAVE', items => items.filter(sprite => isObtained(state, sprite.id))),
+        buildSection('LOOKING FOR', items => items.filter(sprite => !obtainedSet.has(sprite.id))),
+        buildSection('HAVE', items => items.filter(sprite => obtainedSet.has(sprite.id))),
         buildSection('STILL NEED TO MASTER', items =>
-            items.filter(sprite => isObtained(state, sprite.id) && !isMastered(state, sprite.id))
+            items.filter(sprite => obtainedSet.has(sprite.id) && !masteredSet.has(sprite.id))
         ),
         [
             `Colecionados: ${collected}/${total}`,
@@ -737,6 +741,8 @@ export function generateTradeGridText(state, sprites = []) {
     const charKeys = getFamilyKeys(releasedSprites);
     const familyThemeMap = getFamilyThemeMap(releasedSprites);
     const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
+    const obtainedSet = new Set(state?.obtained || []);
+    const masteredSet = new Set(state?.mastered || []);
 
     let lines = [
         '```',
@@ -750,8 +756,8 @@ export function generateTradeGridText(state, sprites = []) {
         const rowStates = activeThemes.map(theme => {
             const s = familyThemeMap.get(charKey).get(theme);
             if (!s) return '⬛';
-            if (isMastered(state, s.id)) return '👑';
-            return isObtained(state, s.id) ? '✅' : '❌';
+            if (masteredSet.has(s.id)) return '👑';
+            return obtainedSet.has(s.id) ? '✅' : '❌';
         });
 
         lines.push(`| ${rowStates.join(' | ')} | ${getCharName(charKey, sprites)}`);

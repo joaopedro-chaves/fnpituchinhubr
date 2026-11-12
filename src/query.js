@@ -5,6 +5,8 @@
 import { THEME_ORDER, RARITY_ORDER, getOrderedIndex } from './share-order.js';
 import { THEME, RARITIES } from './taxonomy.js';
 
+const defaultCollator = new Intl.Collator();
+
 export function getFamilyKey(sprite) {
     return sprite.id.split('_')[0];
 }
@@ -32,20 +34,26 @@ export function getReleasedSprites(
 }
 
 export function getFamilyKeys(sprites) {
-    return sprites.reduce((keys, sprite) => {
+    const seen = new Set();
+    const keys = [];
+    for (const sprite of sprites) {
         const key = getFamilyKey(sprite);
-        if (!keys.includes(key)) keys.push(key);
-        return keys;
-    }, []);
+        if (!seen.has(key)) {
+            seen.add(key);
+            keys.push(key);
+        }
+    }
+    return keys;
 }
 
 export function getActiveThemes(sprites) {
-    return sprites
-        .reduce((themes, sprite) => {
-            if (!themes.includes(sprite.theme)) themes.push(sprite.theme);
-            return themes;
-        }, [])
-        .sort((a, b) => getOrderedIndex(THEME_ORDER, a) - getOrderedIndex(THEME_ORDER, b));
+    const seen = new Set();
+    for (const sprite of sprites) {
+        seen.add(sprite.theme);
+    }
+    return [...seen].sort(
+        (a, b) => getOrderedIndex(THEME_ORDER, a) - getOrderedIndex(THEME_ORDER, b)
+    );
 }
 
 export function getCharName(charKey, sprites = []) {
@@ -104,10 +112,20 @@ export function isMastered(state, id) {
 }
 
 export function getCollectionCounts(sprites, state) {
+    const obtainedSet = new Set(state?.obtained || []);
+    const masteredSet = new Set(state?.mastered || []);
+    let collected = 0;
+    let mastered = 0;
+
+    for (const sprite of sprites) {
+        if (obtainedSet.has(sprite.id)) collected += 1;
+        if (masteredSet.has(sprite.id)) mastered += 1;
+    }
+
     return {
         total: sprites.length,
-        collected: sprites.filter(sprite => isObtained(state, sprite.id)).length,
-        mastered: sprites.filter(sprite => isMastered(state, sprite.id)).length,
+        collected,
+        mastered,
     };
 }
 
@@ -126,11 +144,13 @@ export function uniqueValidIds(ids, validIds) {
 
 export function filterSprites(sprites, state) {
     const search = state.filters.search.trim().toLowerCase();
+    const obtainedSet = new Set(state?.obtained || []);
+    const masteredSet = new Set(state?.mastered || []);
 
     return sprites.filter(sprite => {
-        if (state.settings.hideMastered && isMastered(state, sprite.id)) return false;
+        if (state.settings.hideMastered && masteredSet.has(sprite.id)) return false;
         if (!state.settings.showUnreleased && sprite.unreleased) return false;
-        if (state.viewMode && (!isObtained(state, sprite.id) || sprite.unreleased)) return false;
+        if (state.viewMode && (!obtainedSet.has(sprite.id) || sprite.unreleased)) return false;
 
         const matchesSearch = !search || sprite.name.toLowerCase().includes(search);
         const matchesTheme = state.filters.theme === 'all' || sprite.theme === state.filters.theme;
@@ -138,7 +158,7 @@ export function filterSprites(sprites, state) {
 
         let matchesStatus = true;
         if (!state.viewMode) {
-            const isOwned = isObtained(state, sprite.id);
+            const isOwned = obtainedSet.has(sprite.id);
             if (state.filters.status === 'owned') matchesStatus = isOwned;
             if (state.filters.status === 'missing') matchesStatus = !isOwned;
         }
@@ -161,19 +181,19 @@ export function sortSprites(items, method) {
         return sorted.sort((a, b) => {
             const familyA = getFamilyKey(a);
             const familyB = getFamilyKey(b);
-            if (familyA !== familyB) return familyA.localeCompare(familyB);
+            if (familyA !== familyB) return defaultCollator.compare(familyA, familyB);
             return getOrderedIndex(THEME_ORDER, a.theme) - getOrderedIndex(THEME_ORDER, b.theme);
         });
     }
     if (method === 'name') {
-        return sorted.sort((a, b) => a.name.localeCompare(b.name));
+        return sorted.sort((a, b) => defaultCollator.compare(a.name, b.name));
     }
     if (method === 'rarity') {
         return sorted.sort((a, b) => {
             const idxA = getOrderedIndex(RARITY_ORDER, a.rarity);
             const idxB = getOrderedIndex(RARITY_ORDER, b.rarity);
             if (idxA !== idxB) return idxA - idxB;
-            return a.name.localeCompare(b.name);
+            return defaultCollator.compare(a.name, b.name);
         });
     }
     return sorted;
