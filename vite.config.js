@@ -9,9 +9,9 @@ export default defineConfig({
             globPatterns: ['**/*.{js,css,html,svg,webp}']
         },
         manifest: {
-            name: 'FNPituchinhu BR',
-            short_name: 'FNPituchinhu',
-            description: 'Aplicativo FNPituchinhu em React',
+            name: 'Pituchinhu',
+            short_name: 'Pituchinhu',
+            description: 'Aplicativo Pituchinhu',
             lang: 'pt-BR',
             theme_color: '#1a1a1a',
             background_color: '#1a1a1a',
