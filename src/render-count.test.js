@@ -83,6 +83,8 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
         const { container } = render(createElement(CatalogPage));
         expect(container.querySelectorAll('.card[data-id]').length).toBe(INITIAL_BATCH_SIZE);
+        expect(container.querySelector('.grid-region .load-more-sentinel')).not.toBeNull();
+        expect(container.querySelector('footer.footer')).toBeNull();
         expect(typeof observerCallback).toBe('function');
 
         tracker.reset();
@@ -94,6 +96,15 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(updatedCards.length).toBe(INITIAL_BATCH_SIZE * 2);
         // Apenas os novos 48 cards são montados
         expect(tracker.counts.spriteCard).toBe(INITIAL_BATCH_SIZE);
+
+        // Avança até esgotar os lotes e verifica que o sentinela sai e o footer entra no fim
+        for (let step = 0; step < 8 && container.querySelector('.load-more-sentinel'); step++) {
+            act(() => {
+                observerCallback([{ isIntersecting: true }]);
+            });
+        }
+        expect(container.querySelector('.load-more-sentinel')).toBeNull();
+        expect(container.querySelector('footer.footer')).not.toBeNull();
     });
 
     it('preserva lotes já carregados ao marcar pituchinho sob filtro Faltando', () => {

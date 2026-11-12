@@ -1197,6 +1197,21 @@ body.low-fidelity dialog.modal-popup::backdrop {
     min-height: 400px;
 }
 
+.grid-region {
+    position: relative;
+}
+
+/* Antecipa o próximo lote ~120px acima do fim da grade (+ 120px de rootMargin = ~240px)
+   para carregar o próximo lote antes do fim/footer mantendo o lote inicial em 48 cards no desktop */
+.load-more-sentinel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: min(12%, 120px);
+    height: 1px;
+    pointer-events: none;
+}
+
 .empty-state {
     grid-column: 1 / -1;
     display: flex;
@@ -1255,7 +1270,7 @@ body.low-fidelity dialog.modal-popup::backdrop {
    nem recortar box-shadow/outline externos de .card */
 .card:nth-child(n + 33) .card-inner {
     content-visibility: auto;
-    contain-intrinsic-block-size: auto 12rem;
+    contain-intrinsic-block-size: auto 11.48rem;
 }
 
 .card:focus-within .card-inner,
@@ -1398,12 +1413,17 @@ body.low-fidelity dialog.modal-popup::backdrop {
 .card-rarity {
     position: relative;
     width: 100%;
+    height: 22px;
+    display: flex;
+    align-items: center;
     padding: 6px 10px 4px;
     font-size: 9.5px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
     text-align: left;
     background: var(--card-strip-bg, linear-gradient(90deg, #3b82f6, #4a78b8));
     color: #ffffff;
@@ -2048,6 +2068,10 @@ body.low-fidelity .controller-hud {
         gap: 12px;
     }
 
+    .card:nth-child(n + 33) .card-inner {
+        contain-intrinsic-block-size: auto 11.05rem;
+    }
+
     .controller-hud {
         bottom: 12px;
         right: 12px;
@@ -2069,6 +2093,10 @@ body.low-fidelity .controller-hud {
     .grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
+    }
+
+    .card:nth-child(n + 33) .card-inner {
+        contain-intrinsic-block-size: auto calc(((100vw - 40px) / 3) * 1.075 + 49px);
     }
 
     .card-name {
@@ -2093,6 +2121,10 @@ body.low-fidelity .controller-hud {
 
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card:nth-child(n + 33) .card-inner {
+        contain-intrinsic-block-size: auto calc(((100vw - 32px) / 2) * 1.075 + 49px);
     }
 }
 

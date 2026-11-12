@@ -153,11 +153,11 @@ export function CatalogPage() {
                     loadMoreSprites();
                 }
             },
-            { rootMargin: '150px 0px' }
+            { rootMargin: '120px 0px' }
         );
         observer.observe(target);
         return () => observer.disconnect();
-    }, [hasMoreSprites, loadMoreSprites]);
+    }, [hasMoreSprites, renderedCount, loadMoreSprites]);
 
     const trackerStateRef = useRef(trackerState);
     useEffect(() => {
@@ -419,15 +419,16 @@ export function CatalogPage() {
                     onApplyBatch={handleApplyBatch}
                 />
 
-                <main
-                    ref={gridRef}
-                    className="grid"
-                    id="spriteGrid"
-                    aria-label="Coleção de pituchinhos"
-                    aria-busy={loadingShared}
-                    onKeyDown={handleMainKeyDown}
-                >
-                    {displayedSprites.map((sprite, index) => {
+                <div className="grid-region">
+                    <main
+                        ref={gridRef}
+                        className="grid"
+                        id="spriteGrid"
+                        aria-label="Coleção de pituchinhos"
+                        aria-busy={loadingShared}
+                        onKeyDown={handleMainKeyDown}
+                    >
+                        {displayedSprites.map((sprite, index) => {
                         const isActiveCard = activeCardId
                             ? activeCardId === sprite.id
                             : index === 0;
@@ -487,14 +488,15 @@ export function CatalogPage() {
                             )}
                         </div>
                     )}
-                </main>
-                {hasMoreSprites && (
-                    <div
-                        ref={loadMoreRef}
-                        aria-hidden="true"
-                        style={{ height: 1, width: '100%' }}
-                    />
-                )}
+                    </main>
+                    {hasMoreSprites && (
+                        <div
+                            ref={loadMoreRef}
+                            className="load-more-sentinel"
+                            aria-hidden="true"
+                        />
+                    )}
+                </div>
             </div>
 
             <ControllerHud
@@ -503,13 +505,15 @@ export function CatalogPage() {
                 viewMode={viewMode}
             />
 
-            <footer className="footer">
-                <p>
-                    Fortnite and its materials (Sprites and Data) are trademarks and copyrights of
-                    Epic Games, Inc. This website is not endorsed or affiliated with Epic Games,
-                    Inc.
-                </p>
-            </footer>
+            {!hasMoreSprites && (
+                <footer className="footer">
+                    <p>
+                        Fortnite and its materials (Sprites and Data) are trademarks and copyrights of
+                        Epic Games, Inc. This website is not endorsed or affiliated with Epic Games,
+                        Inc.
+                    </p>
+                </footer>
+            )}
         </>
     );
 }

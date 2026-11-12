@@ -92,7 +92,7 @@ function SpatialNavHarness({
     onToggleMastery,
     onStateSnapshot,
 }) {
-    const gridRef = useRef(/** @type {HTMLElement | null} */ (null));
+    const gridRef = useRef(/** @type {HTMLElement | null} */(null));
     useLayoutEffect(() => {
         gridRef.current = document.getElementById('grid');
         return () => {

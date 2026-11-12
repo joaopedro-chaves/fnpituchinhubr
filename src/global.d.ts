@@ -7,3 +7,4 @@ declare global {
         __recordPerfRender?: (key: string) => void;
     }
 }
+
