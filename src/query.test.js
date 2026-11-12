@@ -9,6 +9,15 @@ import {
     getTradeThemeLabel,
     getSpriteDataIssues,
     getFamilyKey,
+    getSeasonData,
+    getFamilyKeys,
+    getCharName,
+    getSpriteIdSet,
+    getFamilyThemeMap,
+    uniqueValidIds,
+    isObtained,
+    isMastered,
+    getDisplayName,
 } from './query.js';
 import { baseSprites } from './data/sprites-data.js';
 
@@ -94,6 +103,24 @@ describe('sortSprites', () => {
         expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
         expect(sprites).toEqual(copy);
     });
+
+    it('ordena por sprite (família por localeCompare e desempate por THEME_ORDER)', () => {
+        const ids = sortSprites(sprites, 'sprite').map(s => s.id);
+        expect(ids).toEqual(['fire_basic', 'onewish_basic', 'soon_basic', 'water_basic', 'water_gold']);
+    });
+
+    it('mantém a ordem original quando método de ordenação é desconhecido', () => {
+        const ids = sortSprites(sprites, 'desconhecido').map(s => s.id);
+        expect(ids).toEqual(sprites.map(s => s.id));
+    });
+
+    it('garante paridade de ordenação em todos os métodos sobre baseSprites', () => {
+        for (const method of ['theme', 'sprite', 'name', 'rarity']) {
+            const result = sortSprites(baseSprites, method);
+            expect(result).toHaveLength(baseSprites.length);
+            expect(new Set(result.map(s => s.id)).size).toBe(baseSprites.length);
+        }
+    });
 });
 
 describe('contagens e temas', () => {
@@ -109,10 +136,52 @@ describe('contagens e temas', () => {
             collected: 2,
             mastered: 1,
         });
+        expect(getCollectionCounts([], makeState())).toEqual({
+            total: 0,
+            collected: 0,
+            mastered: 0,
+        });
+    });
+
+    it('getSeasonData retorna objeto de temporada esperado ou none', () => {
+        expect(getSeasonData('C7T3')).toEqual({ name: 'C7T3' });
+        expect(getSeasonData('C7T4')).toEqual({ name: 'C7T4' });
+        expect(getSeasonData('C7T5')).toEqual({ name: 'C7T5' });
+        expect(getSeasonData('outra')).toEqual({ name: 'none' });
+        expect(getSeasonData(undefined)).toEqual({ name: 'none' });
+    });
+
+    it('getFamilyKeys preserva ordem de primeira aparição sem duplicatas', () => {
+        expect(getFamilyKeys(sprites)).toEqual(['water', 'fire', 'onewish', 'soon']);
+        expect(getFamilyKeys([])).toEqual([]);
     });
 
     it('getActiveThemes devolve temas únicos na ordem da taxonomia', () => {
         expect(getActiveThemes(sprites)).toEqual(['Básico', 'Dourado']);
+        expect(getActiveThemes(baseSprites)[0]).toBe('Básico');
+    });
+
+    it('getCharName usa o nome do sprite _basic quando existe ou capitaliza a chave', () => {
+        expect(getCharName('water', sprites)).toBe('Água');
+        expect(getCharName('onewish', sprites)).toBe('Desejo');
+        expect(getCharName('desconhecido', sprites)).toBe('Desconhecido');
+    });
+
+    it('getFamilyThemeMap, getSpriteIdSet, uniqueValidIds e helpers auxiliares mantêm comportamento exato', () => {
+        const idSet = getSpriteIdSet(sprites);
+        expect(idSet.size).toBe(5);
+        expect(uniqueValidIds(['water_basic', 'water_basic', 'invalid'], idSet)).toEqual(['water_basic']);
+
+        const map = getFamilyThemeMap(sprites);
+        expect([...map.keys()]).toEqual(['water', 'fire', 'onewish', 'soon']);
+        expect(map.get('water').get('Dourado')?.id).toBe('water_gold');
+
+        const state = makeState({ obtained: ['water_basic'], mastered: ['water_basic'] });
+        expect(isObtained(state, 'water_basic')).toBe(true);
+        expect(isObtained(state, 'fire_basic')).toBe(false);
+        expect(isMastered(state, 'water_basic')).toBe(true);
+        expect(getDisplayName('Fogo')).toBe('Fogo Sprite');
+        expect(getDisplayName('Burnt Peanut')).toBe('Burnt Peanut');
     });
 
     it('getFamilyKey usa o prefixo do id', () => {
