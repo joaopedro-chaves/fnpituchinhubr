@@ -4,7 +4,10 @@ import { getMascotImageUrl } from '../assets/spriteImages.js';
 const RING_RADIUS = 17;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-function CircularProgress({ ratio, variant }) {
+/**
+ * @param {{ ratio: number, variant?: string }} props
+ */
+function CircularProgress({ ratio, variant = '' }) {
     const clampedRatio = Math.max(0, Math.min(1, ratio));
     const dashOffset = RING_CIRCUMFERENCE * (1 - clampedRatio);
 
@@ -39,7 +42,11 @@ function CircularProgress({ ratio, variant }) {
     );
 }
 
-export const Header = memo(function Header({ progressStats }) {
+export const Header = memo(
+    /**
+     * @param {{ progressStats: { collected: number, mastered: number, total: number } }} props
+     */
+    function Header({ progressStats }) {
     if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
         window.__recordPerfRender?.('header');
     }

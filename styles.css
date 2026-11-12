@@ -1059,6 +1059,10 @@ body.low-fidelity dialog.modal-popup::backdrop {
     background: var(--collected);
 }
 
+.dot-collected {
+    background: var(--collected);
+}
+
 .dot-missing {
     background: var(--missing);
 }
@@ -1081,6 +1085,105 @@ body.low-fidelity dialog.modal-popup::backdrop {
 
 .dot-text {
     background: var(--text-soft);
+}
+
+/* ── Batch Modal Controls ── */
+
+.batch-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.batch-scope-group {
+    margin: 0;
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.batch-legend {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.batch-radio-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 2px 4px 6px;
+}
+
+.batch-radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--outline-variant);
+    background: var(--surface-container);
+    color: var(--text-soft);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--duration-short) var(--ease),
+        border-color var(--duration-short) var(--ease),
+        color var(--duration-short) var(--ease);
+}
+
+.batch-radio-option:hover:not(.is-disabled) {
+    background: var(--state-hover);
+    color: var(--text);
+}
+
+.batch-radio-option.is-selected {
+    background: var(--primary-container);
+    border-color: var(--primary);
+    color: var(--on-primary-container);
+    font-weight: 600;
+}
+
+.batch-radio-option.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.batch-radio-option input[type='radio'] {
+    margin: 0;
+    accent-color: var(--primary);
+    cursor: inherit;
+}
+
+.batch-subfilter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 4px 4px;
+}
+
+.batch-subfilter-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.batch-select {
+    width: 100%;
+    height: 38px;
+}
+
+.batch-summary {
+    margin: 6px 4px 2px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.batch-modal-content button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 /* ===================================================

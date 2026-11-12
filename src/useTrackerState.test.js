@@ -28,7 +28,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
 
         expect(setItemSpy).not.toHaveBeenCalled();
 
-        const firstCard = container.querySelector('.card[data-id]');
+        const firstCard = /** @type {HTMLElement} */ (container.querySelector('.card[data-id]'));
         fireEvent.click(firstCard.querySelector('.card-primary'));
 
         expect(setItemSpy).toHaveBeenCalledTimes(1);
@@ -79,11 +79,13 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         expect(document.documentElement.dataset.theme).toBeUndefined();
 
         fireEvent.click(container.querySelector('#settingsToggle'));
-        const themeSwitch = await waitFor(() => {
-            const el = container.querySelector('#lightTheme');
-            expect(el).not.toBeNull();
-            return el;
-        });
+        const themeSwitch = /** @type {HTMLInputElement} */ (
+            await waitFor(() => {
+                const el = container.querySelector('#lightTheme');
+                expect(el).not.toBeNull();
+                return el;
+            })
+        );
 
         expect(themeSwitch.checked).toBe(false);
 

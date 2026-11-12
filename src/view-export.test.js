@@ -5,7 +5,7 @@ const { toastMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('./dom-utils.js', async importOriginal => {
-    const actual = await importOriginal();
+    const actual = /** @type {Record<string, any>} */ (await importOriginal());
     return {
         ...actual,
         toast: toastMock,

@@ -224,3 +224,70 @@ export function sortSprites(items, method) {
     }
     return sorted;
 }
+
+/**
+ * Aplica uma ação em lote à coleção garantindo a invariante mastered ⊆ obtained.
+ * @param {{ obtained: string[], mastered: string[] }} collection
+ * @param {string[]} targetIds
+ * @param {'collect' | 'master' | 'unmaster' | 'uncollect'} action
+ * @param {Set<string>} [validIds]
+ * @returns {{ collection: { obtained: string[], mastered: string[] }, changed: boolean, changedCount: number }}
+ */
+export function applyCollectionBatch(collection, targetIds, action, validIds) {
+    const cleanTargets = validIds
+        ? uniqueValidIds(targetIds, validIds)
+        : [...new Set(targetIds)].filter(id => typeof id === 'string');
+
+    if (cleanTargets.length === 0) {
+        return { collection, changed: false, changedCount: 0 };
+    }
+
+    const prevObtained = collection?.obtained || [];
+    const prevMastered = collection?.mastered || [];
+    const targetSet = new Set(cleanTargets);
+    const obtainedSet = new Set(prevObtained);
+    const masteredSet = new Set(prevMastered);
+
+    let nextObtained = prevObtained;
+    let nextMastered = prevMastered;
+    let changedCount = 0;
+
+    if (action === 'collect') {
+        const added = cleanTargets.filter(id => !obtainedSet.has(id));
+        changedCount = added.length;
+        if (changedCount > 0) {
+            nextObtained = [...prevObtained, ...added];
+        }
+    } else if (action === 'master') {
+        const addedObtained = cleanTargets.filter(id => !obtainedSet.has(id));
+        const addedMastered = cleanTargets.filter(id => !masteredSet.has(id));
+        changedCount = new Set([...addedObtained, ...addedMastered]).size;
+        if (addedObtained.length > 0) {
+            nextObtained = [...prevObtained, ...addedObtained];
+        }
+        if (addedMastered.length > 0) {
+            nextMastered = [...prevMastered, ...addedMastered];
+        }
+    } else if (action === 'unmaster') {
+        changedCount = cleanTargets.filter(id => masteredSet.has(id)).length;
+        if (changedCount > 0) {
+            nextMastered = prevMastered.filter(id => !targetSet.has(id));
+        }
+    } else if (action === 'uncollect') {
+        changedCount = cleanTargets.filter(id => obtainedSet.has(id) || masteredSet.has(id)).length;
+        if (changedCount > 0) {
+            nextObtained = prevObtained.filter(id => !targetSet.has(id));
+            nextMastered = prevMastered.filter(id => !targetSet.has(id));
+        }
+    }
+
+    if (changedCount === 0) {
+        return { collection, changed: false, changedCount: 0 };
+    }
+
+    return {
+        collection: { obtained: nextObtained, mastered: nextMastered },
+        changed: true,
+        changedCount,
+    };
+}

@@ -42,9 +42,11 @@ function hideToastRegionIfEmpty(container) {
     }
 }
 
+/** @typedef {HTMLDivElement & { __dismissToast?: () => void }} ToastElement */
+
 export function toast(message, type = 'info', options = {}) {
     const container = getToastContainer();
-    const el = document.createElement('div');
+    const el = /** @type {ToastElement} */ (document.createElement('div'));
     const hasAction = Boolean(options?.actionLabel);
     const defaultDuration = hasAction ? 5000 : 2500;
     const duration = Number.isFinite(options?.duration) ? options.duration : defaultDuration;
@@ -65,6 +67,7 @@ export function toast(message, type = 'info', options = {}) {
     let remainingMs = duration;
     let hovered = false;
     let focused = false;
+    /** @type {HTMLElement | null} */
     let priorExternalFocus = null;
 
     const removeToastNode = () => {
@@ -94,7 +97,7 @@ export function toast(message, type = 'info', options = {}) {
             const nextControl = [...container.querySelectorAll('.toast-action')].find(
                 btn => !el.contains(btn) && !btn.closest('.toast')?.classList.contains('dismissing')
             );
-            if (nextControl) {
+            if (nextControl instanceof HTMLElement) {
                 nextControl.focus({ preventScroll: true });
             } else if (priorExternalFocus?.isConnected) {
                 priorExternalFocus.focus({ preventScroll: true });
@@ -128,13 +131,13 @@ export function toast(message, type = 'info', options = {}) {
     });
     el.addEventListener('focusin', e => {
         focused = true;
-        if (e.relatedTarget && !container.contains(e.relatedTarget)) {
+        if (e.relatedTarget instanceof HTMLElement && !container.contains(e.relatedTarget)) {
             priorExternalFocus = e.relatedTarget;
         }
         pauseTimer();
     });
     el.addEventListener('focusout', e => {
-        if (el.contains(e.relatedTarget)) return;
+        if (e.relatedTarget instanceof Node && el.contains(e.relatedTarget)) return;
         focused = false;
         resumeTimer();
     });
@@ -152,7 +155,7 @@ export function toast(message, type = 'info', options = {}) {
     }
 
     while (container.childElementCount >= MAX_VISIBLE_TOASTS) {
-        const oldest = container.firstElementChild;
+        const oldest = /** @type {ToastElement | null} */ (container.firstElementChild);
         if (typeof oldest?.__dismissToast === 'function') {
             oldest.__dismissToast();
         }

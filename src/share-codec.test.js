@@ -28,7 +28,10 @@ describe('share-codec v2', () => {
     });
 
     it('decodifica o formato sem compressão (2r.)', async () => {
-        const payload = Buffer.from('water:basic*,gold').toString('base64url');
+        const payload = btoa('water:basic*,gold')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
         const decoded = await decompressCollection(baseSprites, `2r.${payload}`);
         expect(decoded.obtained).toEqual(['water_basic', 'water_gold']);
         expect(decoded.mastered).toEqual(['water_basic']);

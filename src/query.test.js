@@ -19,6 +19,7 @@ import {
     isObtained,
     isMastered,
     getDisplayName,
+    applyCollectionBatch,
 } from './query.js';
 import { THEME, getCardStyleVars } from './taxonomy.js';
 import { baseSprites } from './data/sprites-data.js';
@@ -258,5 +259,87 @@ describe('integridade dos dados reais (sprites-data.js)', () => {
         expect(fallbackUrl).toBe(sameFallbackUrl);
         expect(fallbackUrl).toBe(unrealUrl);
         expect(fallbackUrl).not.toBe(realUrl);
+    });
+});
+
+describe('applyCollectionBatch', () => {
+    const validIds = getSpriteIdSet(sprites);
+
+    it('marca coletados sem duplicar e sem alterar dominados existentes', () => {
+        const initial = { obtained: ['water_basic'], mastered: ['water_basic'] };
+        const result = applyCollectionBatch(
+            initial,
+            ['water_basic', 'water_gold', 'fire_basic'],
+            'collect',
+            validIds
+        );
+
+        expect(result.changed).toBe(true);
+        expect(result.changedCount).toBe(2);
+        expect(result.collection).toEqual({
+            obtained: ['water_basic', 'water_gold', 'fire_basic'],
+            mastered: ['water_basic'],
+        });
+    });
+
+    it('marca dominados garantindo invariante mastered ⊆ obtained', () => {
+        const initial = { obtained: ['water_basic'], mastered: [] };
+        const result = applyCollectionBatch(
+            initial,
+            ['water_basic', 'fire_basic'],
+            'master',
+            validIds
+        );
+
+        expect(result.changed).toBe(true);
+        expect(result.changedCount).toBe(2);
+        expect(result.collection.obtained).toEqual(['water_basic', 'fire_basic']);
+        expect(result.collection.mastered).toEqual(['water_basic', 'fire_basic']);
+    });
+
+    it('remove domínio sem remover da coleção e remove da coleção limpando domínio', () => {
+        const initial = {
+            obtained: ['water_basic', 'water_gold', 'fire_basic'],
+            mastered: ['water_basic', 'water_gold'],
+        };
+
+        const unmastered = applyCollectionBatch(
+            initial,
+            ['water_basic', 'fire_basic'],
+            'unmaster',
+            validIds
+        );
+        expect(unmastered.changed).toBe(true);
+        expect(unmastered.changedCount).toBe(1);
+        expect(unmastered.collection).toEqual({
+            obtained: ['water_basic', 'water_gold', 'fire_basic'],
+            mastered: ['water_gold'],
+        });
+
+        const uncollected = applyCollectionBatch(
+            unmastered.collection,
+            ['water_gold', 'fire_basic'],
+            'uncollect',
+            validIds
+        );
+        expect(uncollected.changed).toBe(true);
+        expect(uncollected.changedCount).toBe(2);
+        expect(uncollected.collection).toEqual({
+            obtained: ['water_basic'],
+            mastered: [],
+        });
+    });
+
+    it('retorna mesma referência sem alteração para alvos já satisfeitos ou inválidos', () => {
+        const initial = { obtained: ['water_basic'], mastered: ['water_basic'] };
+
+        const alreadyMastered = applyCollectionBatch(initial, ['water_basic'], 'master', validIds);
+        expect(alreadyMastered.changed).toBe(false);
+        expect(alreadyMastered.changedCount).toBe(0);
+        expect(alreadyMastered.collection).toBe(initial);
+
+        const unknownOnly = applyCollectionBatch(initial, ['id_desconhecido'], 'collect', validIds);
+        expect(unknownOnly.changed).toBe(false);
+        expect(unknownOnly.collection).toBe(initial);
     });
 });

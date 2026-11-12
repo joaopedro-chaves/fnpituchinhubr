@@ -41,7 +41,23 @@ function CrownIcon() {
     );
 }
 
-export const SpriteCard = memo(function SpriteCard({
+export const SpriteCard = memo(
+    /**
+     * @param {{
+     *   sprite: { id: string, name?: string, theme?: string, rarity?: string, unreleased?: boolean, season?: string },
+     *   obtained: boolean,
+     *   mastered: boolean,
+     *   viewMode?: boolean,
+     *   eager?: boolean,
+     *   priority?: boolean,
+     *   tabIndex?: number,
+     *   isGamepadSelected?: boolean,
+     *   onCardFocus?: (id: string) => void,
+     *   onToggleObtained: (id: string) => void,
+     *   onToggleMastery: (id: string) => void,
+     * }} props
+     */
+    function SpriteCard({
     sprite,
     obtained,
     mastered,
@@ -184,7 +200,7 @@ export const SpriteCard = memo(function SpriteCard({
                             type="button"
                             className="card-primary"
                             tabIndex={tabIndex}
-                            aria-pressed={String(obtained)}
+                            aria-pressed={obtained}
                             aria-label={
                                 mastered
                                     ? meta.masteredCardLabel

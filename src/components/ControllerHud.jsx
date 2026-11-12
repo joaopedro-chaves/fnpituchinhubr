@@ -70,7 +70,15 @@ function KeyboardIcon() {
     );
 }
 
-export const ControllerHud = memo(function ControllerHud({ gamepadInfo, inputMode, viewMode }) {
+export const ControllerHud = memo(
+    /**
+     * @param {{
+     *   gamepadInfo?: { connected?: boolean, type?: string } | null,
+     *   inputMode: string,
+     *   viewMode: boolean,
+     * }} props
+     */
+    function ControllerHud({ gamepadInfo, inputMode, viewMode }) {
     if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
         window.__recordPerfRender?.('controllerHud');
     }

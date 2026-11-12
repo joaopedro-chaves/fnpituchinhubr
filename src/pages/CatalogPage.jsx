@@ -56,6 +56,7 @@ export function CatalogPage() {
         updateSetting,
         importCollection,
         restoreCollection,
+        applyBatchCollection,
         exitViewMode,
     } = useTrackerState(baseSprites);
 
@@ -163,6 +164,21 @@ export function CatalogPage() {
         trackerStateRef.current = trackerState;
     }, [trackerState]);
 
+    const visibleSpritesRef = useRef(visibleSprites);
+    useEffect(() => {
+        visibleSpritesRef.current = visibleSprites;
+    }, [visibleSprites]);
+
+    const getBatchContext = useCallback(() => {
+        const showUnreleased = trackerStateRef.current.settings.showUnreleased;
+        return {
+            visibleIds: visibleSpritesRef.current.map(sprite => sprite.id),
+            scopeSprites: showUnreleased
+                ? baseSprites
+                : baseSprites.filter(sprite => !sprite.unreleased),
+        };
+    }, []);
+
     const handlePrepareExport = useCallback(() => {
         void loadViewExport().catch(() => {});
     }, []);
@@ -242,6 +258,9 @@ export function CatalogPage() {
             const reader = new FileReader();
             reader.onload = event => {
                 try {
+                    if (typeof event.target?.result !== 'string') {
+                        throw new Error('Invalid backup file content');
+                    }
                     const data = JSON.parse(event.target.result);
                     if (!data || !Array.isArray(data.obtained) || !Array.isArray(data.mastered)) {
                         throw new Error('Invalid backup file format');
@@ -283,6 +302,32 @@ export function CatalogPage() {
             reader.readAsText(file);
         },
         [viewMode, importCollection, restoreCollection]
+    );
+
+    const handleApplyBatch = useCallback(
+        (targetIds, action) => {
+            if (viewMode) return;
+            const result = applyBatchCollection(targetIds, action);
+            if (!result.changed) {
+                toast('Nenhuma alteração para aplicar nesse escopo.', 'info');
+                return;
+            }
+            const messages = {
+                collect: `${result.changedCount} sprite(s) marcado(s) como coletado(s)!`,
+                master: `${result.changedCount} sprite(s) marcado(s) como dominado(s)!`,
+                unmaster: `Domínio removido de ${result.changedCount} sprite(s)!`,
+                uncollect: `${result.changedCount} sprite(s) removido(s) da coleção!`,
+            };
+            toast(messages[action], 'success', {
+                duration: 6000,
+                actionLabel: 'Desfazer',
+                onAction: () => {
+                    restoreCollection(result.previousCollection);
+                    toast('Ação em lote desfeita!', 'info');
+                },
+            });
+        },
+        [viewMode, applyBatchCollection, restoreCollection]
     );
 
     const handleShare = useCallback(async () => {
@@ -370,6 +415,8 @@ export function CatalogPage() {
                     onExportBackup={handleExportBackup}
                     onImportBackupFile={handleImportBackupFile}
                     onShare={handleShare}
+                    getBatchContext={getBatchContext}
+                    onApplyBatch={handleApplyBatch}
                 />
 
                 <main

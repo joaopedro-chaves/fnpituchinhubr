@@ -15,7 +15,8 @@ fnpituchinhubr/
 │   ├── favicon.webp            # Ícone do site
 │   ├── pwa-192x192.png         # Ícone do manifesto PWA (192x192)
 │   └── pwa-512x512.png         # Ícone do manifesto PWA (512x512)
-├── package.json                # Scripts: dev, build, preview, lint, test
+├── package.json                # Scripts: dev, build, preview, lint, typecheck, test
+├── tsconfig.json               # Configuração checkJs (--noEmit) para JS/JSX com React 19 e Vite
 ├── vite.config.js              # Vite + plugin React + VitePWA + Vitest
 ├── eslint.config.js            # ESLint 9 (flat config) com regras de React e Hooks
 ├── styles.css                  # Folha de estilos global + variáveis CSS por card
@@ -30,6 +31,7 @@ fnpituchinhubr/
 └── src/
     ├── main.jsx                # Bootstrap do React (createRoot) + registro PWA
     ├── App.jsx                 # Raiz da aplicação (<CatalogPage />)
+    ├── global.d.ts             # Declarações globais de tipos (Vite e gancho de teste)
     ├── pages/
     │   └── CatalogPage.jsx     # Página do catálogo: estado, filtros, grade, modais e exportações
     ├── components/
@@ -38,6 +40,7 @@ fnpituchinhubr/
     │   ├── SpriteCard.jsx      # Cartão reutilizável de pituchinho
     │   ├── ModalDialog.jsx     # Invólucro acessível baseado em <dialog> nativo
     │   ├── ExportModal.jsx     # Modal de exportação/backup/compartilhamento (lazy)
+    │   ├── BatchModal.jsx      # Modal de ações em lote por filtro, temporada ou família (lazy)
     │   ├── SettingsModal.jsx   # Modal de configurações (lazy)
     │   └── ControllerHud.jsx   # Guia de controles para navegação por gamepad
     ├── hooks/
@@ -48,17 +51,19 @@ fnpituchinhubr/
     ├── data/
     │   └── sprites-data.js     # `export const baseSprites`
     ├── taxonomy.js             # FONTE ÚNICA de temas, raridades, rótulos e cores (UI e Canvas)
-    ├── query.js                # Funções puras de filtro, ordenação, temporadas, contagem e validação
+    ├── query.js                # Funções puras de filtro, ordenação, lote, temporadas e validação
     ├── share-order.js          # Chaves de localStorage, layout de exportação e filtros
     ├── share-codec.js          # Links compartilháveis (?c=...) v1 e v2
     ├── share-legacy-order.js   # Ordem congelada do formato v1 (não editar)
     ├── view-export.js          # Imagens em Canvas 2D e textos de troca
     ├── dom-utils.js            # Toasts empilháveis, área de transferência e Canvas
-    ├── query.test.js           # Testes de query, taxonomia, temporadas e integridade dos dados
-    ├── share-codec.test.js     # Testes do codec de compartilhamento
-    ├── view-export.test.js     # Testes de exportação Canvas e textos de troca
-    ├── useTrackerState.test.js # Testes de persistência, debounce e tema no hook
-    └── render-count.test.js    # Testes de lotes de renderização, modais nativos e acessibilidade
+    ├── query.test.js                   # Testes de query, ações em lote, taxonomia e dados
+    ├── share-codec.test.js             # Testes do codec de compartilhamento
+    ├── view-export.test.js             # Testes de exportação Canvas e textos de troca
+    ├── useTrackerState.test.js         # Testes de persistência, debounce e tema no hook
+    ├── useGamepadAndSpatialNav.test.js # Testes de gamepad e navegação espacial
+    ├── modals-backup-share.test.js     # Testes de modais, backup JSON, fluxo ?c= e lote
+    └── render-count.test.js            # Testes de lotes de renderização, modais nativos e a11y
 ```
 
 ---
@@ -80,8 +85,9 @@ npm run build
 # 4. Testar localmente o build de produção
 npm run preview
 
-# 5. Verificar qualidade do código
+# 5. Verificar qualidade do código (ESLint + tsc --noEmit) e testes
 npm run lint
+npm run typecheck
 npm test
 ```
 

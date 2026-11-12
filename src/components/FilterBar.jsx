@@ -3,8 +3,10 @@ import { getUiThemeLabel } from '../query.js';
 
 const loadExportModal = () => import('./ExportModal.jsx');
 const loadSettingsModal = () => import('./SettingsModal.jsx');
+const loadBatchModal = () => import('./BatchModal.jsx');
 const ExportModal = lazy(loadExportModal);
 const SettingsModal = lazy(loadSettingsModal);
+const BatchModal = lazy(loadBatchModal);
 
 const EMPTY_SEASONS = [];
 
@@ -105,6 +107,27 @@ function SettingsIcon() {
     );
 }
 
+function BatchIcon() {
+    return (
+        <svg
+            className="btn-icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+        >
+            <polyline points="9 11 12 14 22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+    );
+}
+
+/** @param {{ open: boolean }} props */
 function DropdownArrowIcon({ open }) {
     return (
         <svg
@@ -119,7 +142,21 @@ function DropdownArrowIcon({ open }) {
     );
 }
 
-const M3FilterMenu = memo(function M3FilterMenu({
+const M3FilterMenu = memo(
+    /**
+     * @param {{
+     *   id: string,
+     *   label: string,
+     *   value: string,
+     *   defaultValue: string,
+     *   options: Array<{ value: string, label: string }>,
+     *   isOpen: boolean,
+     *   onToggle: () => void,
+     *   onClose: () => void,
+     *   onSelect: (value: string) => void,
+     * }} props
+     */
+    function M3FilterMenu({
     id,
     label,
     value,
@@ -158,9 +195,14 @@ const M3FilterMenu = memo(function M3FilterMenu({
     };
 
     const handleMenuKeyDown = e => {
-        const items = Array.from(menuRef.current?.querySelectorAll('button.m3-menu-item') || []);
+        const items = /** @type {HTMLButtonElement[]} */ (
+            Array.from(menuRef.current?.querySelectorAll('button.m3-menu-item') || [])
+        );
         if (!items.length) return;
-        const currentIndex = items.indexOf(document.activeElement);
+        const currentIndex =
+            document.activeElement instanceof HTMLButtonElement
+                ? items.indexOf(document.activeElement)
+                : -1;
 
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
             e.preventDefault();
@@ -195,7 +237,7 @@ const M3FilterMenu = memo(function M3FilterMenu({
                 id={`${id}MenuTrigger`}
                 className={`select filter-chip m3-menu-trigger${isFiltered ? ' is-filtered' : ''}${isOpen ? ' open' : ''}`}
                 aria-haspopup="menu"
-                aria-expanded={String(isOpen)}
+                aria-expanded={isOpen}
                 aria-label={`${label}: ${selectedOption?.label || label}`}
                 onClick={onToggle}
                 onKeyDown={handleTriggerKeyDown}
@@ -220,7 +262,7 @@ const M3FilterMenu = memo(function M3FilterMenu({
                                     key={option.value}
                                     type="button"
                                     role="menuitemradio"
-                                    aria-checked={String(isSelected)}
+                                    aria-checked={isSelected}
                                     className={`m3-menu-item${isSelected ? ' selected' : ''}`}
                                     onClick={() => {
                                         onSelect(option.value);
@@ -239,7 +281,35 @@ const M3FilterMenu = memo(function M3FilterMenu({
     );
 });
 
-export const FilterBar = memo(function FilterBar({
+export const FilterBar = memo(
+    /**
+     * @param {{
+     *   filters: { search: string, theme: string, season: string, status: string },
+     *   settings: {
+     *     hideMastered: boolean,
+     *     sortOrder: string,
+     *     showUnreleased: boolean,
+     *     lowFidelity: boolean,
+     *     openExports: boolean,
+     *     lightTheme: boolean,
+     *   },
+     *   activeThemes: string[],
+     *   activeSeasons?: string[],
+     *   viewMode: boolean,
+     *   onFilterChange: (key: string, value: string) => void,
+     *   onSettingChange: (key: string, value: any) => void,
+     *   onPrepareExport?: () => void,
+     *   onExportImage: (mode: string) => void,
+     *   onCopyTradeText: () => void,
+     *   onCopyTradeGrid: () => void,
+     *   onExportBackup: () => void,
+     *   onImportBackupFile: (file: File) => void,
+     *   onShare: () => void,
+     *   getBatchContext?: () => { visibleIds: string[], scopeSprites: Array<{ id: string, name: string, season?: string, unreleased?: boolean }> },
+     *   onApplyBatch?: (targetIds: string[], action: 'collect' | 'master' | 'unmaster' | 'uncollect') => void,
+     * }} props
+     */
+    function FilterBar({
     filters,
     settings,
     activeThemes,
@@ -254,12 +324,19 @@ export const FilterBar = memo(function FilterBar({
     onExportBackup,
     onImportBackupFile,
     onShare,
+    getBatchContext,
+    onApplyBatch,
 }) {
     if (import.meta.env.MODE === 'test' && typeof window !== 'undefined') {
         window.__recordPerfRender?.('filterBar');
     }
 
-    const [activePopup, setActivePopup] = useState(null); // 'export' | 'settings' | null
+    const [activePopup, setActivePopup] = useState(null); // 'export' | 'settings' | 'batch' | null
+    const [batchContext, setBatchContext] = useState(
+        /** @type {{ visibleIds: string[], scopeSprites: Array<{ id: string, name: string, season?: string, unreleased?: boolean }> } | null} */ (
+            null
+        )
+    );
     const [openFilterMenu, setOpenFilterMenu] = useState(null); // 'theme' | 'season' | 'sortOrder' | null
     const fileInputRef = useRef(null);
     const filtersRowRef = useRef(null);
@@ -287,13 +364,21 @@ export const FilterBar = memo(function FilterBar({
         if (!openFilterMenu) return;
 
         const handlePointerDown = e => {
-            if (filtersRowRef.current && !filtersRowRef.current.contains(e.target)) {
+            if (
+                filtersRowRef.current &&
+                e.target instanceof Node &&
+                !filtersRowRef.current.contains(e.target)
+            ) {
                 setOpenFilterMenu(null);
             }
         };
 
         const handleFocusIn = e => {
-            if (filtersRowRef.current && !filtersRowRef.current.contains(e.target)) {
+            if (
+                filtersRowRef.current &&
+                e.target instanceof Node &&
+                !filtersRowRef.current.contains(e.target)
+            ) {
                 setOpenFilterMenu(null);
             }
         };
@@ -328,6 +413,10 @@ export const FilterBar = memo(function FilterBar({
 
     const handlePrefetchSettings = useCallback(() => {
         void loadSettingsModal().catch(() => {});
+    }, []);
+
+    const handlePrefetchBatch = useCallback(() => {
+        void loadBatchModal().catch(() => {});
     }, []);
 
     const handleFileChange = e => {
@@ -476,7 +565,7 @@ export const FilterBar = memo(function FilterBar({
                                         type="button"
                                         className={`pill${isActive ? ' active' : ''}`}
                                         data-status={pill.value}
-                                        aria-pressed={String(isActive)}
+                                        aria-pressed={isActive}
                                         disabled={viewMode}
                                         onClick={() => {
                                             if (!viewMode) onFilterChange('status', pill.value);
@@ -496,7 +585,7 @@ export const FilterBar = memo(function FilterBar({
                             id="exportToggle"
                             aria-label="Exportar"
                             aria-haspopup="dialog"
-                            aria-expanded={String(activePopup === 'export')}
+                            aria-expanded={activePopup === 'export'}
                             onPointerEnter={handlePrefetchExport}
                             onFocus={handlePrefetchExport}
                             onClick={e => {
@@ -508,6 +597,32 @@ export const FilterBar = memo(function FilterBar({
                             <ExportIcon />
                             <span className="btn-label">Exportar</span>
                         </button>
+
+                        {!viewMode && (
+                            <button
+                                type="button"
+                                className="btn"
+                                id="batchToggle"
+                                aria-label="Ações em lote"
+                                aria-haspopup="dialog"
+                                aria-expanded={activePopup === 'batch'}
+                                onPointerEnter={handlePrefetchBatch}
+                                onFocus={handlePrefetchBatch}
+                                onClick={e => {
+                                    popupInvokerRef.current = e.currentTarget;
+                                    handlePrefetchBatch();
+                                    setBatchContext(
+                                        getBatchContext
+                                            ? getBatchContext()
+                                            : { visibleIds: [], scopeSprites: [] }
+                                    );
+                                    setActivePopup('batch');
+                                }}
+                            >
+                                <BatchIcon />
+                                <span className="btn-label">Em lote</span>
+                            </button>
+                        )}
 
                         <input
                             ref={fileInputRef}
@@ -536,7 +651,7 @@ export const FilterBar = memo(function FilterBar({
                             id="settingsToggle"
                             aria-label="Configurações"
                             aria-haspopup="dialog"
-                            aria-expanded={String(activePopup === 'settings')}
+                            aria-expanded={activePopup === 'settings'}
                             onPointerEnter={handlePrefetchSettings}
                             onFocus={handlePrefetchSettings}
                             onClick={e => {
@@ -613,6 +728,20 @@ export const FilterBar = memo(function FilterBar({
                     <SettingsModal
                         settings={settings}
                         onSettingChange={onSettingChange}
+                        onClose={handleClosePopup}
+                    />
+                </Suspense>
+            )}
+
+            {/* Popup Modal Centralizado: Ações em lote */}
+            {activePopup === 'batch' && !viewMode && batchContext && onApplyBatch && (
+                <Suspense fallback={null}>
+                    <BatchModal
+                        activeSeasons={activeSeasons}
+                        initialSeason={filters.season}
+                        visibleIds={batchContext.visibleIds}
+                        scopeSprites={batchContext.scopeSprites}
+                        onApply={onApplyBatch}
                         onClose={handleClosePopup}
                     />
                 </Suspense>

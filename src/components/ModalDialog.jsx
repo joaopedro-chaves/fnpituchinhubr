@@ -14,6 +14,15 @@ export function closeEnclosingDialog(triggerEl, afterClose) {
     afterClose?.();
 }
 
+/**
+ * @param {{
+ *   title: string,
+ *   titleId?: string,
+ *   bodyAriaLabel: string,
+ *   onClose: () => void,
+ *   children?: any,
+ * }} props
+ */
 export function ModalDialog({ title, titleId, bodyAriaLabel, onClose, children }) {
     const dialogRef = useRef(null);
     const closeBtnRef = useRef(null);

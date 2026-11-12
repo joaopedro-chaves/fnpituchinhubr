@@ -9,6 +9,7 @@ import {
     getCollectionCounts,
     filterSprites,
     sortSprites,
+    applyCollectionBatch,
 } from '../query.js';
 
 const EMPTY_COLLECTION = { obtained: [], mastered: [] };
@@ -122,6 +123,7 @@ export function useTrackerState(sprites) {
     const { obtained, mastered } = collection;
     const deferredSearch = useDeferredValue(filters.search);
 
+    const collectionRef = useRef(collection);
     const persistedCollectionRef = useRef(initial.collection);
     const persistedFiltersRef = useRef({
         theme: initial.filters.theme,
@@ -172,6 +174,11 @@ export function useTrackerState(sprites) {
             cancelled = true;
         };
     }, [viewMode, initial.shareCode, sprites]);
+
+    // Mantém ref sincronizada com a coleção atual para capturas de snapshot sem re-renderizar callbacks
+    useEffect(() => {
+        collectionRef.current = collection;
+    }, [collection]);
 
     // Persistência incremental: coleção (nunca sobrescreve a coleção local em modo compartilhado)
     useEffect(() => {
@@ -421,8 +428,37 @@ export function useTrackerState(sprites) {
             const cleanMastered = uniqueValidIds(snapshot.mastered || [], validIds).filter(id =>
                 obtainedSet.has(id)
             );
-            setCollection({ obtained: cleanObtained, mastered: cleanMastered });
+            const nextCollection = { obtained: cleanObtained, mastered: cleanMastered };
+            collectionRef.current = nextCollection;
+            setCollection(nextCollection);
             return true;
+        },
+        [sprites, viewMode]
+    );
+
+    /**
+     * Aplica uma ação em lote e retorna metadados para desfazer de forma atômica.
+     * @param {string[]} targetIds
+     * @param {'collect' | 'master' | 'unmaster' | 'uncollect'} action
+     */
+    const applyBatchCollection = useCallback(
+        (targetIds, action) => {
+            const previousCollection = collectionRef.current;
+            if (viewMode) {
+                return { changed: false, changedCount: 0, previousCollection };
+            }
+            const validIds = getSpriteIdSet(sprites);
+            const result = applyCollectionBatch(previousCollection, targetIds, action, validIds);
+            if (!result.changed) {
+                return { changed: false, changedCount: 0, previousCollection };
+            }
+            collectionRef.current = result.collection;
+            setCollection(result.collection);
+            return {
+                changed: true,
+                changedCount: result.changedCount,
+                previousCollection,
+            };
         },
         [sprites, viewMode]
     );
@@ -435,6 +471,7 @@ export function useTrackerState(sprites) {
 
         const restored = getStoredCollection(sprites);
         persistedCollectionRef.current = restored;
+        collectionRef.current = restored;
         setViewMode(false);
         setLoadingShared(false);
         setSharedError(null);
@@ -462,6 +499,7 @@ export function useTrackerState(sprites) {
         updateSetting,
         importCollection,
         restoreCollection,
+        applyBatchCollection,
         exitViewMode,
     };
 }

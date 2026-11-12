@@ -13,7 +13,7 @@ Site publicado: https://joaopedro-chaves.github.io/fnpituchinhubr/
 Aplicação web construída com **React 19**, **Vite 6** e **PWA (`vite-plugin-pwa`)**, utilizando:
 
 - Catálogo filtrável por busca textual, tema/tipo, temporada (`C7T3`, `C7T4`, `C7T5` e futuras), status (`Todos`, `Coletados`, `Faltando`) e ordenação (`Categorias`, `Elementais`, `Nome`, `Raridade`).
-- Marcação de coleção (`Coletado`) e dominação (`Dominado`), com persistência em `localStorage`, backup/restauração em JSON e compartilhamento via URL compactada (`?c=...`).
+- Marcação de coleção (`Coletado`) e dominação (`Dominado`), com ações em lote (`Em lote` + desfazer atômico), persistência em `localStorage`, backup/restauração em JSON e compartilhamento via URL compactada (`?c=...`).
 - Exportação de cards em PNG (Canvas 2D) para coleção, faltantes, não dominados, dominados e lista de trocas, além de cópia em texto simples ou grade alinhada por família.
 - Suporte a tema escuro/claro, modo de desempenho simples (`low-fidelity`), navegação por teclado/gamepad e modais nativos com `<dialog>`.
 - Assets em formato WebP (sprites otimizados em `256x256`) e cache offline via Service Worker.
@@ -27,7 +27,8 @@ npm install        # instala as dependências
 npm run dev        # servidor de desenvolvimento com HMR
 npm run build      # build de produção e Service Worker em dist/
 npm run preview    # serve o build localmente
-npm run lint       # ESLint (React, Hooks e boas práticas)
+npm run lint       # ESLint (React/Hooks) + checagem de tipos (tsc --noEmit)
+npm run typecheck  # TypeScript checkJs (--noEmit) sobre os arquivos JS/JSX
 npm test           # suíte de testes unitários e de componentes (Vitest)
 ```
 

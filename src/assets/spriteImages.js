@@ -20,10 +20,12 @@ const FALLBACK_SPRITE_KEY = '/sprites/sprite_unreal.webp';
 export function getSpriteImageUrl(spriteId) {
     if (!spriteId) return '';
     const key = `/sprites/${spriteId}.webp`;
-    if (spriteModules[key]) {
-        return spriteModules[key];
+    const match = spriteModules[key];
+    if (typeof match === 'string') {
+        return match;
     }
-    return spriteModules[FALLBACK_SPRITE_KEY] || 'sprites/sprite_unreal.webp';
+    const fallback = spriteModules[FALLBACK_SPRITE_KEY];
+    return typeof fallback === 'string' ? fallback : 'sprites/sprite_unreal.webp';
 }
 
 /**

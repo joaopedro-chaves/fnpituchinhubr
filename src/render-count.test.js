@@ -69,13 +69,17 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
     it('carrega lotes adicionais via IntersectionObserver conforme rolagem', () => {
         let observerCallback = null;
-        globalThis.IntersectionObserver = class MockIntersectionObserver {
-            constructor(cb) {
-                observerCallback = cb;
-            }
-            observe() {}
-            disconnect() {}
-        };
+        globalThis.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (
+            /** @type {unknown} */ (
+                class MockIntersectionObserver {
+                    constructor(cb) {
+                        observerCallback = cb;
+                    }
+                    observe() {}
+                    disconnect() {}
+                }
+            )
+        );
 
         const { container } = render(createElement(CatalogPage));
         expect(container.querySelectorAll('.card[data-id]').length).toBe(INITIAL_BATCH_SIZE);
@@ -94,13 +98,17 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
     it('preserva lotes já carregados ao marcar pituchinho sob filtro Faltando', () => {
         let observerCallback = null;
-        globalThis.IntersectionObserver = class MockIntersectionObserver {
-            constructor(cb) {
-                observerCallback = cb;
-            }
-            observe() {}
-            disconnect() {}
-        };
+        globalThis.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (
+            /** @type {unknown} */ (
+                class MockIntersectionObserver {
+                    constructor(cb) {
+                        observerCallback = cb;
+                    }
+                    observe() {}
+                    disconnect() {}
+                }
+            )
+        );
 
         const { container } = render(createElement(CatalogPage));
         fireEvent.click(container.querySelector('[data-status="missing"]'));
@@ -112,7 +120,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         const expandedCards = container.querySelectorAll('.card[data-id]');
         expect(expandedCards.length).toBe(INITIAL_BATCH_SIZE * 2);
 
-        const card49 = expandedCards[INITIAL_BATCH_SIZE];
+        const card49 = /** @type {HTMLElement} */ (expandedCards[INITIAL_BATCH_SIZE]);
         const card49Id = card49.dataset.id;
         fireEvent.click(card49.querySelector('.card-primary'));
 
@@ -198,7 +206,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(container.querySelector('#exportPopupTitle')).toBeNull();
         expect(container.querySelector('#settingsPopupTitle')).toBeNull();
 
-        const exportBtn = container.querySelector('#exportToggle');
+        const exportBtn = /** @type {HTMLElement} */ (container.querySelector('#exportToggle'));
         exportBtn.focus();
         fireEvent.click(exportBtn);
         await waitFor(() => {
@@ -217,7 +225,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
             expect(document.activeElement).toBe(exportBtn);
         });
 
-        const settingsBtn = container.querySelector('#settingsToggle');
+        const settingsBtn = /** @type {HTMLElement} */ (container.querySelector('#settingsToggle'));
         settingsBtn.focus();
         fireEvent.click(settingsBtn);
         await waitFor(() => {
@@ -261,7 +269,8 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         const viewRender = render(createElement(CatalogPage));
         const pills = viewRender.container.querySelectorAll('#statusPills .pill');
         expect(pills.length).toBe(3);
-        pills.forEach(pill => {
+        pills.forEach(node => {
+            const pill = /** @type {HTMLButtonElement} */ (node);
             expect(pill.disabled).toBe(true);
             const expectedPressed = pill.dataset.status === 'owned' ? 'true' : 'false';
             expect(pill.getAttribute('aria-pressed')).toBe(expectedPressed);
