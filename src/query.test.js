@@ -20,6 +20,7 @@ import {
     getDisplayName,
 } from './query.js';
 import { baseSprites } from './data/sprites-data.js';
+import { getSpriteImageUrl } from './assets/spriteImages.js';
 
 const sprites = [
     { id: 'water_basic', name: 'Água', theme: 'Básico', rarity: 'Raro', unreleased: false, season: 'C7T3' },
@@ -115,12 +116,10 @@ describe('sortSprites', () => {
     });
 
     it('garante paridade de ordenação em todos os métodos sobre baseSprites', () => {
-        const uniqueIdCount = new Set(baseSprites.map(s => s.id)).size;
         for (const method of ['theme', 'sprite', 'name', 'rarity']) {
             const result = sortSprites(baseSprites, method);
             expect(result).toHaveLength(baseSprites.length);
-            expect(new Set(result)).toEqual(new Set(baseSprites));
-            expect(new Set(result.map(s => s.id)).size).toBe(uniqueIdCount);
+            expect(new Set(result.map(s => s.id)).size).toBe(baseSprites.length);
         }
     });
 });
@@ -204,12 +203,10 @@ describe('integridade dos dados reais (sprites-data.js)', () => {
         expect(getSpriteDataIssues(baseSprites)).toEqual([]);
     });
 
-    it('detecta problemas em sprites lançados incompletos e permite sprite_unreal duplicado', () => {
+    it('detecta problemas em sprites lançados incompletos', () => {
         const issues = getSpriteDataIssues([
             { id: 'a_basic', name: '', theme: 'Inexistente', rarity: 'Raro', unreleased: false },
             { id: 'a_basic', name: 'X', theme: 'Básico', rarity: 'Raro', unreleased: false },
-            { id: 'sprite_unreal', name: 'Sem imagem 1', theme: 'Dourado', rarity: 'Especial', unreleased: false },
-            { id: 'sprite_unreal', name: 'Sem imagem 2', theme: 'Dourado', rarity: 'Especial', unreleased: false },
             { id: 'placeholder', name: '', theme: '', rarity: '', unreleased: true },
         ]);
         expect(issues).toEqual([
@@ -217,5 +214,15 @@ describe('integridade dos dados reais (sprites-data.js)', () => {
             'a_basic: tema desconhecido "Inexistente"',
             'a_basic: id duplicado',
         ]);
+    });
+
+    it('usa sprite_unreal.webp como fallback quando a imagem do id ainda não existe', () => {
+        const fallbackUrl = getSpriteImageUrl('treasurechest_gold');
+        const sameFallbackUrl = getSpriteImageUrl('treasuremap_gold');
+        const realUrl = getSpriteImageUrl('water_basic');
+
+        expect(fallbackUrl).toBeTruthy();
+        expect(fallbackUrl).toBe(sameFallbackUrl);
+        expect(fallbackUrl).not.toBe(realUrl);
     });
 });

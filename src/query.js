@@ -77,13 +77,10 @@ export function getTradeThemeLabel(theme) {
     return THEME[theme]?.tradeLabel || theme;
 }
 
-const PLACEHOLDER_SPRITE_ID = 'sprite_unreal';
-
 /**
  * Valida os dados de sprites e devolve uma lista de problemas legíveis.
  * Sprites lançados precisam de nome, tema e raridade conhecidos
  * (sprites `unreleased` podem ser placeholders incompletos).
- * O ID temporário `sprite_unreal` pode ser reutilizado enquanto a imagem não existe.
  */
 export function getSpriteDataIssues(sprites) {
     const issues = [];
@@ -94,7 +91,7 @@ export function getSpriteDataIssues(sprites) {
             issues.push('Sprite sem id');
             return;
         }
-        if (sprite.id !== PLACEHOLDER_SPRITE_ID && seen.has(sprite.id)) {
+        if (seen.has(sprite.id)) {
             issues.push(`${sprite.id}: id duplicado`);
         }
         seen.add(sprite.id);
