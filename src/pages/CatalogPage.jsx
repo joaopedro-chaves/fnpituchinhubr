@@ -1,9 +1,11 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { baseSprites } from '../data/sprites-data.js';
 import { useTrackerState } from '../hooks/useTrackerState.js';
+import { useGamepadAndSpatialNav } from '../hooks/useGamepadAndSpatialNav.js';
 import { Header } from '../components/Header.jsx';
 import { FilterBar } from '../components/FilterBar.jsx';
 import { SpriteCard } from '../components/SpriteCard.jsx';
+import { ControllerHud } from '../components/ControllerHud.jsx';
 import { exportImage, generateTradeText, generateTradeGridText } from '../view-export.js';
 import { compressCollection } from '../share-codec.js';
 import { toast, copyText } from '../dom-utils.js';
@@ -35,6 +37,22 @@ export function CatalogPage() {
     // Conjuntos O(1) para verificar rapidamente se cada card foi coletado/dominado
     const obtainedSet = useMemo(() => new Set(obtained), [obtained]);
     const masteredSet = useMemo(() => new Set(mastered), [mastered]);
+
+    const gridRef = useRef(null);
+    const {
+        activeCardId,
+        gamepadInfo,
+        inputMode,
+        handleGridKeyDown,
+        handleCardFocus,
+        handleCardKeyNavigate,
+    } = useGamepadAndSpatialNav({
+        gridRef,
+        visibleSprites,
+        viewMode,
+        onToggleObtained: toggleObtained,
+        onToggleMastery: toggleMastery,
+    });
 
     const handleExportImage = useCallback(
         mode => exportImage(mode, trackerState, baseSprites),
@@ -139,25 +157,49 @@ export function CatalogPage() {
                 />
 
                 <main
+                    ref={gridRef}
                     className="grid"
                     id="spriteGrid"
+                    role="grid"
                     aria-label="Coleção de pituchinhos"
                     aria-busy={loadingShared}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === 'd' || e.key === 'D') {
+                            handleCardKeyNavigate();
+                        }
+                        handleGridKeyDown(e);
+                    }}
                 >
-                    {visibleSprites.map((sprite, index) => (
-                        <SpriteCard
-                            key={sprite.id}
-                            sprite={sprite}
-                            obtained={obtainedSet.has(sprite.id)}
-                            mastered={masteredSet.has(sprite.id)}
-                            viewMode={viewMode}
-                            priority={index < PRIORITY_CARDS}
-                            onToggleObtained={toggleObtained}
-                            onToggleMastery={toggleMastery}
-                        />
-                    ))}
+                    {visibleSprites.map((sprite, index) => {
+                        const isActiveCard = activeCardId
+                            ? activeCardId === sprite.id
+                            : index === 0;
+                        return (
+                            <SpriteCard
+                                key={sprite.id}
+                                sprite={sprite}
+                                obtained={obtainedSet.has(sprite.id)}
+                                mastered={masteredSet.has(sprite.id)}
+                                viewMode={viewMode}
+                                priority={index < PRIORITY_CARDS}
+                                tabIndex={isActiveCard ? 0 : -1}
+                                isGamepadSelected={
+                                    Boolean(gamepadInfo.connected) && isActiveCard
+                                }
+                                onCardFocus={handleCardFocus}
+                                onToggleObtained={toggleObtained}
+                                onToggleMastery={toggleMastery}
+                            />
+                        );
+                    })}
                 </main>
             </div>
+
+            <ControllerHud
+                gamepadInfo={gamepadInfo}
+                inputMode={inputMode}
+                viewMode={viewMode}
+            />
 
             <footer className="footer">
                 <p>

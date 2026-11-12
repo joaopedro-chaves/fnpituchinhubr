@@ -1,9 +1,47 @@
 import { getMascotImageUrl } from '../assets/spriteImages.js';
 
+const RING_RADIUS = 17;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+function CircularProgress({ ratio, variant }) {
+    const clampedRatio = Math.max(0, Math.min(1, ratio));
+    const dashOffset = RING_CIRCUMFERENCE * (1 - clampedRatio);
+
+    return (
+        <svg
+            className={`progress-ring${variant ? ` ${variant}` : ''}`}
+            width="44"
+            height="44"
+            viewBox="0 0 44 44"
+            aria-hidden="true"
+        >
+            <circle
+                className="progress-ring-track"
+                cx="22"
+                cy="22"
+                r={RING_RADIUS}
+                fill="none"
+                strokeWidth="5.5"
+            />
+            <circle
+                className="progress-ring-fill"
+                cx="22"
+                cy="22"
+                r={RING_RADIUS}
+                fill="none"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+                strokeDasharray={RING_CIRCUMFERENCE}
+                strokeDashoffset={dashOffset}
+            />
+        </svg>
+    );
+}
+
 export function Header({ progressStats }) {
     const { total, collected, mastered } = progressStats;
-    const collectionPct = total > 0 ? `${(collected / total) * 100}%` : '0%';
-    const masteryPct = total > 0 ? `${(mastered / total) * 100}%` : '0%';
+    const collectionRatio = total > 0 ? collected / total : 0;
+    const masteryRatio = total > 0 ? mastered / total : 0;
 
     return (
         <header className="header">
@@ -23,31 +61,21 @@ export function Header({ progressStats }) {
                     <div className="progress-meta">
                         <span className="progress-label">Coleção</span>
                         <span className="progress-value" id="collectionRatio">
-                            {collected} / {total}
+                            <strong>{collected}</strong>
+                            <span className="progress-total">/{total}</span>
                         </span>
                     </div>
-                    <div className="progress-track">
-                        <div
-                            className="progress-fill"
-                            id="collectionFill"
-                            style={{ width: collectionPct }}
-                        />
-                    </div>
+                    <CircularProgress ratio={collectionRatio} />
                 </div>
                 <div className="progress-item">
                     <div className="progress-meta">
                         <span className="progress-label">Dominados</span>
                         <span className="progress-value" id="masteryRatio">
-                            {mastered} / {total}
+                            <strong>{mastered}</strong>
+                            <span className="progress-total">/{total}</span>
                         </span>
                     </div>
-                    <div className="progress-track">
-                        <div
-                            className="progress-fill mastery"
-                            id="masteryFill"
-                            style={{ width: masteryPct }}
-                        />
-                    </div>
+                    <CircularProgress ratio={masteryRatio} variant="mastery" />
                 </div>
             </div>
         </header>

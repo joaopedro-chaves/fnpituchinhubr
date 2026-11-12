@@ -165,8 +165,15 @@ export function useTrackerState(sprites) {
         id => {
             if (viewMode) return;
             setCollection(prev => {
+                if (prev.mastered.includes(id)) {
+                    // Se estiver dominado, clicar remove apenas o domínio (mantém coletado)
+                    return {
+                        ...prev,
+                        mastered: prev.mastered.filter(item => item !== id),
+                    };
+                }
                 if (prev.obtained.includes(id)) {
-                    // Remover da coleção também remove de "dominados"
+                    // Se estiver apenas coletado, clicar remove da coleção
                     return {
                         obtained: prev.obtained.filter(item => item !== id),
                         mastered: prev.mastered.filter(item => item !== id),
@@ -182,7 +189,12 @@ export function useTrackerState(sprites) {
         id => {
             if (viewMode) return;
             setCollection(prev => {
-                if (!prev.obtained.includes(id)) return prev;
+                if (!prev.obtained.includes(id)) {
+                    return {
+                        obtained: [...prev.obtained, id],
+                        mastered: [...prev.mastered, id],
+                    };
+                }
                 const mastered = prev.mastered.includes(id)
                     ? prev.mastered.filter(item => item !== id)
                     : [...prev.mastered, id];
