@@ -15,6 +15,8 @@ vi.mock('./dom-utils.js', async importOriginal => {
 import {
     getExportConfig,
     getExportCardState,
+    getExportThemePalette,
+    drawMiniCard,
     generateTradeText,
     generateTradeGridText,
 } from './view-export.js';
@@ -168,5 +170,68 @@ describe('view-export (paridade)', () => {
                 '```',
             ].join('\n')
         );
+    });
+
+    it('getExportThemePalette retorna tokens de tema escuro e claro do sistema M3', () => {
+        const dark = getExportThemePalette(false);
+        expect(dark.isLight).toBe(false);
+        expect(dark.bg).toBe('#141218');
+        expect(dark.primary).toBe('#d0bcff');
+        expect(dark.cardSurface).toBe('#232938');
+
+        const light = getExportThemePalette(true);
+        expect(light.isLight).toBe(true);
+        expect(light.bg).toBe('#fef7ff');
+        expect(light.primary).toBe('#6750a4');
+        expect(light.cardSurface).toBe('#ffffff');
+    });
+
+    it('drawMiniCard renderiza raridade MÍTICO em português, temporada e status no estilo da UI', () => {
+        const filledTexts = [];
+        const gradientStub = { addColorStop: vi.fn() };
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
+            clip: vi.fn(),
+            fill: vi.fn(),
+            stroke: vi.fn(),
+            fillRect: vi.fn(),
+            translate: vi.fn(),
+            rotate: vi.fn(),
+            scale: vi.fn(),
+            setLineDash: vi.fn(),
+            createLinearGradient: vi.fn(() => gradientStub),
+            measureText: vi.fn(text => ({ width: String(text).length * 5 })),
+            fillText: vi.fn(text => filledTexts.push(text)),
+            drawImage: vi.fn(),
+        };
+
+        const mythicSprite = {
+            id: 'mythic_water',
+            name: 'Água',
+            theme: 'Básico',
+            rarity: 'Mítico',
+            season: 'C7T3',
+        };
+
+        drawMiniCard(ctx, mythicSprite, 10, 20, 88, 114, 'mastered', {}, getExportThemePalette(true));
+
+        expect(filledTexts).toContain('DOMINADO');
+        expect(filledTexts).toContain('MÍTICO');
+        expect(filledTexts).not.toContain('MYTHIC');
+        expect(filledTexts).toContain('C7T3');
+        expect(filledTexts).toContain('Água');
+
+        // Estado missing_gray (modo trocar) não deve exibir faixa de status no topo
+        filledTexts.length = 0;
+        drawMiniCard(ctx, mythicSprite, 10, 20, 88, 114, 'missing_gray', {}, getExportThemePalette(false));
+        expect(filledTexts).not.toContain('FALTANDO');
+        expect(filledTexts).not.toContain('COLETADO');
+        expect(filledTexts).toContain('MÍTICO');
     });
 });

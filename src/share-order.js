@@ -28,20 +28,20 @@ export const SORT_METHODS = ['theme', 'sprite', 'name', 'rarity'];
 export const TRACKER_URL = 'https://joaopedro-chaves.github.io/fnpituchinhubr/';
 
 export const EXPORT_LAYOUT = {
-    border: 8,
-    sidePad: 20,
-    minCanvasW: 360,
-    compactHeaderW: 760,
-    headerH: 80,
-    compactHeaderH: 132,
-    colHeaderH: 35,
-    cardW: 80,
-    cardH: 100,
+    border: 0,
+    sidePad: 24,
+    minCanvasW: 420,
+    compactHeaderW: 820,
+    headerH: 96,
+    compactHeaderH: 148,
+    colHeaderH: 36,
+    cardW: 88,
+    cardH: 114,
     rowGap: 12,
-    cardGap: 8,
-    labelW: 120,
-    colGap: 60,
-    footerH: 60,
+    cardGap: 10,
+    labelW: 124,
+    colGap: 48,
+    footerH: 52,
     maxSingleColumnRows: 6,
 };
 

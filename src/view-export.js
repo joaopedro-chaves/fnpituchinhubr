@@ -1,5 +1,5 @@
 /* ===================================================
-   Canvas Export & Trade Generation
+   Canvas Export & Trade Generation (Material Design 3)
    =================================================== */
 
 import { EXPORT_LAYOUT, TRACKER_URL } from './share-order.js';
@@ -17,9 +17,96 @@ import {
     getTradeThemeLabel,
     getCharName,
     getDisplayName,
+    getSeasonData,
     isObtained,
     isMastered,
 } from './query.js';
+
+const DARK_EXPORT_PALETTE = {
+    isLight: false,
+    bg: '#141218',
+    bgGlow: '#271e3a',
+    surfaceContainerLow: '#1d1b20',
+    surfaceContainer: '#211f26',
+    surfaceContainerHigh: '#2b2930',
+    surfaceContainerHighest: '#36343b',
+    outlineVariant: '#49454f',
+    border: 'rgba(230, 224, 233, 0.12)',
+    text: '#e6e0e9',
+    textSoft: '#cac4d0',
+    textMuted: '#a29cae',
+    primary: '#d0bcff',
+    secondaryContainer: '#4a4458',
+    onSecondaryContainer: '#e8def8',
+    uiMastered: '#facc15',
+    cardSurface: '#232938',
+    cardTitleColor: '#e2e8f0',
+    cardSeasonBg: '#9ca3af',
+    cardSeasonColor: '#1e2430',
+    cardBorder: 'rgba(230, 224, 233, 0.14)',
+    emptyCardBorder: 'rgba(230, 224, 233, 0.2)',
+    cardShadow: 'rgba(0, 0, 0, 0.35)',
+};
+
+const LIGHT_EXPORT_PALETTE = {
+    isLight: true,
+    bg: '#fef7ff',
+    bgGlow: '#efe5ff',
+    surfaceContainerLow: '#f7f2fa',
+    surfaceContainer: '#f3edf7',
+    surfaceContainerHigh: '#ece6f0',
+    surfaceContainerHighest: '#e6e0e9',
+    outlineVariant: '#cac4d0',
+    border: 'rgba(29, 27, 32, 0.12)',
+    text: '#1d1b20',
+    textSoft: '#49454f',
+    textMuted: '#5d5766',
+    primary: '#6750a4',
+    secondaryContainer: '#e8def8',
+    onSecondaryContainer: '#1d192b',
+    uiMastered: '#9a5b00',
+    cardSurface: '#ffffff',
+    cardTitleColor: '#1d1b20',
+    cardSeasonBg: '#e8def8',
+    cardSeasonColor: '#1d192b',
+    cardBorder: '#cac4d0',
+    emptyCardBorder: 'rgba(29, 27, 32, 0.24)',
+    cardShadow: 'rgba(29, 27, 32, 0.16)',
+};
+
+export function getExportThemePalette(lightTheme = false) {
+    return lightTheme ? LIGHT_EXPORT_PALETTE : DARK_EXPORT_PALETTE;
+}
+
+const RARITY_DISPLAY_GRADIENTS = {
+    Raro: ['#4b79c4', '#2b4c85', '#1d3561'],
+    Épico: ['#a844c9', '#6e2587', '#4a155e'],
+    Lendário: ['#f06d42', '#a84220', '#6e260e'],
+    Mítico: ['#f59e1d', '#a86408', '#6e3d00'],
+};
+
+const RARITY_STRIP_STYLES = {
+    Raro: {
+        colors: ['#3b82f6', '#4a78b8'],
+        glow: 'rgba(59, 130, 246, 0.48)',
+    },
+    Épico: {
+        colors: ['#9333ea', '#a855f7'],
+        glow: 'rgba(168, 85, 247, 0.5)',
+    },
+    Lendário: {
+        colors: ['#f97316', '#fb923c'],
+        glow: 'rgba(249, 115, 22, 0.5)',
+    },
+    Mítico: {
+        colors: ['#f59e0b', '#fbbf24'],
+        glow: 'rgba(245, 158, 11, 0.5)',
+    },
+    Especial: {
+        colors: ['#22c55e', '#06b6d4', '#3b82f6', '#a855f7', '#ec4899', '#ef4444', '#f97316', '#eab308'],
+        glow: 'rgba(168, 85, 247, 0.45)',
+    },
+};
 
 export function getRarityGradient(rarity, theme) {
     const rarityInfo = RARITIES[rarity];
@@ -27,6 +114,20 @@ export function getRarityGradient(rarity, theme) {
     // Raridade "Especial" não tem gradiente próprio: usa o do tema
     if (rarityInfo) return (THEME[theme] || THEME['Básico']).gradient;
     return RARITIES['Raro'].gradient;
+}
+
+export function getRarityDisplayGradient(rarity, theme) {
+    if (RARITY_DISPLAY_GRADIENTS[rarity]) {
+        return RARITY_DISPLAY_GRADIENTS[rarity];
+    }
+    if (rarity === 'Especial') {
+        return (THEME[theme] || THEME['Básico']).gradient;
+    }
+    return RARITY_DISPLAY_GRADIENTS.Raro;
+}
+
+export function getRarityStripStyle(rarity) {
+    return RARITY_STRIP_STYLES[rarity] || RARITY_STRIP_STYLES.Raro;
 }
 
 export function getRarityTagColors(rarity) {
@@ -52,41 +153,41 @@ export function getExportConfig(mode, state, sprites = []) {
     const configs = {
         collected: {
             items,
-            titleL1: 'Rastreador de Pituchinhos:',
+            titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Minha coleção',
-            color: '#3fac3fff',
+            color: '#4ade80',
             filename: 'fnsprites-collection',
             emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
         missing: {
             items,
-            titleL1: 'Rastreador de Pituchinhos:',
+            titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Eu procuro estes!',
-            color: '#e34b4bff',
+            color: '#e57373',
             filename: 'fnsprites-missing',
             emptyMsg: 'Você não está faltando nenhum pituchinhu!',
         },
         unmastered: {
             items,
-            titleL1: 'Rastreador de Pituchinhos:',
+            titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Não Dominados',
-            color: '#6ad1d8ff',
+            color: '#4fc3f7',
             filename: 'fnsprites-unmastered',
             emptyMsg: 'Você não tem nenhum pituchinhu para exportar!',
         },
         mastered: {
             items,
-            titleL1: 'Rastreador de Pituchinhos:',
+            titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Dominados',
-            color: '#edd234ff',
+            color: '#facc15',
             filename: 'fnsprites-mastered',
             emptyMsg: 'Você não tem nenhum pituchinhu dominado!',
         },
         trade: {
             items,
-            titleL1: 'Rastreador de Pituchinhos:',
+            titleL1: 'Rastreador de Pituchinhos',
             titleL2: 'Lista de Trocas',
-            color: '#ce26d3ff',
+            color: '#d0bcff',
             filename: 'fnsprites-trade-card',
             emptyMsg: 'Nenhum pituchinhu para exportar!',
         },
@@ -131,34 +232,49 @@ export function loadImage(item) {
 }
 
 export function drawCrown(ctx, cx, cy) {
+    // Mesma geometria de CrownIcon em SpriteCard.jsx (viewBox 0 0 24 20), inclinada 18°
     ctx.save();
-    ctx.fillStyle = '#ffd700';
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.2;
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 2;
+    ctx.translate(cx, cy);
+    ctx.rotate((18 * Math.PI) / 180);
+    const scale = 0.62;
+    ctx.scale(scale, scale);
+    ctx.translate(-12, -10);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 1.5;
+    ctx.fillStyle = '#facc15';
     ctx.beginPath();
-    ctx.moveTo(cx - 7, cy + 5);
-    ctx.lineTo(cx + 7, cy + 5);
-    ctx.lineTo(cx + 7, cy - 2);
-    ctx.lineTo(cx + 3, cy + 1.5);
-    ctx.lineTo(cx, cy - 4.5);
-    ctx.lineTo(cx - 3, cy + 1.5);
-    ctx.lineTo(cx - 7, cy - 2);
+    ctx.moveTo(2, 5);
+    ctx.lineTo(7, 8.5);
+    ctx.lineTo(12, 2);
+    ctx.lineTo(17, 8.5);
+    ctx.lineTo(22, 5);
+    ctx.lineTo(22, 17);
+    ctx.lineTo(2, 17);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();
     ctx.restore();
 }
 
-export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
+function fitTextWithEllipsis(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let trimmed = text;
+    while (trimmed.length > 1 && ctx.measureText(`${trimmed}…`).width > maxWidth) {
+        trimmed = trimmed.slice(0, -1);
+    }
+    return `${trimmed}…`;
+}
+
+export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap, palette = DARK_EXPORT_PALETTE) {
+    const radius = 10;
+
     if (cardState === 'empty') {
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.strokeStyle = palette.emptyCardBorder;
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        drawRoundRect(ctx, x, y, w, h, 8);
+        drawRoundRect(ctx, x, y, w, h, radius);
         ctx.stroke();
         ctx.restore();
         return;
@@ -166,184 +282,311 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap) {
 
     const rarity = sprite.rarity || 'Raro';
     const theme = sprite.theme || 'Básico';
-    const innerH = h - 22; // 100 - 22 = 78
+    const footerH = 26;
+    const stripH = 15;
+    const displayH = h - footerH;
+    const badgeH = 17;
 
-    const isMastered = cardState === 'mastered';
+    const isMasteredCard = cardState === 'mastered';
     const isGrayed = cardState === 'missing_gray';
-    const isMissing = cardState === 'missing_gray' || cardState === 'missing_color';
+    const isMissingColor = cardState === 'missing_color';
 
-    /* Card base background */
-    ctx.fillStyle = '#0f141d';
-    ctx.beginPath();
-    drawRoundRect(ctx, x, y, w, h);
-    ctx.fill();
-
-    /* Rarity background */
+    /* Card elevation shadow */
     ctx.save();
+    ctx.shadowColor = palette.cardShadow;
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = palette.cardSurface;
     ctx.beginPath();
-    drawRoundRect(ctx, x, y, w, innerH, 8);
-    ctx.clip();
-
-    const grad = ctx.createLinearGradient(x, y, x, y + innerH);
-    const [c1, c2] = getRarityGradient(rarity, theme);
-    grad.addColorStop(0, c1);
-    grad.addColorStop(1, c2);
-    ctx.fillStyle = grad;
-    ctx.fillRect(x, y, w, innerH);
-
-    /* Special rainbow overlay */
-    if (rarity === 'Especial') {
-        const rainbow = ctx.createLinearGradient(x, y, x + w, y + innerH);
-        rainbow.addColorStop(0, 'rgba(81,247,204,0.25)');
-        rainbow.addColorStop(0.5, 'rgba(227,116,238,0.35)');
-        rainbow.addColorStop(1, 'rgba(181,246,158,0.25)');
-        ctx.fillStyle = rainbow;
-        ctx.fillRect(x, y, w, innerH);
-    }
-
-    /* Highlight shine */
-    const shine = ctx.createLinearGradient(x, y, x, y + innerH);
-    shine.addColorStop(0, 'rgba(255,255,255,0.12)');
-    shine.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = shine;
-    ctx.fillRect(x, y, w, innerH);
-
-    if (isGrayed) {
-        ctx.fillStyle = 'rgba(11, 13, 20, 0.45)';
-        ctx.fillRect(x, y, w, innerH);
-    }
+    drawRoundRect(ctx, x, y, w, h, radius);
+    ctx.fill();
     ctx.restore();
 
+    /* Clip all inner layers to card rounded corners */
+    ctx.save();
+    ctx.beginPath();
+    drawRoundRect(ctx, x, y, w, h, radius);
+    ctx.clip();
+
+    /* Card surface */
+    ctx.fillStyle = palette.cardSurface;
+    ctx.fillRect(x, y, w, h);
+
+    /* Display background gradient (3-stop CSS match) */
+    const displayStops = getRarityDisplayGradient(rarity, theme);
+    const grad = ctx.createLinearGradient(x, y, x, y + displayH);
+    if (displayStops.length >= 3) {
+        grad.addColorStop(0, displayStops[0]);
+        grad.addColorStop(0.75, displayStops[1]);
+        grad.addColorStop(1, displayStops[2]);
+    } else {
+        grad.addColorStop(0, displayStops[0]);
+        grad.addColorStop(1, displayStops[1]);
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, displayH);
+
+    /* Special rainbow overlay (135deg) */
+    if (rarity === 'Especial') {
+        const rainbow = ctx.createLinearGradient(x, y, x + w, y + displayH);
+        rainbow.addColorStop(0, 'rgba(74, 222, 128, 0.35)');
+        rainbow.addColorStop(0.35, 'rgba(96, 165, 250, 0.25)');
+        rainbow.addColorStop(0.68, 'rgba(192, 132, 252, 0.3)');
+        rainbow.addColorStop(1, 'rgba(244, 114, 182, 0.28)');
+        ctx.fillStyle = rainbow;
+        ctx.fillRect(x, y, w, displayH);
+    }
+
+    /* Top highlight shine (.card-display::before) */
+    const shine = ctx.createLinearGradient(x, y, x, y + displayH * 0.6);
+    shine.addColorStop(0, 'rgba(255, 255, 255, 0.08)');
+    shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = shine;
+    ctx.fillRect(x, y, w, displayH * 0.6);
+
     /* Sprite image */
-    const img = imageMap[sprite.id];
+    const img = imageMap?.[sprite.id];
+    const hasTopBanner = isMasteredCard || cardState === 'owned' || cardState === 'unmastered' || isMissingColor;
+    const spriteTopOffset = hasTopBanner ? badgeH : 4;
+    const spriteAreaH = displayH - stripH * 0.65 - spriteTopOffset;
+
     if (img && img.complete && img.naturalWidth > 0) {
         ctx.save();
-        ctx.beginPath();
-        drawRoundRect(ctx, x, y, w, innerH, 8);
-        ctx.clip();
-
         if (isGrayed) {
             try {
-                ctx.filter = 'grayscale(100%) brightness(48%)';
+                ctx.filter = 'brightness(35%) saturate(45%) contrast(95%)';
             } catch {
-                /* ctx.filter não suportado neste navegador: segue sem o efeito */
+                /* ctx.filter não suportado neste navegador */
             }
         }
-        const maxDim = w * 0.82;
+        const maxDim = Math.min(w * 0.78, spriteAreaH * 0.92);
         const ratio = Math.min(maxDim / img.width, maxDim / img.height);
         const nw = img.width * ratio;
         const nh = img.height * ratio;
-        ctx.drawImage(img, x + (w - nw) / 2, y + (innerH - nh) / 2, nw, nh);
+        ctx.drawImage(
+            img,
+            x + (w - nw) / 2,
+            y + spriteTopOffset + (spriteAreaH - nh) / 2,
+            nw,
+            nh
+        );
         ctx.restore();
+    }
 
-        if (isGrayed) {
-            ctx.fillStyle = 'rgba(15, 20, 30, 0.15)';
-            ctx.beginPath();
-            drawRoundRect(ctx, x, y, w, innerH, 8);
-            ctx.fill();
+    /* Tilted golden crown inside display area (.card-crown-display) */
+    if (isMasteredCard) {
+        drawCrown(ctx, x + w - 13, y + badgeH + 9);
+    }
+
+    /* Top Header Banner (.card-badge) */
+    if (hasTopBanner) {
+        let bannerText = 'COLETADO';
+        let bannerBg = '#4ade80';
+        let bannerFg = '#052e16';
+
+        if (isMasteredCard) {
+            bannerText = 'DOMINADO';
+            bannerBg = '#facc15';
+            bannerFg = '#1c1917';
+        } else if (isMissingColor) {
+            bannerText = 'FALTANDO';
+            bannerBg = '#e57373';
+            bannerFg = '#1c1917';
         }
+
+        ctx.fillStyle = bannerBg;
+        ctx.fillRect(x, y, w, badgeH);
+
+        ctx.fillStyle = bannerFg;
+        ctx.font = '800 8px "Roboto", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(bannerText, x + w / 2, y + badgeH / 2 + 0.5);
     }
 
-    /* Status label */
-    ctx.save();
-    ctx.font = '900 8.5px "Roboto", sans-serif';
-    ctx.shadowColor = 'rgba(0,0,0,0.8)';
-    ctx.shadowBlur = 2;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-
-    let labelText = 'COLETADO';
-    let labelColor = '#22c55e';
-    if (isMastered) {
-        labelText = 'DOMINADO';
-        labelColor = '#ffd700';
-    } else if (isMissing) {
-        labelText = 'FALTANDO';
-        labelColor = '#ef4444';
-    }
-
-    ctx.fillStyle = labelColor;
-    ctx.fillText(labelText, x + 5, y + 5);
-    ctx.restore();
-
-    /* Rarity tag (angled shape) */
-    const [tagBg, tagText] = getRarityTagColors(rarity);
-    ctx.save();
+    /* Upward Rarity Glow Beam (.card-rarity-wrap::before) */
+    const stripStyle = getRarityStripStyle(rarity);
+    const stripTopY = y + displayH - stripH;
+    const glowH = 14;
+    const glowGrad = ctx.createLinearGradient(x, stripTopY + 3, x, stripTopY - glowH);
+    glowGrad.addColorStop(0, stripStyle.glow);
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
     ctx.beginPath();
-    drawRoundRect(ctx, x, y, w, innerH, 8);
-    ctx.clip();
-
-    if (rarity === 'Especial') {
-        const tg = ctx.createLinearGradient(x, y + innerH - 12, x + w * 0.6, y + innerH - 12);
-        tg.addColorStop(0, '#51f7cc');
-        tg.addColorStop(0.5, '#e374ee');
-        tg.addColorStop(1, '#b5f69e');
-        ctx.fillStyle = tg;
-    } else {
-        ctx.fillStyle = tagBg;
-    }
-    ctx.beginPath();
-    ctx.moveTo(x, y + innerH - 12);
-    ctx.lineTo(x + w * 0.48, y + innerH - 12);
-    ctx.lineTo(x + w * 0.58, y + innerH);
-    ctx.lineTo(x, y + innerH);
+    ctx.moveTo(x, stripTopY + 3);
+    ctx.lineTo(x + w, stripTopY);
+    ctx.lineTo(x + w, stripTopY - glowH);
+    ctx.lineTo(x, stripTopY - glowH);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
 
-    ctx.fillStyle = tagText;
-    ctx.font = '900 8.5px "Roboto", sans-serif';
+    /* Rarity Strip (.card-rarity) with diagonal top cut */
+    const stripGrad = ctx.createLinearGradient(x, stripTopY, x + w, stripTopY);
+    stripStyle.colors.forEach((col, idx) => {
+        stripGrad.addColorStop(idx / Math.max(1, stripStyle.colors.length - 1), col);
+    });
+    ctx.fillStyle = stripGrad;
+    ctx.beginPath();
+    ctx.moveTo(x, stripTopY + 3);
+    ctx.lineTo(x + w, stripTopY);
+    ctx.lineTo(x + w, y + displayH);
+    ctx.lineTo(x, y + displayH);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    if (rarity === 'Especial') {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetY = 1;
+    }
+    ctx.font = '800 7.5px "Roboto", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(rarity === 'Mítico' ? 'MYTHIC' : rarity.toUpperCase(), x + 4, y + innerH - 6);
+    ctx.fillText(rarity.toUpperCase(), x + 6, stripTopY + stripH / 2 + 1);
+    ctx.restore();
 
-    /* Name/Theme footer */
-    ctx.fillStyle = 'rgba(15,20,29,0.9)';
-    ctx.fillRect(x, y + innerH, w, 22);
+    /* Card Metadata Footer (.card-name) */
+    const footerY = y + displayH;
+    ctx.fillStyle = palette.cardSurface;
+    ctx.fillRect(x, footerY, w, footerH);
 
-    ctx.fillStyle = isMissing ? '#ef4444' : '#ffffff';
-    let fontSize = 9.5;
-    const name = sprite.name.toUpperCase();
-    ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
-    ctx.textAlign = 'center';
+    const seasonName = getSeasonData(sprite.season).name;
+    const hasSeason = seasonName !== 'none';
+    const padX = 6;
+    let titleMaxW = w - padX * 2;
+
+    if (hasSeason) {
+        ctx.font = '800 7px "Roboto", sans-serif';
+        const pillTextW = ctx.measureText(seasonName).width;
+        const pillW = pillTextW + 7;
+        const pillH = 12;
+        const pillX = x + w - padX - pillW;
+        const pillY = footerY + (footerH - pillH) / 2;
+
+        ctx.fillStyle = palette.cardSeasonBg;
+        ctx.beginPath();
+        drawRoundRect(ctx, pillX, pillY, pillW, pillH, 3.5);
+        ctx.fill();
+
+        ctx.fillStyle = palette.cardSeasonColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(seasonName, pillX + pillW / 2, pillY + pillH / 2 + 0.5);
+
+        titleMaxW = pillX - (x + padX) - 4;
+    }
+
+    ctx.fillStyle = palette.cardTitleColor;
+    ctx.font = '500 9.5px "Roboto", sans-serif';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    while (ctx.measureText(name).width > w - 6 && fontSize > 6.5) {
-        fontSize -= 0.5;
-        ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
-    }
-    ctx.fillText(name, x + w / 2, y + innerH + 11);
+    const fittedTitle = fitTextWithEllipsis(ctx, sprite.name || sprite.id, Math.max(12, titleMaxW));
+    ctx.fillText(fittedTitle, x + padX, footerY + footerH / 2 + 0.5);
 
-    /* Bottom accent + border */
-    let bottomAccentColor = tagBg;
-    let borderColor = '#1a2233';
-    if (isMastered) {
-        bottomAccentColor = '#ffd700';
-        borderColor = '#ffd700';
-    } else if (isMissing) {
-        bottomAccentColor = '#ef4444';
-    } else if (cardState === 'unmastered') {
-        bottomAccentColor = '#00f0ff';
-    }
+    ctx.restore();
 
-    ctx.fillStyle = bottomAccentColor;
-    ctx.fillRect(x, y + h - 3, w, 3);
-
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = isMastered ? 2 : 1;
+    /* Crisp card outline */
+    ctx.save();
+    ctx.strokeStyle = palette.cardBorder;
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    drawRoundRect(ctx, x, y, w, h, 8);
+    drawRoundRect(ctx, x, y, w, h, radius);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawCircularProgress(ctx, cx, cy, ratio, fillColor, trackColor) {
+    const r = 13.5;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    const startAngle = -Math.PI / 2;
+
+    ctx.save();
+    ctx.lineWidth = 4.2;
+
+    // Track
+    ctx.strokeStyle = trackColor;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.stroke();
 
-    /* Crown at top center */
-    if (isMastered) {
-        drawCrown(ctx, x + w / 2, y - 2);
+    // Fill
+    if (clamped > 0) {
+        ctx.strokeStyle = fillColor;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, startAngle, startAngle + Math.PI * 2 * clamped);
+        ctx.stroke();
     }
+    ctx.restore();
+}
+
+function drawProgressCard(ctx, x, y, w, h, label, count, total, ringColor, palette) {
+    ctx.save();
+    ctx.fillStyle = palette.surfaceContainer;
+    ctx.strokeStyle = palette.outlineVariant;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    drawRoundRect(ctx, x, y, w, h, 14);
+    ctx.fill();
+    ctx.stroke();
+
+    const padX = 14;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = palette.textSoft;
+    ctx.font = '600 11px "Roboto", sans-serif';
+    ctx.fillText(label, x + padX, y + 18);
+
+    const countText = String(count);
+    ctx.fillStyle = palette.text;
+    ctx.font = '700 17px "Roboto", sans-serif';
+    ctx.fillText(countText, x + padX, y + 38);
+    const countW = ctx.measureText(countText).width;
+
+    ctx.fillStyle = palette.textMuted;
+    ctx.font = '600 12.5px "Roboto", sans-serif';
+    ctx.fillText(`/${total}`, x + padX + countW + 2, y + 39);
+
+    const ratio = total > 0 ? count / total : 0;
+    drawCircularProgress(ctx, x + w - 28, y + h / 2, ratio, ringColor, palette.surfaceContainerHighest);
+    ctx.restore();
+}
+
+function drawModeChip(ctx, x, y, label, dotColor, palette) {
+    ctx.save();
+    ctx.font = '600 12px "Roboto", sans-serif';
+    const textW = ctx.measureText(label).width;
+    const chipH = 26;
+    const chipW = 28 + textW + 12;
+
+    ctx.fillStyle = palette.secondaryContainer;
+    ctx.beginPath();
+    drawRoundRect(ctx, x, y, chipW, chipH, chipH / 2);
+    ctx.fill();
+
+    // Dot
+    ctx.fillStyle = dotColor;
+    ctx.beginPath();
+    ctx.arc(x + 14, y + chipH / 2, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Text
+    ctx.fillStyle = palette.onSecondaryContainer;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + 24, y + chipH / 2 + 0.5);
+    ctx.restore();
+    return chipW;
 }
 
 export function exportImage(mode, state, sprites = []) {
     const config = getExportConfig(mode, state, sprites);
     if (!config) return;
 
+    const palette = getExportThemePalette(Boolean(state?.settings?.lightTheme));
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const imagesToLoad = [
         { id: 'mascot', src: getMascotImageUrl() },
@@ -412,7 +655,6 @@ export function exportImage(mode, state, sprites = []) {
             const totalItems = config.items.length;
             const cardAspect = (layout.cardW + layout.cardGap) / (layout.cardH + layout.rowGap);
 
-            // Compute ideal column count to make overall layout aspect ratio as close to 1:1 as possible
             cols = Math.max(1, Math.round(Math.sqrt(totalItems / cardAspect)));
             rows = Math.ceil(totalItems / cols);
 
@@ -437,47 +679,29 @@ export function exportImage(mode, state, sprites = []) {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // Border gradient
-        let borderGrad;
-        if (mode === 'trade') {
-            borderGrad = ctx.createLinearGradient(0, 0, canvasW, canvasH);
-            borderGrad.addColorStop(0, '#ffd700');
-            borderGrad.addColorStop(1, '#22c55e');
-            ctx.fillStyle = borderGrad;
-        } else {
-            ctx.fillStyle = config.color;
-            borderGrad = config.color;
-        }
+        // Material Design 3 Background (--bg + radial glow --bg-glow)
+        ctx.fillStyle = palette.bg;
         ctx.fillRect(0, 0, canvasW, canvasH);
 
-        // Inner Background
-        ctx.fillStyle = '#0b0d13';
-        ctx.fillRect(layout.border, layout.border, canvasW - layout.border * 2, canvasH - layout.border * 2);
+        const bgRadial = ctx.createRadialGradient(
+            canvasW * 0.5,
+            0,
+            0,
+            canvasW * 0.5,
+            0,
+            Math.max(canvasW, canvasH) * 0.78
+        );
+        bgRadial.addColorStop(0, palette.bgGlow);
+        bgRadial.addColorStop(1, palette.bg);
+        ctx.fillStyle = bgRadial;
+        ctx.fillRect(0, 0, canvasW, canvasH);
 
-        // Header Background
-        ctx.fillStyle = '#181c25';
-        ctx.fillRect(layout.border, layout.border, canvasW - layout.border * 2, headerH);
-
-        // Header separator
-        ctx.strokeStyle = borderGrad;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(layout.border, layout.border + headerH);
-        ctx.lineTo(canvasW - layout.border, layout.border + headerH);
-        ctx.stroke();
-
-        // Header Stats / Progress Bars
+        // Header Stats
         const { total: totalCount, collected: ownedCount, mastered: masteredCount } = getCollectionCounts(
             releasedSprites,
             state
         );
-        const colPct = totalCount > 0 ? ownedCount / totalCount : 0;
-        const masPct = totalCount > 0 ? masteredCount / totalCount : 0;
-
-        const bw = 110;
-        const statGap = 25;
         const mascotImg = imageMap['mascot'];
-        const fullTitle = `${config.titleL1} ${config.titleL2}`;
 
         const fitFont = (text, maxWidth, startSize, minSize, style) => {
             let size = startSize;
@@ -489,90 +713,143 @@ export function exportImage(mode, state, sprites = []) {
             return size;
         };
 
-        const drawProgressBlock = (label, count, total, pct, x, y, color) => {
-            ctx.font = '900 12px "Roboto", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = color;
-            ctx.fillText(`${label}: ${count}/${total}`, x, y);
-            ctx.fillStyle = '#0e1117';
-            ctx.fillRect(x, y + 15, bw, 12);
-            ctx.strokeStyle = '#3b4253';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x, y + 15, bw, 12);
-            ctx.fillStyle = color;
-            ctx.fillRect(x, y + 16, bw * pct, 10);
-        };
+        const cardW = 172;
+        const cardH = 56;
+        const cardGap = 12;
 
         if (useCompactHeader) {
-            const topY = layout.border + 24;
-            const mascotSize = 24;
-            const mascotGap = mascotImg ? 8 : 0;
-            fitFont(config.titleL1, canvasW - layout.border * 2 - 60, 14, 10, 'italic 900');
-            const titleL1W = ctx.measureText(config.titleL1).width;
-            const titleGroupW = titleL1W + (mascotImg ? mascotSize + mascotGap : 0);
-            let groupX = (canvasW - titleGroupW) / 2;
+            const topY = layout.border + 28;
+            const mascotSize = 30;
+            const mascotGap = mascotImg ? 10 : 0;
+            const titleMaxW = canvasW - layout.sidePad * 2 - (mascotImg ? mascotSize + mascotGap : 0);
+            fitFont(config.titleL1, titleMaxW, 20, 14, '500');
+            const titleW = ctx.measureText(config.titleL1).width;
+            const brandW = titleW + (mascotImg ? mascotSize + mascotGap : 0);
+            let bx = (canvasW - brandW) / 2;
+
             if (mascotImg) {
-                ctx.drawImage(mascotImg, groupX, topY - mascotSize / 2, mascotSize, mascotSize);
-                groupX += mascotSize + mascotGap;
+                ctx.drawImage(mascotImg, bx, topY - mascotSize / 2, mascotSize, mascotSize);
+                bx += mascotSize + mascotGap;
             }
-            ctx.fillStyle = borderGrad;
+            ctx.fillStyle = palette.text;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText(config.titleL1, groupX, topY);
+            ctx.fillText(config.titleL1, bx, topY);
 
-            fitFont(config.titleL2, canvasW - layout.border * 2 - 36, 20, 13, 'italic 900');
-            ctx.fillStyle = borderGrad;
-            ctx.textAlign = 'center';
-            ctx.fillText(config.titleL2, canvasW / 2, layout.border + 52);
+            // Mode chip centered below title
+            ctx.font = '600 12px "Roboto", sans-serif';
+            const chipW = 28 + ctx.measureText(config.titleL2).width + 12;
+            drawModeChip(ctx, (canvasW - chipW) / 2, layout.border + 48, config.titleL2, config.color, palette);
 
-            const statsW = bw * 2 + statGap;
-            const statsX = (canvasW - statsW) / 2;
-            const statsY = layout.border + 86;
-            drawProgressBlock('COLECIONADOS', ownedCount, totalCount, colPct, statsX, statsY, '#22c55e');
-            drawProgressBlock('DOMINADOS', masteredCount, totalCount, masPct, statsX + bw + statGap, statsY, '#ffd700');
+            // Two progress cards side by side
+            const compactCardW = Math.min(180, Math.floor((canvasW - layout.sidePad * 2 - cardGap) / 2));
+            const totalCardsW = compactCardW * 2 + cardGap;
+            const cardsX = (canvasW - totalCardsW) / 2;
+            const cardsY = layout.border + 84;
+            drawProgressCard(
+                ctx,
+                cardsX,
+                cardsY,
+                compactCardW,
+                cardH,
+                'Coleção',
+                ownedCount,
+                totalCount,
+                palette.primary,
+                palette
+            );
+            drawProgressCard(
+                ctx,
+                cardsX + compactCardW + cardGap,
+                cardsY,
+                compactCardW,
+                cardH,
+                'Dominados',
+                masteredCount,
+                totalCount,
+                palette.uiMastered,
+                palette
+            );
         } else {
             const statsRight = canvasW - layout.border - layout.sidePad;
-            const collectionX = statsRight - bw * 2 - statGap;
-            const masteryX = statsRight - bw;
+            const masteryX = statsRight - cardW;
+            const collectionX = masteryX - cardGap - cardW;
+            const cardsY = layout.border + (headerH - cardH) / 2;
+
+            drawProgressCard(
+                ctx,
+                collectionX,
+                cardsY,
+                cardW,
+                cardH,
+                'Coleção',
+                ownedCount,
+                totalCount,
+                palette.primary,
+                palette
+            );
+            drawProgressCard(
+                ctx,
+                masteryX,
+                cardsY,
+                cardW,
+                cardH,
+                'Dominados',
+                masteredCount,
+                totalCount,
+                palette.uiMastered,
+                palette
+            );
+
             const titleX = layout.border + layout.sidePad;
-            const mascotSize = 32;
-            const mascotGap = mascotImg ? 10 : 0;
-            const titleMaxW = collectionX - titleX - 20;
+            const mascotSize = 36;
+            const mascotGap = mascotImg ? 12 : 0;
+            const brandMaxW = collectionX - titleX - 20 - (mascotImg ? mascotSize + mascotGap : 0);
 
-            fitFont(fullTitle, titleMaxW - (mascotImg ? mascotSize + mascotGap : 0), 26, 16, 'italic 900');
-            ctx.fillStyle = borderGrad;
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-
-            let textLeft = titleX;
             if (mascotImg) {
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetY = 2;
                 ctx.drawImage(
                     mascotImg,
-                    textLeft,
+                    titleX,
                     layout.border + headerH / 2 - mascotSize / 2,
                     mascotSize,
                     mascotSize
                 );
-                textLeft += mascotSize + mascotGap;
+                ctx.restore();
             }
-            ctx.fillText(fullTitle, textLeft, layout.border + headerH / 2);
 
-            drawProgressBlock('COLECIONADOS', ownedCount, totalCount, colPct, collectionX, layout.border + 28, '#22c55e');
-            drawProgressBlock('DOMINADOS', masteredCount, totalCount, masPct, masteryX, layout.border + 28, '#ffd700');
+            const textLeft = titleX + (mascotImg ? mascotSize + mascotGap : 0);
+            fitFont(config.titleL1, brandMaxW, 22, 15, '500');
+            ctx.fillStyle = palette.text;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(config.titleL1, textLeft, layout.border + headerH / 2 - 14);
+
+            drawModeChip(ctx, textLeft, layout.border + headerH / 2 + 4, config.titleL2, config.color, palette);
         }
+
+        // Subtle header bottom divider
+        ctx.strokeStyle = palette.border;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(layout.sidePad, layout.border + headerH);
+        ctx.lineTo(canvasW - layout.sidePad, layout.border + headerH);
+        ctx.stroke();
 
         if (mode === 'trade') {
             const startTableY = layout.border + headerH + layout.colHeaderH;
 
             const drawColHeaders = startX => {
-                ctx.fillStyle = '#8891a5';
-                ctx.font = 'bold 12px "Roboto", sans-serif';
+                ctx.fillStyle = palette.textSoft;
+                ctx.font = '700 11px "Roboto", sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 themeColumns.forEach((t, i) => {
                     const cx = startX + layout.labelW + i * (layout.cardW + layout.cardGap) + layout.cardW / 2;
-                    ctx.fillText(t.name, cx, startTableY - 8);
+                    ctx.fillText(t.name, cx, startTableY - 10);
                 });
             };
 
@@ -588,16 +865,16 @@ export function exportImage(mode, state, sprites = []) {
                 const name = getCharName(charKey, sprites);
                 const displayName = getDisplayName(name);
 
-                ctx.fillStyle = '#ffffff';
-                let fontSize = 14;
-                ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
+                ctx.fillStyle = palette.text;
+                let fontSize = 13.5;
+                ctx.font = `600 ${fontSize}px "Roboto", sans-serif`;
                 ctx.textAlign = 'right';
                 ctx.textBaseline = 'middle';
-                while (ctx.measureText(displayName).width > layout.labelW - 12 && fontSize > 8) {
+                while (ctx.measureText(displayName).width > layout.labelW - 14 && fontSize > 8) {
                     fontSize -= 0.5;
-                    ctx.font = `bold ${fontSize}px "Roboto", sans-serif`;
+                    ctx.font = `600 ${fontSize}px "Roboto", sans-serif`;
                 }
-                ctx.fillText(displayName, startX + layout.labelW - 10, y + layout.cardH / 2);
+                ctx.fillText(displayName, startX + layout.labelW - 12, y + layout.cardH / 2);
 
                 const rowCards = themeColumns.map(t => familyThemeMap.get(charKey).get(t.themeName));
 
@@ -606,16 +883,9 @@ export function exportImage(mode, state, sprites = []) {
 
                     if (s) {
                         const cardState = getExportCardState(s, mode, state);
-                        drawMiniCard(ctx, s, cx, y, layout.cardW, layout.cardH, cardState, imageMap);
+                        drawMiniCard(ctx, s, cx, y, layout.cardW, layout.cardH, cardState, imageMap, palette);
                     } else {
-                        ctx.save();
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([4, 4]);
-                        ctx.beginPath();
-                        drawRoundRect(ctx, cx, y, layout.cardW, layout.cardH, 8);
-                        ctx.stroke();
-                        ctx.restore();
+                        drawMiniCard(ctx, null, cx, y, layout.cardW, layout.cardH, 'empty', imageMap, palette);
                     }
                 });
             };
@@ -641,27 +911,27 @@ export function exportImage(mode, state, sprites = []) {
                 const y = startGridY + row * (layout.cardH + layout.rowGap);
 
                 const cardState = getExportCardState(sprite, mode, state);
-                drawMiniCard(ctx, sprite, x, y, layout.cardW, layout.cardH, cardState, imageMap);
+                drawMiniCard(ctx, sprite, x, y, layout.cardW, layout.cardH, cardState, imageMap, palette);
             });
         }
 
-        // Footer
-        ctx.fillStyle = '#0e1117';
-        ctx.fillRect(
-            layout.border,
-            canvasH - layout.footerH - layout.border,
-            canvasW - layout.border * 2,
-            layout.footerH
-        );
+        // Footer (.footer style)
+        const footerTopY = canvasH - layout.footerH - layout.border;
+        ctx.strokeStyle = palette.border;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(layout.sidePad, footerTopY);
+        ctx.lineTo(canvasW - layout.sidePad, footerTopY);
+        ctx.stroke();
 
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px "Roboto", sans-serif';
+        ctx.fillStyle = palette.textMuted;
+        ctx.font = '500 13px "Roboto", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
             'joaopedro-chaves.github.io/fnpituchinhubr/',
             canvasW / 2,
-            canvasH - layout.border - layout.footerH / 2
+            footerTopY + layout.footerH / 2
         );
 
         // Export mode
