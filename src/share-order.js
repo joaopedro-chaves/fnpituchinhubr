@@ -18,6 +18,7 @@ export const KEYS = {
     lowFidelity: 'fn_state_low_fidelity',
     openExports: 'fn_state_open_exports',
     season: 'fn_state_season',
+    lightTheme: 'fn_state_light_theme',
 };
 
 export const STATUS_FILTERS = ['all', 'owned', 'missing'];

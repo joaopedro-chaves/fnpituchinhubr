@@ -3,37 +3,48 @@
 }
 
 /* ===================================================
-   Design Tokens - Material Design 3 (Dark Theme)
+   Design Tokens - Material Design 3 Expressive (Purple)
    =================================================== */
 
 :root {
-    /* Color Palette */
-    --primary: #d6a8fa;
-    --on-primary: #4f066f;
-    --primary-container: #4a0090;
-    --on-primary-container: #efd3ff;
+    /* Color Palette (Dark Theme - Default) */
+    --primary: #d0bcff;
+    --on-primary: #381e72;
+    --primary-container: #4f378b;
+    --on-primary-container: #eaddff;
 
-    --secondary: #bec6dc;
-    --on-secondary: #283141;
-    --secondary-container: #3e4759;
-    --on-secondary-container: #dae2f9;
+    --secondary: #ccc2dc;
+    --on-secondary: #332d41;
+    --secondary-container: #4a4458;
+    --on-secondary-container: #e8def8;
 
-    --bg: #11151c;
-    --surface: #141821;
-    --surface-container: #1b202c;
-    --surface-container-high: #232938;
-    --surface-container-highest: #2e3545;
+    --bg: #141218;
+    --bg-glow: #271e3a;
+    --surface: #141218;
+    --surface-dim: #141218;
+    --surface-bright: #3b383e;
+    --surface-container-low: #1d1b20;
+    --surface-container: #211f26;
+    --surface-container-high: #2b2930;
+    --surface-container-highest: #36343b;
 
-    --border: rgba(255, 255, 255, 0.1);
-    --outline: #8c9199;
-    --outline-variant: #3c424f;
-    --focus-ring: #a8c7fa;
+    --border: rgba(230, 224, 233, 0.12);
+    --outline: #938f99;
+    --outline-variant: #49454f;
+    --focus-ring: #d0bcff;
+    --state-hover: rgba(230, 224, 233, 0.08);
+    --state-focus: rgba(230, 224, 233, 0.14);
 
-    --text: #e3e2e6;
-    --text-soft: #c4c6d0;
-    --text-muted: #8e9099;
+    --text: #e6e0e9;
+    --text-soft: #cac4d0;
+    --text-muted: #a29cae;
 
-    /* Status Colors */
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23e6e0e9' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+
+    /* UI Accent Overrides (keep card rarity/status tokens intact) */
+    --ui-mastered: #facc15;
+
+    /* Status Colors (used by cards & export dots) */
     --collected: #4ade80;
     --mastered: #facc15;
     --missing: #e57373;
@@ -106,20 +117,96 @@
     --tertiary-container: #633b48;
     --on-tertiary-container: #ffd8e4;
 
-    --surface-dim: #0d1019;
-    --surface-bright: #333944;
-    --surface-container-low: #131722;
-
-    --inverse-surface: #e3e2e6;
-    --inverse-on-surface: #2f3036;
+    --inverse-surface: #e6e0e9;
+    --inverse-on-surface: #322f35;
     --inverse-primary: #6750a4;
 
-    --scrim: rgba(0, 0, 0, 0.6);
+    --scrim: rgba(15, 13, 19, 0.65);
 
     --error: #ffb4ab;
     --on-error: #690005;
     --error-container: #93000a;
     --on-error-container: #ffdad6;
+
+    /* Controller HUD (Dark) */
+    --hud-bg: rgba(20, 18, 24, 0.84);
+    --hud-bg-solid: rgba(29, 27, 32, 0.96);
+    --hud-border: rgba(230, 224, 233, 0.16);
+    --hud-text: #e6e0e9;
+    --hud-divider: rgba(230, 224, 233, 0.18);
+    --hud-badge-bg: #36343b;
+    --hud-badge-border: rgba(230, 224, 233, 0.24);
+    --hud-badge-text: #ffffff;
+    --hud-command-text: #cac4d0;
+}
+
+:root[data-theme="light"] {
+    --primary: #6750a4;
+    --on-primary: #ffffff;
+    --primary-container: #eaddff;
+    --on-primary-container: #21005d;
+
+    --secondary: #625b71;
+    --on-secondary: #ffffff;
+    --secondary-container: #e8def8;
+    --on-secondary-container: #1d192b;
+
+    --bg: #fef7ff;
+    --bg-glow: #efe5ff;
+    --surface: #fef7ff;
+    --surface-dim: #ded8e1;
+    --surface-bright: #fef7ff;
+    --surface-container-low: #f7f2fa;
+    --surface-container: #f3edf7;
+    --surface-container-high: #ece6f0;
+    --surface-container-highest: #e6e0e9;
+
+    --border: rgba(29, 27, 32, 0.12);
+    --outline: #79747e;
+    --outline-variant: #cac4d0;
+    --focus-ring: #6750a4;
+    --state-hover: rgba(29, 27, 32, 0.08);
+    --state-focus: rgba(29, 27, 32, 0.14);
+
+    --text: #1d1b20;
+    --text-soft: #49454f;
+    --text-muted: #5d5766;
+
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2349454f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+
+    --ui-mastered: #9a5b00;
+
+    --tertiary: #7d5260;
+    --on-tertiary: #ffffff;
+    --tertiary-container: #ffd8e4;
+    --on-tertiary-container: #31111d;
+
+    --inverse-surface: #322f35;
+    --inverse-on-surface: #f5eff7;
+    --inverse-primary: #d0bcff;
+
+    --scrim: rgba(29, 27, 32, 0.45);
+
+    --error: #b3261e;
+    --on-error: #ffffff;
+    --error-container: #f9dedc;
+    --on-error-container: #410e0b;
+
+    --elevation-1: 0px 1px 3px 1px rgba(29, 27, 32, 0.12), 0px 1px 2px 0px rgba(29, 27, 32, 0.18);
+    --elevation-2: 0px 2px 6px 2px rgba(29, 27, 32, 0.12), 0px 1px 2px 0px rgba(29, 27, 32, 0.20);
+    --elevation-3: 0px 4px 8px 3px rgba(29, 27, 32, 0.14), 0px 1px 3px 0px rgba(29, 27, 32, 0.22);
+    --elevation-4: 0px 6px 14px 4px rgba(29, 27, 32, 0.16), 0px 2px 4px 0px rgba(29, 27, 32, 0.24);
+
+    /* Controller HUD (Light) */
+    --hud-bg: rgba(243, 237, 247, 0.90);
+    --hud-bg-solid: rgba(236, 230, 240, 0.98);
+    --hud-border: rgba(29, 27, 32, 0.14);
+    --hud-text: #1d1b20;
+    --hud-divider: rgba(29, 27, 32, 0.14);
+    --hud-badge-bg: #e6e0e9;
+    --hud-badge-border: rgba(29, 27, 32, 0.2);
+    --hud-badge-text: #1d1b20;
+    --hud-command-text: #49454f;
 }
 
 /* ===================================================
@@ -137,7 +224,7 @@
 body {
     min-height: 100vh;
     background-color: var(--bg);
-    background-image: radial-gradient(circle at 50% 0%, #1a2536 0%, var(--bg) 80%);
+    background-image: radial-gradient(circle at 50% 0%, var(--bg-glow) 0%, var(--bg) 78%);
     color: var(--text);
     font-family: 'Roboto', system-ui, sans-serif;
     font-weight: 400;
@@ -283,7 +370,7 @@ a:hover {
     background: var(--surface-container);
     padding: 12px 20px;
     border-radius: 14px;
-    border: 1px solid #2e3545;
+    border: 1px solid var(--outline-variant);
 }
 
 .progress-meta {
@@ -297,26 +384,26 @@ a:hover {
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: #9ca3af;
+    color: var(--text-soft);
 }
 
 .progress-value {
     font-size: 22px;
     font-weight: 700;
     line-height: 1.15;
-    color: #ffffff;
+    color: var(--text);
     font-variant-numeric: tabular-nums;
 }
 
 .progress-value strong {
     font-weight: 700;
-    color: #ffffff;
+    color: var(--text);
 }
 
 .progress-total {
     font-size: 16px;
     font-weight: 600;
-    color: #949eb0;
+    color: var(--text-muted);
     margin-inline-start: 2px;
 }
 
@@ -328,7 +415,7 @@ a:hover {
 }
 
 .progress-ring-track {
-    stroke: #262c3d;
+    stroke: var(--surface-container-highest);
 }
 
 .progress-ring-fill {
@@ -337,7 +424,7 @@ a:hover {
 }
 
 .progress-ring.mastery .progress-ring-fill {
-    stroke: var(--mastered);
+    stroke: var(--ui-mastered);
 }
 
 /* ===================================================
@@ -402,7 +489,7 @@ a:hover {
 }
 
 .search-bar:hover {
-    border-color: #5c6475;
+    border-color: var(--outline);
 }
 
 .search-bar:focus-within {
@@ -433,7 +520,7 @@ a:hover {
 }
 
 .search-input::placeholder {
-    color: #7e8696;
+    color: var(--text-muted);
 }
 
 /* ── M3 Filter Chips & Desktop M3 Menu Dropdowns ── */
@@ -447,9 +534,9 @@ a:hover {
     border-radius: var(--radius-pill);
     font-size: 13.5px;
     font-weight: 500;
-    color: #d1d5db;
+    color: var(--text-soft);
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23e2e8f0' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-image: var(--select-chevron);
     background-repeat: no-repeat;
     background-position: right 16px center;
     cursor: pointer;
@@ -461,8 +548,8 @@ a:hover {
 
 .select:hover {
     background-color: var(--surface-container-high);
-    border-color: #5c6475;
-    color: #ffffff;
+    border-color: var(--outline);
+    color: var(--text);
 }
 
 .select:focus-visible {
@@ -514,7 +601,7 @@ a:hover {
 .m3-menu-trigger.open {
     border-color: var(--primary);
     background-color: var(--surface-container-high);
-    color: #ffffff;
+    color: var(--text);
 }
 
 .m3-chip-label {
@@ -525,7 +612,7 @@ a:hover {
 
 .m3-chip-arrow {
     flex-shrink: 0;
-    color: #e2e8f0;
+    color: var(--text-soft);
     transition: transform var(--duration-short2) var(--ease-standard);
 }
 
@@ -602,12 +689,12 @@ a:hover {
 }
 
 .m3-menu-item:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--state-hover);
 }
 
 .m3-menu-item:focus-visible {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: var(--state-focus);
 }
 
 .m3-menu-item[aria-checked="true"],
@@ -646,7 +733,7 @@ a:hover {
     font-weight: 600;
     transition: background-color var(--duration-short) var(--ease),
         color var(--duration-short) var(--ease);
-    color: #c4c9d4;
+    color: var(--text-soft);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -657,13 +744,13 @@ a:hover {
 }
 
 .pill:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: #ffffff;
+    background-color: var(--state-hover);
+    color: var(--text);
 }
 
 .pill.active {
-    background-color: #454e5f;
-    color: #f1f5f9;
+    background-color: var(--secondary-container);
+    color: var(--on-secondary-container);
 }
 
 /* ── Material Switches ── */
@@ -752,32 +839,33 @@ a:hover {
     text-align: center;
     white-space: nowrap;
     border-radius: var(--radius-pill);
-    background: #3d4656;
-    border: 1px solid #525c6e;
-    color: #e2e8f0;
+    background: var(--secondary-container);
+    border: 1px solid transparent;
+    color: var(--on-secondary-container);
     transition: background-color var(--duration-short) var(--ease),
         border-color var(--duration-short) var(--ease),
-        box-shadow var(--duration-short) var(--ease);
+        box-shadow var(--duration-short) var(--ease),
+        color var(--duration-short) var(--ease);
 }
 
 .btn-icon {
     flex-shrink: 0;
-    color: #cbd5e1;
+    color: var(--on-secondary-container);
     transition: color var(--duration-short) var(--ease);
 }
 
 .btn:hover:not(:disabled) {
-    background-color: #495366;
-    border-color: #6b768b;
-    color: #ffffff;
+    background-color: var(--primary-container);
+    color: var(--on-primary-container);
+    box-shadow: var(--elevation-1);
 }
 
 .btn:hover:not(:disabled) .btn-icon {
-    color: #ffffff;
+    color: var(--on-primary-container);
 }
 
 .btn:active:not(:disabled) {
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 2px var(--state-focus);
 }
 
 /* ── Dropdowns & Modal Popups ── */
@@ -965,11 +1053,11 @@ body.low-fidelity .modal-backdrop {
 }
 
 .dot-mastered {
-    background: var(--mastered);
+    background: var(--ui-mastered);
 }
 
 .dot-trade {
-    background: linear-gradient(135deg, var(--mastered), var(--collected));
+    background: linear-gradient(135deg, var(--ui-mastered), var(--collected));
 }
 
 .dot-backup {
@@ -1264,7 +1352,7 @@ body.low-fidelity .modal-backdrop {
 .crown-icon {
     width: 14px;
     height: 14px;
-    fill: var(--text-muted);
+    fill: #8e9099;
     transition: fill var(--duration-short) var(--ease);
 }
 
@@ -1290,7 +1378,7 @@ body.low-fidelity .modal-backdrop {
 }
 
 .card-crown:hover {
-    background-color: var(--surface-container-highest);
+    background-color: #2e3545;
 }
 
 .card-crown:hover .crown-icon {
@@ -1674,7 +1762,7 @@ body.low-fidelity .rarity-Especial .card-rarity {
 }
 
 .toast-gamepad {
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid var(--inverse-primary);
 }
 
 /* ===================================================
@@ -1690,13 +1778,13 @@ body.low-fidelity .rarity-Especial .card-rarity {
     align-items: center;
     gap: 12px;
     padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--hud-bg);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--hud-border);
     border-radius: 12px;
     box-shadow: var(--elevation-3);
-    color: #f1f5f9;
+    color: var(--hud-text);
     font-size: 12.5px;
     font-weight: 500;
     user-select: none;
@@ -1706,7 +1794,7 @@ body.low-fidelity .rarity-Especial .card-rarity {
 body.low-fidelity .controller-hud {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(17, 21, 28, 0.94);
+    background: var(--hud-bg-solid);
 }
 
 .controller-hud-device {
@@ -1725,7 +1813,7 @@ body.low-fidelity .controller-hud {
 .controller-hud-divider {
     width: 1px;
     height: 18px;
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--hud-divider);
 }
 
 .controller-hud-command {
@@ -1742,14 +1830,14 @@ body.low-fidelity .controller-hud {
     height: 22px;
     padding: 0 6px;
     border-radius: 9999px;
-    background: #2b3344;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    color: #ffffff;
+    background: var(--hud-badge-bg);
+    border: 1px solid var(--hud-badge-border);
+    color: var(--hud-badge-text);
     font-family: inherit;
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
 .badge-keyboard-collect,
@@ -1758,7 +1846,7 @@ body.low-fidelity .controller-hud {
 }
 
 .controller-command-label {
-    color: #e2e8f0;
+    color: var(--hud-command-text);
     font-weight: 500;
 }
 

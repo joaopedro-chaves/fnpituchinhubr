@@ -24,8 +24,18 @@
             href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
             rel="stylesheet">
     </noscript>
-    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="theme-color" content="#141218" />
     <link rel="apple-touch-icon" href="pwa-192x192.png" />
+    <script>
+        try {
+            if (localStorage.getItem('fn_state_light_theme') === 'true') {
+                document.documentElement.dataset.theme = 'light';
+                document.documentElement.style.colorScheme = 'light';
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', '#FEF7FF');
+            }
+        } catch {}
+    </script>
 </head>
 
 <body>

@@ -74,6 +74,7 @@ function getInitialSettings() {
         showUnreleased: localStorage.getItem(KEYS.showUnreleased) === 'true',
         lowFidelity: localStorage.getItem(KEYS.lowFidelity) === 'true',
         openExports: localStorage.getItem(KEYS.openExports) === 'true',
+        lightTheme: localStorage.getItem(KEYS.lightTheme) === 'true',
     };
 }
 
@@ -233,6 +234,28 @@ export function useTrackerState(sprites) {
         document.body.classList.toggle('low-fidelity', settings.lowFidelity);
         return () => document.body.classList.remove('low-fidelity');
     }, [settings.lowFidelity]);
+
+    // Tema claro/escuro na raiz do documento (escuro por padrão)
+    useEffect(() => {
+        const root = document.documentElement;
+        if (settings.lightTheme) {
+            root.dataset.theme = 'light';
+            root.style.colorScheme = 'light';
+        } else {
+            delete root.dataset.theme;
+            root.style.colorScheme = 'dark';
+        }
+
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', settings.lightTheme ? '#FEF7FF' : '#141218');
+        }
+
+        return () => {
+            delete root.dataset.theme;
+            root.style.colorScheme = '';
+        };
+    }, [settings.lightTheme]);
 
     const activeThemes = useMemo(() => getActiveThemes(sprites), [sprites]);
 

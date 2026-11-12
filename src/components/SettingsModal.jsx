@@ -65,6 +65,15 @@ export default function SettingsModal({ settings, onSettingChange, onClose }) {
                                 onChange={e => onSettingChange('lowFidelity', e.target.checked)}
                             />
                         </label>
+                        <label className="switch">
+                            <span>Tema claro</span>
+                            <input
+                                type="checkbox"
+                                id="lightTheme"
+                                checked={settings.lightTheme}
+                                onChange={e => onSettingChange('lightTheme', e.target.checked)}
+                            />
+                        </label>
                         {!isIOS() && (
                             <label className="switch" id="exportModeSwitch">
                                 <span>Abrir exportações</span>

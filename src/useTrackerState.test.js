@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
 import { createElement } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent, act, cleanup } from '@testing-library/react';
+import { render, fireEvent, act, cleanup, waitFor } from '@testing-library/react';
 import { CatalogPage } from './pages/CatalogPage.jsx';
 import { KEYS } from './share-order.js';
 
-describe('Fase 5 — useTrackerState (persistência incremental e debounce)', () => {
+describe('useTrackerState (persistência incremental, debounce e tema claro/escuro)', () => {
     beforeEach(() => {
         localStorage.clear();
+        delete document.documentElement.dataset.theme;
     });
 
     afterEach(() => {
         vi.useRealTimers();
+        delete document.documentElement.dataset.theme;
         cleanup();
     });
 
@@ -65,6 +67,30 @@ describe('Fase 5 — useTrackerState (persistência incremental e debounce)', ()
         expect(setItemSpy).toHaveBeenCalledWith(KEYS.search, 'agua');
 
         setItemSpy.mockRestore();
+    });
+
+    it('usa tema escuro por padrão e alterna para tema claro pelo switch nas configurações', async () => {
+        const { container } = render(createElement(CatalogPage));
+        expect(document.documentElement.dataset.theme).toBeUndefined();
+
+        fireEvent.click(container.querySelector('#settingsToggle'));
+        const themeSwitch = await waitFor(() => {
+            const el = container.querySelector('#lightTheme');
+            expect(el).not.toBeNull();
+            return el;
+        });
+
+        expect(themeSwitch.checked).toBe(false);
+
+        fireEvent.click(themeSwitch);
+        expect(themeSwitch.checked).toBe(true);
+        expect(document.documentElement.dataset.theme).toBe('light');
+        expect(localStorage.getItem(KEYS.lightTheme)).toBe('true');
+
+        fireEvent.click(themeSwitch);
+        expect(themeSwitch.checked).toBe(false);
+        expect(document.documentElement.dataset.theme).toBeUndefined();
+        expect(localStorage.getItem(KEYS.lightTheme)).toBe('false');
     });
 });
 
