@@ -115,10 +115,12 @@ describe('sortSprites', () => {
     });
 
     it('garante paridade de ordenação em todos os métodos sobre baseSprites', () => {
+        const uniqueIdCount = new Set(baseSprites.map(s => s.id)).size;
         for (const method of ['theme', 'sprite', 'name', 'rarity']) {
             const result = sortSprites(baseSprites, method);
             expect(result).toHaveLength(baseSprites.length);
-            expect(new Set(result.map(s => s.id)).size).toBe(baseSprites.length);
+            expect(new Set(result)).toEqual(new Set(baseSprites));
+            expect(new Set(result.map(s => s.id)).size).toBe(uniqueIdCount);
         }
     });
 });
@@ -202,10 +204,12 @@ describe('integridade dos dados reais (sprites-data.js)', () => {
         expect(getSpriteDataIssues(baseSprites)).toEqual([]);
     });
 
-    it('detecta problemas em sprites lançados incompletos', () => {
+    it('detecta problemas em sprites lançados incompletos e permite sprite_unreal duplicado', () => {
         const issues = getSpriteDataIssues([
             { id: 'a_basic', name: '', theme: 'Inexistente', rarity: 'Raro', unreleased: false },
             { id: 'a_basic', name: 'X', theme: 'Básico', rarity: 'Raro', unreleased: false },
+            { id: 'sprite_unreal', name: 'Sem imagem 1', theme: 'Dourado', rarity: 'Especial', unreleased: false },
+            { id: 'sprite_unreal', name: 'Sem imagem 2', theme: 'Dourado', rarity: 'Especial', unreleased: false },
             { id: 'placeholder', name: '', theme: '', rarity: '', unreleased: true },
         ]);
         expect(issues).toEqual([
