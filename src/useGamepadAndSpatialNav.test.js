@@ -9,6 +9,28 @@ import {
     useGamepadAndSpatialNav,
 } from './hooks/useGamepadAndSpatialNav.js';
 
+/** @typedef {ReturnType<typeof useGamepadAndSpatialNav>} SpatialNavSnapshot */
+
+/**
+ * Ensures a captured navigation snapshot is non-null before assertions read its fields.
+ * @param {SpatialNavSnapshot | null} snapshot
+ * @returns {SpatialNavSnapshot}
+ */
+function requireSnapshot(snapshot) {
+    if (!snapshot) {
+        throw new Error('Expected navigation snapshot');
+    }
+    return snapshot;
+}
+
+/**
+ * Builds a mock DOMRect for card geometry assertions.
+ * @param {number} left
+ * @param {number} top
+ * @param {number} [width]
+ * @param {number} [height]
+ * @returns {DOMRect}
+ */
 function rect(left, top, width = 100, height = 100) {
     return /** @type {DOMRect} */ ({
         left,
@@ -39,6 +61,11 @@ function makePad(id = 'DualSense Wireless Controller (Vendor: 054c Product: 0ce6
     };
 }
 
+/**
+ * Assigns visibility and mock bounding rects to cards inside a grid element.
+ * @param {HTMLElement} gridEl
+ * @param {Record<string, [number, number, number?, number?]>} coords
+ */
 function mockCardGeometry(gridEl, coords) {
     /** @type {any} */ (gridEl).checkVisibility = () => true;
     Object.entries(coords).forEach(([id, bounds]) => {
@@ -55,7 +82,7 @@ function mockCardGeometry(gridEl, coords) {
  *   viewMode?: boolean,
  *   onToggleObtained?: (id: string) => void,
  *   onToggleMastery?: (id: string) => void,
- *   onStateSnapshot?: (nav: any) => void,
+ *   onStateSnapshot?: (nav: SpatialNavSnapshot) => void,
  * }} props
  */
 function SpatialNavHarness({
@@ -267,6 +294,10 @@ describe('useGamepadAndSpatialNav', () => {
         globalThis.cancelAnimationFrame = originalCAF;
     });
 
+    /**
+     * Flushes queued requestAnimationFrame callbacks at the given timestamp.
+     * @param {number} timestamp
+     */
     function stepRaf(timestamp) {
         const entries = Array.from(rafCallbacks.entries());
         rafCallbacks.clear();
@@ -274,6 +305,7 @@ describe('useGamepadAndSpatialNav', () => {
     }
 
     it('navega com setas do teclado, preserva rolagem nas bordas e ignora inputs editáveis', () => {
+        /** @type {SpatialNavSnapshot | null} */
         let latest = null;
         const { container } = render(
             createElement(SpatialNavHarness, {
@@ -314,7 +346,7 @@ describe('useGamepadAndSpatialNav', () => {
         });
         expect(rightEv.defaultPrevented).toBe(true);
         expect(document.activeElement).toBe(c2Btn);
-        expect(latest.inputMode).toBe('keyboard');
+        expect(requireSnapshot(latest).inputMode).toBe('keyboard');
 
         // Atalho com Ctrl é ignorado
         fireEvent.keyDown(c2Btn, { key: 'ArrowRight', ctrlKey: true });
@@ -351,6 +383,7 @@ describe('useGamepadAndSpatialNav', () => {
     it('gerencia conexão, polling D-Pad/Stick, coleta/domínio em borda e visibilitychange', () => {
         const onToggleObtained = vi.fn();
         const onToggleMastery = vi.fn();
+        /** @type {SpatialNavSnapshot | null} */
         let latest = null;
 
         const { container } = render(
@@ -378,22 +411,23 @@ describe('useGamepadAndSpatialNav', () => {
             window.dispatchEvent(Object.assign(new Event('gamepadconnected'), { gamepad: pad }));
         });
 
-        expect(latest.gamepadInfo).toEqual({ connected: true, type: 'playstation' });
-        expect(latest.inputMode).toBe('gamepad');
+        const connectedState = requireSnapshot(latest);
+        expect(connectedState.gamepadInfo).toEqual({ connected: true, type: 'playstation' });
+        expect(connectedState.inputMode).toBe('gamepad');
         expect(document.body.textContent).toContain('Controle PlayStation reconhecido');
 
-        expect(latest.activeCardId).toBe('c1');
+        expect(connectedState.activeCardId).toBe('c1');
 
         // Frame 1: D-Pad direita move de c1 (inicial) para c2; segurar repete após ~260ms para c3
         pad.buttons[15] = makeButton(true);
         act(() => {
             stepRaf(100);
         });
-        expect(latest.activeCardId).toBe('c2');
+        expect(requireSnapshot(latest).activeCardId).toBe('c2');
         act(() => {
             stepRaf(370);
         });
-        expect(latest.activeCardId).toBe('c3');
+        expect(requireSnapshot(latest).activeCardId).toBe('c3');
 
         // Solta D-Pad e volta pelo analógico esquerdo para c2
         pad.buttons[15] = makeButton(false);
@@ -404,7 +438,7 @@ describe('useGamepadAndSpatialNav', () => {
         act(() => {
             stepRaf(410);
         });
-        expect(latest.activeCardId).toBe('c2');
+        expect(requireSnapshot(latest).activeCardId).toBe('c2');
         pad.axes[0] = 0;
 
         // Botões A/B (buttons[1]) e X/Y (buttons[3]) são disparados por borda (1x enquanto pressionados)
@@ -441,8 +475,9 @@ describe('useGamepadAndSpatialNav', () => {
         act(() => {
             window.dispatchEvent(Object.assign(new Event('gamepaddisconnected'), { gamepad: pad }));
         });
-        expect(latest.gamepadInfo.connected).toBe(false);
-        expect(latest.inputMode).toBeNull();
+        const disconnectedState = requireSnapshot(latest);
+        expect(disconnectedState.gamepadInfo.connected).toBe(false);
+        expect(disconnectedState.inputMode).toBeNull();
         expect(document.body.textContent).toContain('Controle PlayStation desconectado');
 
         getGamepadsSpy.mockClear();
