@@ -41,21 +41,16 @@ export function getControllerLabel(type) {
 
 /**
  * Seleciona o próximo card candidato em uma direção ('up' | 'down' | 'left' | 'right')
- * usando a geometria real na tela (getBoundingClientRect + checkVisibility).
+ * usando a geometria real na tela (getBoundingClientRect + visibilidade do container).
  */
 export function findSpatialCandidate(container, currentElement, direction) {
     if (!container || !currentElement) return null;
 
-    const allCards = Array.from(container.querySelectorAll('.card[data-id]'));
-    const candidates = allCards.filter(el => {
-        if (el === currentElement) return false;
-        if (typeof el.checkVisibility === 'function') {
-            return el.checkVisibility();
-        }
-        return el.offsetParent !== null;
-    });
+    const hasCheckVisibility = typeof container.checkVisibility === 'function';
+    if (hasCheckVisibility && !container.checkVisibility()) return null;
 
-    if (!candidates.length) return null;
+    const children = container.children;
+    if (!children.length) return null;
 
     const currentRect = currentElement.getBoundingClientRect();
     const currentCenterX = (currentRect.left + currentRect.right) / 2;
@@ -63,7 +58,19 @@ export function findSpatialCandidate(container, currentElement, direction) {
 
     const directionalCandidates = [];
 
-    for (const candidate of candidates) {
+    for (let i = 0; i < children.length; i++) {
+        const candidate = children[i];
+        if (
+            candidate === currentElement ||
+            !candidate.classList?.contains('card') ||
+            !candidate.hasAttribute('data-id')
+        ) {
+            continue;
+        }
+        if (!hasCheckVisibility && candidate.offsetParent === null) {
+            continue;
+        }
+
         const rect = candidate.getBoundingClientRect();
         let inDirection = false;
         let gap = 0;
@@ -143,7 +150,6 @@ export function useGamepadAndSpatialNav({
     const [inputMode, setInputMode] = useState(null); // 'gamepad' | 'keyboard' | null
 
     const activeCardIdRef = useRef(activeCardId);
-    const visibleSpritesRef = useRef(visibleSprites);
     const viewModeRef = useRef(viewMode);
     const onToggleObtainedRef = useRef(onToggleObtained);
     const onToggleMasteryRef = useRef(onToggleMastery);
@@ -153,7 +159,6 @@ export function useGamepadAndSpatialNav({
     }, [activeCardId]);
 
     useEffect(() => {
-        visibleSpritesRef.current = visibleSprites;
         if (
             visibleSprites.length > 0 &&
             (!activeCardIdRef.current ||
@@ -192,9 +197,18 @@ export function useGamepadAndSpatialNav({
             if (!container) return false;
 
             const currentId = activeCardIdRef.current;
-            let currentEl = currentId
-                ? container.querySelector(`.card[data-id="${CSS.escape(currentId)}"]`)
-                : null;
+            const activeEl = document.activeElement;
+            let currentEl =
+                activeEl &&
+                activeEl.parentElement === container &&
+                activeEl.classList?.contains('card') &&
+                (!currentId || activeEl.getAttribute('data-id') === currentId)
+                    ? activeEl
+                    : null;
+
+            if (!currentEl && currentId) {
+                currentEl = container.querySelector(`.card[data-id="${CSS.escape(currentId)}"]`);
+            }
 
             if (!currentEl) {
                 const firstCard = container.querySelector('.card[data-id]');
@@ -255,7 +269,7 @@ export function useGamepadAndSpatialNav({
         [gridRef, focusCardElement]
     );
 
-    // Conexão / Desconexão de controles via Gamepad API + Polling
+    // Conexão / Desconexão de controles via Gamepad API + Polling sob demanda
     useEffect(() => {
         if (typeof window === 'undefined' || !('getGamepads' in navigator)) return;
 
@@ -266,10 +280,107 @@ export function useGamepadAndSpatialNav({
             nextRepeatTime: 0,
         };
 
+        const findActiveGamepad = () => {
+            const pads = navigator.getGamepads?.();
+            if (!pads) return null;
+            for (let i = 0; i < pads.length; i++) {
+                if (pads[i]) return pads[i];
+            }
+            return null;
+        };
+
+        const stopPolling = () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            navStateRef.lastDirection = null;
+            prevButtonsRef.collect = false;
+            prevButtonsRef.master = false;
+        };
+
+        const pollGamepad = timestamp => {
+            rafId = null;
+            if (document.hidden) return;
+
+            const pad = findActiveGamepad();
+            if (!pad) {
+                stopPolling();
+                return;
+            }
+
+            const detectedType = detectControllerType(pad.id);
+
+            // Direções via D-Pad (buttons 12..15) ou Analógico Esquerdo (axes 0..1)
+            const upPressed =
+                Boolean(pad.buttons?.[12]?.pressed) || (pad.axes?.[1] ?? 0) < -STICK_DEADZONE;
+            const downPressed =
+                Boolean(pad.buttons?.[13]?.pressed) || (pad.axes?.[1] ?? 0) > STICK_DEADZONE;
+            const leftPressed =
+                Boolean(pad.buttons?.[14]?.pressed) || (pad.axes?.[0] ?? 0) < -STICK_DEADZONE;
+            const rightPressed =
+                Boolean(pad.buttons?.[15]?.pressed) || (pad.axes?.[0] ?? 0) > STICK_DEADZONE;
+
+            let activeDir = null;
+            if (upPressed) activeDir = 'up';
+            else if (downPressed) activeDir = 'down';
+            else if (leftPressed) activeDir = 'left';
+            else if (rightPressed) activeDir = 'right';
+
+            if (activeDir) {
+                setInputMode('gamepad');
+                setGamepadInfo(prev =>
+                    prev.connected && prev.type === detectedType
+                        ? prev
+                        : { connected: true, type: detectedType }
+                );
+
+                if (navStateRef.lastDirection !== activeDir) {
+                    navStateRef.lastDirection = activeDir;
+                    navStateRef.nextRepeatTime = timestamp + INITIAL_REPEAT_DELAY_MS;
+                    moveFocusInDirection(activeDir);
+                } else if (timestamp >= navStateRef.nextRepeatTime) {
+                    navStateRef.nextRepeatTime = timestamp + REPEAT_INTERVAL_MS;
+                    moveFocusInDirection(activeDir);
+                }
+            } else {
+                navStateRef.lastDirection = null;
+            }
+
+            // Ações:
+            // Coletar: Switch A | PlayStation Círculo (○) | Xbox B -> buttons[1] no mapeamento padrão
+            // Dominar: Switch X | PlayStation Triângulo (△) | Xbox Y -> buttons[3] no mapeamento padrão
+            const collectPressed = Boolean(pad.buttons?.[1]?.pressed);
+            const masterPressed = Boolean(pad.buttons?.[3]?.pressed);
+
+            if (collectPressed && !prevButtonsRef.collect) {
+                setInputMode('gamepad');
+                if (!viewModeRef.current && activeCardIdRef.current && onToggleObtainedRef.current) {
+                    onToggleObtainedRef.current(activeCardIdRef.current);
+                }
+            }
+
+            if (masterPressed && !prevButtonsRef.master) {
+                setInputMode('gamepad');
+                if (!viewModeRef.current && activeCardIdRef.current && onToggleMasteryRef.current) {
+                    onToggleMasteryRef.current(activeCardIdRef.current);
+                }
+            }
+
+            prevButtonsRef.collect = collectPressed;
+            prevButtonsRef.master = masterPressed;
+
+            rafId = requestAnimationFrame(pollGamepad);
+        };
+
+        const startPolling = () => {
+            if (rafId !== null || document.hidden) return;
+            rafId = requestAnimationFrame(pollGamepad);
+        };
+
         const syncConnectedGamepads = () => {
-            const pads = Array.from(navigator.getGamepads?.() || []).filter(Boolean);
-            if (pads.length > 0) {
-                const pad = pads[0];
+            const pad = findActiveGamepad();
+            if (pad) {
                 const type = detectControllerType(pad.id);
                 setGamepadInfo({ connected: true, type });
                 setInputMode('gamepad');
@@ -285,6 +396,7 @@ export function useGamepadAndSpatialNav({
             setGamepadInfo({ connected: true, type });
             setInputMode('gamepad');
             toast(`Controle ${label} reconhecido`, 'gamepad');
+            startPolling();
         };
 
         const handleGamepadDisconnected = e => {
@@ -294,89 +406,31 @@ export function useGamepadAndSpatialNav({
             const stillHasPad = syncConnectedGamepads();
             if (!stillHasPad) {
                 setInputMode(null);
+                stopPolling();
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                stopPolling();
+            } else if (findActiveGamepad()) {
+                startPolling();
             }
         };
 
         window.addEventListener('gamepadconnected', handleGamepadConnected);
         window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        syncConnectedGamepads();
-
-        const pollGamepad = timestamp => {
-            const pads = Array.from(navigator.getGamepads?.() || []).filter(Boolean);
-            if (pads.length > 0) {
-                const pad = pads[0];
-                const detectedType = detectControllerType(pad.id);
-
-                // Direções via D-Pad (buttons 12..15) ou Analógico Esquerdo (axes 0..1)
-                const upPressed =
-                    Boolean(pad.buttons?.[12]?.pressed) || (pad.axes?.[1] ?? 0) < -STICK_DEADZONE;
-                const downPressed =
-                    Boolean(pad.buttons?.[13]?.pressed) || (pad.axes?.[1] ?? 0) > STICK_DEADZONE;
-                const leftPressed =
-                    Boolean(pad.buttons?.[14]?.pressed) || (pad.axes?.[0] ?? 0) < -STICK_DEADZONE;
-                const rightPressed =
-                    Boolean(pad.buttons?.[15]?.pressed) || (pad.axes?.[0] ?? 0) > STICK_DEADZONE;
-
-                let activeDir = null;
-                if (upPressed) activeDir = 'up';
-                else if (downPressed) activeDir = 'down';
-                else if (leftPressed) activeDir = 'left';
-                else if (rightPressed) activeDir = 'right';
-
-                if (activeDir) {
-                    setInputMode('gamepad');
-                    setGamepadInfo(prev =>
-                        prev.connected && prev.type === detectedType
-                            ? prev
-                            : { connected: true, type: detectedType }
-                    );
-
-                    if (navStateRef.lastDirection !== activeDir) {
-                        navStateRef.lastDirection = activeDir;
-                        navStateRef.nextRepeatTime = timestamp + INITIAL_REPEAT_DELAY_MS;
-                        moveFocusInDirection(activeDir);
-                    } else if (timestamp >= navStateRef.nextRepeatTime) {
-                        navStateRef.nextRepeatTime = timestamp + REPEAT_INTERVAL_MS;
-                        moveFocusInDirection(activeDir);
-                    }
-                } else {
-                    navStateRef.lastDirection = null;
-                }
-
-                // Ações:
-                // Coletar: Switch A | PlayStation Círculo (○) | Xbox B -> buttons[1] no mapeamento padrão
-                // Dominar: Switch X | PlayStation Triângulo (△) | Xbox Y -> buttons[3] no mapeamento padrão
-                const collectPressed = Boolean(pad.buttons?.[1]?.pressed);
-                const masterPressed = Boolean(pad.buttons?.[3]?.pressed);
-
-                if (collectPressed && !prevButtonsRef.collect) {
-                    setInputMode('gamepad');
-                    if (!viewModeRef.current && activeCardIdRef.current && onToggleObtainedRef.current) {
-                        onToggleObtainedRef.current(activeCardIdRef.current);
-                    }
-                }
-
-                if (masterPressed && !prevButtonsRef.master) {
-                    setInputMode('gamepad');
-                    if (!viewModeRef.current && activeCardIdRef.current && onToggleMasteryRef.current) {
-                        onToggleMasteryRef.current(activeCardIdRef.current);
-                    }
-                }
-
-                prevButtonsRef.collect = collectPressed;
-                prevButtonsRef.master = masterPressed;
-            }
-
-            rafId = requestAnimationFrame(pollGamepad);
-        };
-
-        rafId = requestAnimationFrame(pollGamepad);
+        if (syncConnectedGamepads()) {
+            startPolling();
+        }
 
         return () => {
             window.removeEventListener('gamepadconnected', handleGamepadConnected);
             window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
-            if (rafId) cancelAnimationFrame(rafId);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            stopPolling();
         };
     }, [moveFocusInDirection]);
 
