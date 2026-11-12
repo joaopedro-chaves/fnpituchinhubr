@@ -57,7 +57,6 @@ export const Header = memo(function Header({ progressStats }) {
                     className="brand-icon"
                     width="36"
                     height="36"
-                    fetchPriority="high"
                 />
                 <h1>Rastreador de Pituchinhos</h1>
             </div>

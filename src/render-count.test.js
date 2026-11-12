@@ -2,7 +2,12 @@
 import { createElement } from 'react';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, cleanup, act, waitFor } from '@testing-library/react';
-import { CatalogPage, INITIAL_BATCH_SIZE, PRIORITY_CARDS } from './pages/CatalogPage.jsx';
+import {
+    CatalogPage,
+    INITIAL_BATCH_SIZE,
+    EAGER_CARDS,
+    PRIORITY_CARDS,
+} from './pages/CatalogPage.jsx';
 
 function setupRenderCounter() {
     const counts = {
@@ -175,11 +180,15 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
             expect(img.getAttribute('decoding')).toBe('async');
             expect(img.getAttribute('width')).toBe('80');
             expect(img.getAttribute('height')).toBe('80');
-            if (index < PRIORITY_CARDS) {
+            if (index < EAGER_CARDS) {
                 expect(img.getAttribute('loading')).toBe('eager');
-                expect(img.getAttribute('fetchpriority')).toBe('high');
             } else {
                 expect(img.getAttribute('loading')).toBe('lazy');
+            }
+            if (index < PRIORITY_CARDS) {
+                expect(img.getAttribute('fetchpriority')).toBe('high');
+            } else {
+                expect(img.hasAttribute('fetchpriority')).toBe(false);
             }
         });
     });

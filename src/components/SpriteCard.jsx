@@ -49,6 +49,7 @@ export const SpriteCard = memo(function SpriteCard({
     obtained,
     mastered,
     viewMode = false,
+    eager = false,
     priority = false,
     tabIndex = 0,
     isGamepadSelected = false,
@@ -225,9 +226,9 @@ export const SpriteCard = memo(function SpriteCard({
                 <img
                     src={meta.imgSrc}
                     alt={meta.displayName}
-                    loading={priority ? 'eager' : 'lazy'}
+                    loading={eager || priority ? 'eager' : 'lazy'}
                     decoding="async"
-                    fetchPriority={priority ? 'high' : 'auto'}
+                    fetchPriority={priority ? 'high' : undefined}
                     width="80"
                     height="80"
                     draggable="false"

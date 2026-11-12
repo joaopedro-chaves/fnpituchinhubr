@@ -27,8 +27,9 @@ function loadViewExport() {
     return viewExportPromise;
 }
 
-// Quantidade de cards "acima da dobra" que carregam a imagem com prioridade alta
-export const PRIORITY_CARDS = 8;
+// Primeiros cards acima da dobra carregam sem lazy-loading; só os 2 iniciais recebem prioridade alta
+export const EAGER_CARDS = 8;
+export const PRIORITY_CARDS = 2;
 export const INITIAL_BATCH_SIZE = 48;
 const BATCH_INCREMENT = 48;
 
@@ -388,6 +389,7 @@ export function CatalogPage() {
                                 obtained={obtainedSet.has(sprite.id)}
                                 mastered={masteredSet.has(sprite.id)}
                                 viewMode={viewMode}
+                                eager={index < EAGER_CARDS}
                                 priority={index < PRIORITY_CARDS}
                                 tabIndex={isActiveCard ? 0 : -1}
                                 isGamepadSelected={

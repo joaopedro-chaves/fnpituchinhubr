@@ -1,9 +1,10 @@
 /* ===================================================
    Mapeamento de Imagens Estáticas para o Vite
    ===================================================
-   Utiliza `import.meta.glob` do Vite para resolver os caminhos
-   de todas as imagens `.webp` da pasta `/sprites/` e `/siteimages/`
-   tanto em modo de desenvolvimento (`vite`) quanto em produção (`vite build`).
+   Utiliza `import.meta.glob` com `eager: true` para gerar URLs com hash
+   de cada sprite `.webp` da pasta `/sprites/`. Isso garante invalidação
+   automática de cache (`CacheFirst` em runtime no Workbox) e fallback
+   síncrono para `sprite_unreal.webp` sem disparar requisições 404.
    =================================================== */
 
 const spriteModules = import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' });
