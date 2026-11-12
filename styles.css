@@ -187,114 +187,6 @@ a:hover {
     border: 0;
 }
 
-/* ===================================================
-   MD3 Typography Utility Classes
-   =================================================== */
-
-/* Display */
-.display-large {
-    font-size: 3.5625rem;
-    line-height: 4rem;
-    font-weight: 400;
-    letter-spacing: -0.015625rem;
-}
-
-.display-medium {
-    font-size: 2.8125rem;
-    line-height: 3.25rem;
-    font-weight: 400;
-}
-
-.display-small {
-    font-size: 2.25rem;
-    line-height: 2.75rem;
-    font-weight: 400;
-}
-
-/* Headline */
-.headline-large {
-    font-size: 2rem;
-    line-height: 2.5rem;
-    font-weight: 400;
-}
-
-.headline-medium {
-    font-size: 1.75rem;
-    line-height: 2.25rem;
-    font-weight: 400;
-}
-
-.headline-small {
-    font-size: 1.5rem;
-    line-height: 2rem;
-    font-weight: 400;
-}
-
-/* Title */
-.title-large {
-    font-size: 1.375rem;
-    line-height: 1.75rem;
-    font-weight: 400;
-}
-
-.title-medium {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 500;
-    letter-spacing: 0.009375rem;
-}
-
-.title-small {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 0.00625rem;
-}
-
-/* Body */
-.body-large {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 400;
-    letter-spacing: 0.03125rem;
-}
-
-.body-medium {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 400;
-    letter-spacing: 0.015625rem;
-}
-
-.body-small {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 400;
-    letter-spacing: 0.025rem;
-}
-
-/* Label */
-.label-large {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 0.00625rem;
-}
-
-.label-medium {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.03125rem;
-}
-
-.label-small {
-    font-size: 0.6875rem;
-    line-height: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.03125rem;
-}
-
 .file-input {
     display: none;
 }
@@ -888,36 +780,6 @@ a:hover {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
 }
 
-.btn-accent {
-    background: var(--primary-container);
-    border-color: transparent;
-    color: var(--on-primary-container);
-}
-
-.btn-accent:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--primary-container) 85%, white 15%);
-    color: var(--on-primary-container);
-}
-
-.btn-sm {
-    min-height: 32px;
-    padding: 0 14px;
-    font-size: 13px;
-    gap: 6px;
-}
-
-.btn-redeemed {
-    background: var(--surface-container-highest);
-    color: var(--text-soft);
-    border-color: var(--outline-variant);
-}
-
-.btn-redeemed:hover:not(:disabled) {
-    background: var(--surface-container-high);
-    color: var(--missing);
-    border-color: var(--missing);
-}
-
 /* ── Dropdowns & Modal Popups ── */
 
 .modal-backdrop {
@@ -1065,78 +927,6 @@ body.low-fidelity .modal-backdrop {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: rgba(0, 0, 0, 0.85);
-}
-
-.dropdown {
-    position: relative;
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    min-width: 220px;
-    background: var(--surface-container-high);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 6px;
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(0.95);
-    transform-origin: top right;
-    transition: opacity var(--duration-standard) var(--ease), transform var(--duration-standard) var(--ease), visibility var(--duration-standard);
-    z-index: 100;
-    box-shadow: var(--elevation-3);
-}
-
-.dropdown.open .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: scale(1);
-    position: absolute;
-    left: 0;
-}
-
-.dropdown-menu button {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 10px 14px;
-    font-size: 14px;
-    border-radius: var(--radius-sm);
-    transition: background-color var(--duration-short) var(--ease);
-    color: var(--text);
-}
-
-.dropdown-menu button:hover {
-    background-color: var(--surface-container-highest);
-}
-
-.dropdown-menu .switches {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding: 4px;
-    min-width: 220px;
-}
-
-.dropdown-menu .switch {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    color: var(--text);
-    white-space: nowrap;
-    transition: background-color var(--duration-short) var(--ease);
-}
-
-.dropdown-menu .switch:hover {
-    background-color: var(--surface-container-highest);
 }
 
 .dropdown-divider {
@@ -1595,16 +1385,10 @@ body.low-fidelity .modal-backdrop {
     background: linear-gradient(180deg, #4c1d95, #1e0b3d);
 }
 
-.rarity-Especial.theme-Rift .card-display {
-    background: linear-gradient(180deg, #154b5e, #04161c);
-}
-
-.rarity-Especial.theme-Trapaça .card-display,
 .rarity-Especial.theme-Trapaceiro .card-display {
     background: linear-gradient(180deg, #295913, #0f360a);
 }
 
-.rarity-Especial.theme-Hacker .card-display,
 .rarity-Especial.theme-Hacker-de-Saque .card-display {
     background: linear-gradient(180deg, #114030, #051b14);
 }
@@ -1823,16 +1607,10 @@ body.low-fidelity .rarity-Especial.theme-Cubo .card-display {
     background: #4c1d95;
 }
 
-body.low-fidelity .rarity-Especial.theme-Rift .card-display {
-    background: #154b5e;
-}
-
-body.low-fidelity .rarity-Especial.theme-Trapaça .card-display,
 body.low-fidelity .rarity-Especial.theme-Trapaceiro .card-display {
     background: #155913;
 }
 
-body.low-fidelity .rarity-Especial.theme-Hacker .card-display,
 body.low-fidelity .rarity-Especial.theme-Hacker-de-Saque .card-display {
     background: #114030;
 }
@@ -1999,16 +1777,6 @@ body.low-fidelity .controller-hud {
     margin-top: 60px;
     min-height: 58px;
     box-sizing: border-box;
-}
-
-.footer a {
-    margin-left: 4px;
-    color: var(--text);
-    font-weight: 500;
-}
-
-.footer a:hover {
-    color: var(--primary);
 }
 
 /* ===================================================
