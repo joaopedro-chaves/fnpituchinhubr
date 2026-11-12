@@ -85,3 +85,4 @@ Execute `npm run preview` e valide os seguintes itens (de preferência comparand
 - [ ] **Exportação e Clipboard:** Testar exportação PNG (desktop download e, se possível, iOS/nova aba), `Lista de trocas (texto)`, `Grade de trocas (texto)` (inclusive em iOS/Safari para confirmar preservação do *user gesture*), backup JSON e compartilhamento por URL `?c=`.
 - [ ] **Teclado e Gamepad:** Navegar com setas, `Enter` e `D`; conectar e desconectar um controle verificando o HUD inferior direito e os atalhos.
 - [ ] **DevTools Performance (Idle):** Gravar 5 segundos na aba *Performance* sem controle conectado e sem interagir na página — confirmar que **não há** callbacks contínuos de `requestAnimationFrame` rodando em repouso.
+
