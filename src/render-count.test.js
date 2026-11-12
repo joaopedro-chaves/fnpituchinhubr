@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { createElement } from 'react';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import { CatalogPage } from './pages/CatalogPage.jsx';
+import { render, fireEvent, cleanup, act, waitFor } from '@testing-library/react';
+import { CatalogPage, INITIAL_BATCH_SIZE, PRIORITY_CARDS } from './pages/CatalogPage.jsx';
 
 function setupRenderCounter() {
     const counts = {
@@ -25,8 +25,9 @@ function setupRenderCounter() {
     };
 }
 
-describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)', () => {
+describe('Otimizações de renderização, carregamento e acessibilidade', () => {
     let tracker;
+    const originalIntersectionObserver = globalThis.IntersectionObserver;
 
     beforeEach(() => {
         localStorage.clear();
@@ -35,15 +36,16 @@ describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)'
 
     afterEach(() => {
         delete window.__recordPerfRender;
+        globalThis.IntersectionObserver = originalIntersectionObserver;
         cleanup();
     });
 
-    it('mover o foco entre cards re-renderiza no máximo 2 cards e nenhum componente auxiliar', () => {
+    it('renderiza apenas o lote inicial e preserva memoização ao mover foco entre cards', () => {
         const { container } = render(createElement(CatalogPage));
         const cards = container.querySelectorAll('.card[data-id]');
-        expect(cards.length).toBe(314);
+        expect(cards.length).toBe(INITIAL_BATCH_SIZE);
         expect(tracker.counts).toEqual({
-            spriteCard: 314,
+            spriteCard: INITIAL_BATCH_SIZE,
             header: 1,
             filterBar: 1,
             controllerHud: 1,
@@ -58,10 +60,39 @@ describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)'
         expect(tracker.counts.controllerHud).toBe(0);
     });
 
-    it('clicar para coletar, dominar e desmarcar domínio re-renderiza apenas 1 card (sem FilterBar/ControllerHud)', () => {
+    it('carrega lotes adicionais via IntersectionObserver conforme rolagem', () => {
+        let observerCallback = null;
+        globalThis.IntersectionObserver = class MockIntersectionObserver {
+            constructor(cb) {
+                observerCallback = cb;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        const { container } = render(createElement(CatalogPage));
+        expect(container.querySelectorAll('.card[data-id]').length).toBe(INITIAL_BATCH_SIZE);
+        expect(typeof observerCallback).toBe('function');
+
+        tracker.reset();
+        act(() => {
+            observerCallback([{ isIntersecting: true }]);
+        });
+
+        const updatedCards = container.querySelectorAll('.card[data-id]');
+        expect(updatedCards.length).toBe(INITIAL_BATCH_SIZE * 2);
+        // Apenas os novos 48 cards são montados
+        expect(tracker.counts.spriteCard).toBe(INITIAL_BATCH_SIZE);
+    });
+
+    it('clicar para coletar, dominar e desmarcar domínio re-renderiza apenas 1 card e atualiza aria-label em PT-BR', () => {
         const { container } = render(createElement(CatalogPage));
         const cards = container.querySelectorAll('.card[data-id]');
-        const targetCard = cards[0]; // já é o card ativo inicial (tabIndex=0)
+        const targetCard = cards[0];
+        const cardTitle = targetCard.querySelector('.card-title').textContent;
+
+        expect(targetCard.getAttribute('aria-label')).toContain(cardTitle);
+        expect(targetCard.getAttribute('aria-label')).toContain('Não coletado');
 
         // 1. Marcar como coletado
         tracker.reset();
@@ -72,6 +103,7 @@ describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)'
         expect(tracker.counts.controllerHud).toBe(0);
         expect(targetCard.classList.contains('obtained')).toBe(true);
         expect(targetCard.classList.contains('mastered')).toBe(false);
+        expect(targetCard.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Coletado`));
 
         // 2. Marcar como dominado pela coroa
         const crownBtn = targetCard.querySelector('.card-crown');
@@ -83,6 +115,7 @@ describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)'
         expect(tracker.counts.filterBar).toBe(0);
         expect(tracker.counts.controllerHud).toBe(0);
         expect(targetCard.classList.contains('mastered')).toBe(true);
+        expect(targetCard.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Dominado`));
 
         // 3. Clicar no card dominado volta para apenas coletado
         tracker.reset();
@@ -93,5 +126,45 @@ describe('Fase 4 — Contagem de re-renderizações (React.memo + estabilidade)'
         expect(tracker.counts.controllerHud).toBe(0);
         expect(targetCard.classList.contains('obtained')).toBe(true);
         expect(targetCard.classList.contains('mastered')).toBe(false);
+    });
+
+    it('configura prioridade de imagens e semântica ARIA acessível no grid e cards', () => {
+        const { container } = render(createElement(CatalogPage));
+        const grid = container.querySelector('#spriteGrid');
+        expect(grid.getAttribute('role')).toBeNull();
+
+        const imgs = container.querySelectorAll('.card-display img');
+        expect(imgs.length).toBe(INITIAL_BATCH_SIZE);
+
+        imgs.forEach((img, index) => {
+            expect(img.getAttribute('decoding')).toBe('async');
+            expect(img.getAttribute('width')).toBe('80');
+            expect(img.getAttribute('height')).toBe('80');
+            if (index < PRIORITY_CARDS) {
+                expect(img.getAttribute('loading')).toBe('eager');
+                expect(img.getAttribute('fetchpriority')).toBe('high');
+            } else {
+                expect(img.getAttribute('loading')).toBe('lazy');
+            }
+        });
+    });
+
+    it('carrega os modais de Exportar e Configurações sob demanda via React.lazy', async () => {
+        const { container } = render(createElement(CatalogPage));
+        expect(container.querySelector('#exportPopupTitle')).toBeNull();
+        expect(container.querySelector('#settingsPopupTitle')).toBeNull();
+
+        fireEvent.click(container.querySelector('#exportToggle'));
+        await waitFor(() => {
+            expect(container.querySelector('#exportPopupTitle')).not.toBeNull();
+        });
+
+        fireEvent.click(container.querySelector('.modal-close-btn'));
+        expect(container.querySelector('#exportPopupTitle')).toBeNull();
+
+        fireEvent.click(container.querySelector('#settingsToggle'));
+        await waitFor(() => {
+            expect(container.querySelector('#settingsPopupTitle')).not.toBeNull();
+        });
     });
 });

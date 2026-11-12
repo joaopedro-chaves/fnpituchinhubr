@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { baseSprites } from '../data/sprites-data.js';
 import { useTrackerState } from '../hooks/useTrackerState.js';
 import { useGamepadAndSpatialNav } from '../hooks/useGamepadAndSpatialNav.js';
@@ -6,7 +6,6 @@ import { Header } from '../components/Header.jsx';
 import { FilterBar } from '../components/FilterBar.jsx';
 import { SpriteCard } from '../components/SpriteCard.jsx';
 import { ControllerHud } from '../components/ControllerHud.jsx';
-import { compressCollection } from '../share-codec.js';
 import { toast, copyText } from '../dom-utils.js';
 
 let viewExportModule = null;
@@ -29,7 +28,9 @@ function loadViewExport() {
 }
 
 // Quantidade de cards "acima da dobra" que carregam a imagem com prioridade alta
-const PRIORITY_CARDS = 24;
+export const PRIORITY_CARDS = 8;
+export const INITIAL_BATCH_SIZE = 48;
+const BATCH_INCREMENT = 48;
 
 export function CatalogPage() {
 
@@ -56,7 +57,25 @@ export function CatalogPage() {
     const obtainedSet = useMemo(() => new Set(obtained), [obtained]);
     const masteredSet = useMemo(() => new Set(mastered), [mastered]);
 
+    // Renderização incremental em lotes para reduzir TBT e tamanho inicial do DOM
+    const [batchState, setBatchState] = useState(() => ({
+        list: visibleSprites,
+        count: INITIAL_BATCH_SIZE,
+    }));
+
+    const loadMoreSprites = useCallback(() => {
+        setBatchState(prev => {
+            const currentCount = prev.list === visibleSprites ? prev.count : INITIAL_BATCH_SIZE;
+            if (currentCount >= visibleSprites.length) return prev;
+            return {
+                list: visibleSprites,
+                count: Math.min(visibleSprites.length, currentCount + BATCH_INCREMENT),
+            };
+        });
+    }, [visibleSprites]);
+
     const gridRef = useRef(null);
+    const loadMoreRef = useRef(null);
     const {
         activeCardId,
         gamepadInfo,
@@ -71,6 +90,42 @@ export function CatalogPage() {
         onToggleObtained: toggleObtained,
         onToggleMastery: toggleMastery,
     });
+
+    const minRequiredForFocus = useMemo(() => {
+        if (!activeCardId) return INITIAL_BATCH_SIZE;
+        const idx = visibleSprites.findIndex(sprite => sprite.id === activeCardId);
+        return idx >= 0 ? idx + 13 : INITIAL_BATCH_SIZE;
+    }, [activeCardId, visibleSprites]);
+
+    const renderedCount = Math.min(
+        visibleSprites.length,
+        Math.max(
+            batchState.list === visibleSprites ? batchState.count : INITIAL_BATCH_SIZE,
+            minRequiredForFocus
+        )
+    );
+    const displayedSprites = useMemo(
+        () => visibleSprites.slice(0, renderedCount),
+        [visibleSprites, renderedCount]
+    );
+    const hasMoreSprites = renderedCount < visibleSprites.length;
+
+    useEffect(() => {
+        if (!hasMoreSprites || typeof IntersectionObserver === 'undefined') return;
+        const target = loadMoreRef.current;
+        if (!target) return;
+
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries.some(entry => entry.isIntersecting)) {
+                    loadMoreSprites();
+                }
+            },
+            { rootMargin: '150px 0px' }
+        );
+        observer.observe(target);
+        return () => observer.disconnect();
+    }, [hasMoreSprites, loadMoreSprites]);
 
     const trackerStateRef = useRef(trackerState);
     useEffect(() => {
@@ -173,10 +228,16 @@ export function CatalogPage() {
     );
 
     const handleShare = useCallback(async () => {
-        const current = trackerStateRef.current;
-        const code = await compressCollection(current.obtained, current.mastered);
-        const url = `${window.location.origin}${window.location.pathname}?c=${code}`;
-        copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
+        try {
+            const current = trackerStateRef.current;
+            const { compressCollection } = await import('../share-codec.js');
+            const code = await compressCollection(current.obtained, current.mastered);
+            const url = `${window.location.origin}${window.location.pathname}?c=${code}`;
+            copyText(url, 'Link compartilhado!', 'Falha ao compartilhar');
+        } catch (err) {
+            toast('Falha ao compartilhar', 'error');
+            console.error(err);
+        }
     }, []);
 
     const handleMainKeyDown = useCallback(
@@ -232,12 +293,11 @@ export function CatalogPage() {
                     ref={gridRef}
                     className="grid"
                     id="spriteGrid"
-                    role="grid"
                     aria-label="Coleção de pituchinhos"
                     aria-busy={loadingShared}
                     onKeyDown={handleMainKeyDown}
                 >
-                    {visibleSprites.map((sprite, index) => {
+                    {displayedSprites.map((sprite, index) => {
                         const isActiveCard = activeCardId
                             ? activeCardId === sprite.id
                             : index === 0;
@@ -260,6 +320,13 @@ export function CatalogPage() {
                         );
                     })}
                 </main>
+                {hasMoreSprites && (
+                    <div
+                        ref={loadMoreRef}
+                        aria-hidden="true"
+                        style={{ height: 1, width: '100%' }}
+                    />
+                )}
             </div>
 
             <ControllerHud

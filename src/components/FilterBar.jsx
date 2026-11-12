@@ -1,6 +1,10 @@
-import { memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { memo, useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
 import { getUiThemeLabel } from '../query.js';
-import { isIOS } from '../dom-utils.js';
+
+const loadExportModal = () => import('./ExportModal.jsx');
+const loadSettingsModal = () => import('./SettingsModal.jsx');
+const ExportModal = lazy(loadExportModal);
+const SettingsModal = lazy(loadSettingsModal);
 
 const STATUS_PILLS = [
     { value: 'all', label: 'Todos' },
@@ -309,17 +313,31 @@ export const FilterBar = memo(function FilterBar({
         };
     }, [activePopup]);
 
-    const handleExportAction = mode => {
-        onExportImage(mode);
-        setActivePopup(null);
-    };
+    const handleClosePopup = useCallback(() => setActivePopup(null), []);
 
-    const handleTriggerImport = () => {
+    const handleExportAction = useCallback(
+        mode => {
+            onExportImage(mode);
+            setActivePopup(null);
+        },
+        [onExportImage]
+    );
+
+    const handleTriggerImport = useCallback(() => {
         setActivePopup(null);
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
-    };
+    }, []);
+
+    const handlePrefetchExport = useCallback(() => {
+        void loadExportModal().catch(() => {});
+        onPrepareExport?.();
+    }, [onPrepareExport]);
+
+    const handlePrefetchSettings = useCallback(() => {
+        void loadSettingsModal().catch(() => {});
+    }, []);
 
     const handleFileChange = e => {
         const file = e.target.files?.[0];
@@ -415,10 +433,10 @@ export const FilterBar = memo(function FilterBar({
                             aria-label="Exportar"
                             aria-haspopup="dialog"
                             aria-expanded={String(activePopup === 'export')}
-                            onPointerEnter={onPrepareExport}
-                            onFocus={onPrepareExport}
+                            onPointerEnter={handlePrefetchExport}
+                            onFocus={handlePrefetchExport}
                             onClick={() => {
-                                onPrepareExport?.();
+                                handlePrefetchExport();
                                 setActivePopup('export');
                             }}
                         >
@@ -454,7 +472,12 @@ export const FilterBar = memo(function FilterBar({
                             aria-label="Configurações"
                             aria-haspopup="dialog"
                             aria-expanded={String(activePopup === 'settings')}
-                            onClick={() => setActivePopup('settings')}
+                            onPointerEnter={handlePrefetchSettings}
+                            onFocus={handlePrefetchSettings}
+                            onClick={() => {
+                                handlePrefetchSettings();
+                                setActivePopup('settings');
+                            }}
                         >
                             <SettingsIcon />
                             <span className="btn-label">Configurações</span>
@@ -556,198 +579,27 @@ export const FilterBar = memo(function FilterBar({
 
             {/* Popup Modal Centralizado: Exportar */}
             {activePopup === 'export' && (
-                <div
-                    className="modal-backdrop"
-                    onClick={() => setActivePopup(null)}
-                    role="presentation"
-                >
-                    <div
-                        className="modal-popup"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="exportPopupTitle"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <div className="modal-header">
-                            <h3 id="exportPopupTitle" className="modal-title">
-                                Exportar
-                            </h3>
-                            <button
-                                type="button"
-                                className="modal-close-btn"
-                                onClick={() => setActivePopup(null)}
-                                aria-label="Fechar"
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    aria-hidden="true"
-                                >
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="modal-body" aria-label="Opções de exportação e dados">
-                            <div className="dropdown-section-title">Imagens</div>
-                            <button type="button" onClick={() => handleExportAction('collected')}>
-                                <span className="dot dot-collected" />
-                                Coleção
-                            </button>
-                            <button type="button" onClick={() => handleExportAction('missing')}>
-                                <span className="dot dot-missing" />
-                                Faltando
-                            </button>
-                            <button type="button" onClick={() => handleExportAction('unmastered')}>
-                                <span className="dot dot-unmastered" />
-                                Não dominados
-                            </button>
-                            <button type="button" onClick={() => handleExportAction('mastered')}>
-                                <span className="dot dot-mastered" />
-                                Dominados
-                            </button>
-                            <button type="button" onClick={() => handleExportAction('trade')}>
-                                <span className="dot dot-trade" />
-                                Trocar
-                            </button>
-
-                            <hr className="dropdown-divider" />
-                            <div className="dropdown-section-title">Trocas</div>
-                            <button
-                                type="button"
-                                id="copyTradeTextBtn"
-                                onClick={() => {
-                                    onCopyTradeText();
-                                    setActivePopup(null);
-                                }}
-                            >
-                                <span className="dot dot-text" />
-                                Lista de trocas (texto)
-                            </button>
-                            <button
-                                type="button"
-                                id="copyTradeGridBtn"
-                                onClick={() => {
-                                    onCopyTradeGrid();
-                                    setActivePopup(null);
-                                }}
-                            >
-                                <span className="dot dot-text" />
-                                Grade de trocas (texto)
-                            </button>
-
-                            <hr className="dropdown-divider" />
-                            <div className="dropdown-section-title">Dados</div>
-                            <button
-                                type="button"
-                                id="exportBackupBtn"
-                                onClick={() => {
-                                    onExportBackup();
-                                    setActivePopup(null);
-                                }}
-                            >
-                                <span className="dot dot-backup" />
-                                Backup dos dados (JSON)
-                            </button>
-                            <button type="button" id="importBtn" onClick={handleTriggerImport}>
-                                <span className="dot dot-collected" />
-                                Importar dados (JSON)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <Suspense fallback={null}>
+                    <ExportModal
+                        onClose={handleClosePopup}
+                        onExportImage={handleExportAction}
+                        onCopyTradeText={onCopyTradeText}
+                        onCopyTradeGrid={onCopyTradeGrid}
+                        onExportBackup={onExportBackup}
+                        onTriggerImport={handleTriggerImport}
+                    />
+                </Suspense>
             )}
 
             {/* Popup Modal Centralizado: Configurações */}
             {activePopup === 'settings' && (
-                <div
-                    className="modal-backdrop"
-                    onClick={() => setActivePopup(null)}
-                    role="presentation"
-                >
-                    <div
-                        className="modal-popup"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="settingsPopupTitle"
-                        onClick={e => e.stopPropagation()}
-                    >
-                        <div className="modal-header">
-                            <h3 id="settingsPopupTitle" className="modal-title">
-                                Configurações
-                            </h3>
-                            <button
-                                type="button"
-                                className="modal-close-btn"
-                                onClick={() => setActivePopup(null)}
-                                aria-label="Fechar"
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    aria-hidden="true"
-                                >
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="modal-body" aria-label="Opções de configuração">
-                            <div className="switches">
-                                <label className="switch">
-                                    <span>Ocultar dominados</span>
-                                    <input
-                                        type="checkbox"
-                                        id="hideMastered"
-                                        checked={settings.hideMastered}
-                                        onChange={e => onSettingChange('hideMastered', e.target.checked)}
-                                    />
-                                </label>
-                                <label className="switch">
-                                    <span>Não lançados</span>
-                                    <input
-                                        type="checkbox"
-                                        id="showUnreleased"
-                                        checked={settings.showUnreleased}
-                                        onChange={e => onSettingChange('showUnreleased', e.target.checked)}
-                                    />
-                                </label>
-                                <label className="switch">
-                                    <span>Baixo Desempenho</span>
-                                    <input
-                                        type="checkbox"
-                                        id="lowFidelity"
-                                        checked={settings.lowFidelity}
-                                        onChange={e => onSettingChange('lowFidelity', e.target.checked)}
-                                    />
-                                </label>
-                                {!isIOS() && (
-                                    <label className="switch" id="exportModeSwitch">
-                                        <span>Abrir exportações</span>
-                                        <input
-                                            type="checkbox"
-                                            id="openExports"
-                                            checked={settings.openExports}
-                                            onChange={e => onSettingChange('openExports', e.target.checked)}
-                                        />
-                                    </label>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Suspense fallback={null}>
+                    <SettingsModal
+                        settings={settings}
+                        onSettingChange={onSettingChange}
+                        onClose={handleClosePopup}
+                    />
+                </Suspense>
             )}
         </nav>
     );

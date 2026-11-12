@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, useDeferredValue } from 'react';
 import { KEYS, STATUS_FILTERS, SORT_METHODS } from '../share-order.js';
-import { decompressCollection } from '../share-codec.js';
 import {
     getSpriteIdSet,
     uniqueValidIds,
@@ -140,11 +139,18 @@ export function useTrackerState(sprites) {
         if (!viewMode || !initial.shareCode) return;
 
         let cancelled = false;
-        decompressCollection(sprites, initial.shareCode).then(decoded => {
-            if (cancelled) return;
-            setCollection(decoded);
-            setLoadingShared(false);
-        });
+        import('../share-codec.js')
+            .then(({ decompressCollection }) => decompressCollection(sprites, initial.shareCode))
+            .then(decoded => {
+                if (cancelled) return;
+                setCollection(decoded);
+                setLoadingShared(false);
+            })
+            .catch(err => {
+                if (cancelled) return;
+                console.warn('Unable to decode shared collection.', err);
+                setLoadingShared(false);
+            });
 
         return () => {
             cancelled = true;

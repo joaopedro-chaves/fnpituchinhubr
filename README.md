@@ -11,7 +11,7 @@ https://joaopedro-chaves.github.io/fnpituchinhubr/
 
 ## Migração para React e PWA
 
-O projeto está em processo de migração para React e PWA.
+O projeto já está em React e PWA, e estável, estamos agora trabalhando em melhorias, otimazações e funcionalidades futuras. A lot work do to...
 
 ## Desenvolvimento (React + Vite)
 

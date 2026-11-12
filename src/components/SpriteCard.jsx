@@ -21,8 +21,9 @@ function getSpriteStaticMeta(sprite) {
         seasonName: seasonData.name,
         baseClassName: baseClasses.join(' '),
         imgSrc: getSpriteImageUrl(sprite.id),
-        collectLabel: `Mark ${displayName} as part of your collection`,
-        removeLabel: `Remove ${displayName} from your collection`,
+        collectLabel: `${displayName} - ${sprite.unreleased ? 'Não lançado' : 'Não coletado'} (clique para coletar)`,
+        removeLabel: `${displayName} - Coletado (clique para remover da coleção)`,
+        masteredCardLabel: `${displayName} - Dominado (clique para deixar apenas coletado)`,
         unmasterLabel: `Remover dominação de ${displayName}`,
         masterTitleLabel: `Marcar ${displayName} como dominado`,
     };
@@ -202,7 +203,7 @@ export const SpriteCard = memo(function SpriteCard({
             aria-label={
                 !viewMode
                     ? mastered
-                        ? meta.unmasterLabel
+                        ? meta.masteredCardLabel
                         : obtained
                           ? meta.removeLabel
                           : meta.collectLabel
@@ -235,11 +236,26 @@ export const SpriteCard = memo(function SpriteCard({
             <div className="card-inner">
                 {/* Faixa Superior de Status (Header Banner) */}
                 {sprite.unreleased ? (
-                    <div className="card-badge unreleased-badge">NÃO LANÇADO</div>
+                    <div
+                        className="card-badge unreleased-badge"
+                        aria-hidden={!viewMode ? 'true' : undefined}
+                    >
+                        NÃO LANÇADO
+                    </div>
                 ) : mastered ? (
-                    <div className="card-badge mastered-badge">DOMINADO</div>
+                    <div
+                        className="card-badge mastered-badge"
+                        aria-hidden={!viewMode ? 'true' : undefined}
+                    >
+                        DOMINADO
+                    </div>
                 ) : obtained ? (
-                    <div className="card-badge collected">COLETADO</div>
+                    <div
+                        className="card-badge collected"
+                        aria-hidden={!viewMode ? 'true' : undefined}
+                    >
+                        COLETADO
+                    </div>
                 ) : null}
 
                 {/* Botão de ação para marcar/desmarcar como dominado (coroa) */}
@@ -283,14 +299,19 @@ export const SpriteCard = memo(function SpriteCard({
                     />
                 </div>
 
-                <div className="card-rarity-wrap">
+                <div className="card-rarity-wrap" aria-hidden={!viewMode ? 'true' : undefined}>
                     <div className="card-rarity">{meta.rarityLabel}</div>
                 </div>
 
                 <div className="card-name">
                     <span className="card-title">{meta.displayName}</span>
                     {meta.seasonName !== 'none' && (
-                        <span className="card-season">{meta.seasonName}</span>
+                        <span
+                            className="card-season"
+                            aria-hidden={!viewMode ? 'true' : undefined}
+                        >
+                            {meta.seasonName}
+                        </span>
                     )}
                 </div>
             </div>
