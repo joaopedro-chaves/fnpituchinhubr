@@ -3,6 +3,8 @@ import { createElement } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, act, cleanup, waitFor } from '@testing-library/react';
 import { CatalogPage } from './pages/CatalogPage.jsx';
+import { useTrackerState } from './hooks/useTrackerState.js';
+import { baseSprites } from './data/sprites-data.js';
 import { KEYS } from './share-order.js';
 import { toast, copyText } from './dom-utils.js';
 
@@ -227,6 +229,44 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
             value: originalClipboard,
         });
         delete document.execCommand;
+    });
+
+    it('preserva referência de visibleSprites ao marcar cards na visão padrão e recalcula sob status/hideMastered', () => {
+        /** @type {ReturnType<typeof useTrackerState> | null} */
+        let latest = null;
+        function Probe() {
+            latest = useTrackerState(baseSprites);
+            return null;
+        }
+        const readState = () => {
+            if (!latest) throw new Error('Expected tracker state snapshot');
+            return latest;
+        };
+
+        render(createElement(Probe));
+        const initialVisible = readState().visibleSprites;
+        const firstId = initialVisible[0].id;
+
+        act(() => {
+            readState().toggleObtained(firstId);
+            readState().toggleMastery(firstId);
+            readState().updateSetting('lightTheme', true);
+            readState().updateSetting('lowFidelity', true);
+        });
+        expect(readState().visibleSprites).toBe(initialVisible);
+
+        act(() => {
+            readState().updateFilter('status', 'owned');
+        });
+        const ownedVisible = readState().visibleSprites;
+        expect(ownedVisible).not.toBe(initialVisible);
+        expect(ownedVisible.map(s => s.id)).toEqual([firstId]);
+
+        act(() => {
+            readState().updateFilter('status', 'all');
+            readState().updateSetting('hideMastered', true);
+        });
+        expect(readState().visibleSprites.some(s => s.id === firstId)).toBe(false);
     });
 });
 

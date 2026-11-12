@@ -1251,6 +1251,24 @@ body.low-fidelity dialog.modal-popup::backdrop {
     background: var(--card-surface);
 }
 
+/* Pula layout/paint de cards fora da viewport sem afetar os primeiros visíveis acima da dobra
+   nem recortar box-shadow/outline externos de .card */
+.card:nth-child(n + 33) .card-inner {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 12rem;
+}
+
+.card:focus-within .card-inner,
+.card.gamepad-selected .card-inner {
+    content-visibility: visible;
+}
+
+@supports not (content-visibility: auto) {
+    .card-inner {
+        contain: layout style paint;
+    }
+}
+
 .card-primary {
     display: flex;
     flex-direction: column;

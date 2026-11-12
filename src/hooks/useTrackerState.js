@@ -293,15 +293,38 @@ export function useTrackerState(sprites) {
         [filters, deferredSearch]
     );
 
+    // Só inclui obtained/mastered/configurações de consulta quando afetam o resultado do grid,
+    // evitando re-filtrar e re-ordenar ao coletar/dominar cards na visão padrão ("Todos") ou trocar tema visual.
+    const queryObtained = viewMode || gridFilters.status !== 'all' ? obtained : EMPTY_COLLECTION.obtained;
+    const queryMastered = settings.hideMastered ? mastered : EMPTY_COLLECTION.mastered;
+
     const gridQueryState = useMemo(
-        () => ({ obtained, mastered, viewMode, filters: gridFilters, settings }),
-        [obtained, mastered, viewMode, gridFilters, settings]
+        () => ({
+            obtained: queryObtained,
+            mastered: queryMastered,
+            viewMode,
+            filters: gridFilters,
+            settings: {
+                hideMastered: settings.hideMastered,
+                showUnreleased: settings.showUnreleased,
+                sortOrder: settings.sortOrder,
+            },
+        }),
+        [
+            queryObtained,
+            queryMastered,
+            viewMode,
+            gridFilters,
+            settings.hideMastered,
+            settings.showUnreleased,
+            settings.sortOrder,
+        ]
     );
 
     const visibleSprites = useMemo(() => {
         const filtered = filterSprites(sprites, gridQueryState);
-        return sortSprites(filtered, settings.sortOrder);
-    }, [sprites, gridQueryState, settings.sortOrder]);
+        return sortSprites(filtered, gridQueryState.settings.sortOrder);
+    }, [sprites, gridQueryState]);
 
     const progressStats = useMemo(() => {
         const released = getReleasedSprites(sprites, filters.season);

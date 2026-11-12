@@ -13,6 +13,8 @@ import {
     getSeasonData,
     getFamilyKeys,
     getCharName,
+    getCharNameMap,
+    resolveCharName,
     getSpriteIdSet,
     getFamilyThemeMap,
     uniqueValidIds,
@@ -21,7 +23,7 @@ import {
     getDisplayName,
     applyCollectionBatch,
 } from './query.js';
-import { THEME, getCardStyleVars } from './taxonomy.js';
+import { THEME, THEME_ORDER, getCardStyleVars } from './taxonomy.js';
 import { baseSprites } from './data/sprites-data.js';
 import { getSpriteImageUrl } from './assets/spriteImages.js';
 
@@ -341,5 +343,36 @@ describe('applyCollectionBatch', () => {
         const unknownOnly = applyCollectionBatch(initial, ['id_desconhecido'], 'collect', validIds);
         expect(unknownOnly.changed).toBe(false);
         expect(unknownOnly.collection).toBe(initial);
+    });
+});
+
+describe('otimizações de consulta e ordenação', () => {
+    it('getCharNameMap + resolveCharName mantêm paridade O(1) com getCharName', () => {
+        const list = [
+            ...sprites,
+            { id: 'empty_basic', name: '', theme: 'Básico', rarity: 'Raro', unreleased: true },
+            { id: 'water_basic', name: 'Ignorado', theme: 'Básico', rarity: 'Raro', unreleased: false },
+        ];
+        const nameMap = getCharNameMap(list);
+
+        for (const key of ['water', 'onewish', 'empty', 'desconhecido']) {
+            expect(resolveCharName(nameMap, key)).toBe(getCharName(key, list));
+        }
+    });
+
+    it('sortSprites("sprite") mantém exatamente a mesma ordem de Intl.Collator + THEME_ORDER', () => {
+        const collator = new Intl.Collator();
+        const themeIndex = new Map(THEME_ORDER.map((k, i) => [k, i]));
+        const expectedIds = [...baseSprites]
+            .sort((a, b) => {
+                const famA = getFamilyKey(a);
+                const famB = getFamilyKey(b);
+                const cmp = famA === famB ? 0 : collator.compare(famA, famB);
+                if (cmp !== 0) return cmp;
+                return (themeIndex.get(a.theme) ?? Infinity) - (themeIndex.get(b.theme) ?? Infinity);
+            })
+            .map(s => s.id);
+
+        expect(sortSprites(baseSprites, 'sprite').map(s => s.id)).toEqual(expectedIds);
     });
 });

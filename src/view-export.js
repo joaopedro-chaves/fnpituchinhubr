@@ -20,7 +20,8 @@ import {
     getActiveThemes,
     getExportThemeLabel,
     getTradeThemeLabel,
-    getCharName,
+    getCharNameMap,
+    resolveCharName,
     getDisplayName,
     getSeasonData,
     isObtained,
@@ -609,10 +610,11 @@ export function exportImage(mode, state, sprites = []) {
             gridWidth = 0;
 
         // Trade Card Layout Variables
-        let charKeys, familyThemeMap, themeColumns, leftColumnKeys, rightColumnKeys, tableColumnCount, colW, tableW;
+        let charKeys, charNameMap, familyThemeMap, themeColumns, leftColumnKeys, rightColumnKeys, tableColumnCount, colW, tableW;
 
         if (mode === 'trade') {
             charKeys = getFamilyKeys(releasedSprites);
+            charNameMap = getCharNameMap(sprites);
             familyThemeMap = getFamilyThemeMap(releasedSprites);
             themeColumns = getActiveThemes(releasedSprites).map(theme => ({
                 name: getExportThemeLabel(theme),
@@ -860,7 +862,7 @@ export function exportImage(mode, state, sprites = []) {
             }
 
             const drawRow = (charKey, startX, y) => {
-                const name = getCharName(charKey, sprites);
+                const name = resolveCharName(charNameMap, charKey);
                 const displayName = getDisplayName(name);
 
                 ctx.fillStyle = palette.text;
@@ -987,6 +989,7 @@ export function exportImage(mode, state, sprites = []) {
 export function generateTradeText(state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const charKeys = getFamilyKeys(releasedSprites);
+    const charNameMap = getCharNameMap(sprites);
     const familyThemeMap = getFamilyThemeMap(releasedSprites);
     const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
     const obtainedSet = new Set(state?.obtained || []);
@@ -996,7 +999,7 @@ export function generateTradeText(state, sprites = []) {
         const lines = [];
 
         charKeys.forEach(charKey => {
-            const name = getCharName(charKey, sprites);
+            const name = resolveCharName(charNameMap, charKey);
             const themeSprites = [...familyThemeMap.get(charKey).values()];
             const selected = selectSprites(themeSprites);
             if (selected.length === 0) return;
@@ -1028,6 +1031,7 @@ export function generateTradeGridText(state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const activeThemes = getActiveThemes(releasedSprites);
     const charKeys = getFamilyKeys(releasedSprites);
+    const charNameMap = getCharNameMap(sprites);
     const familyThemeMap = getFamilyThemeMap(releasedSprites);
     const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
     const obtainedSet = new Set(state?.obtained || []);
@@ -1049,7 +1053,7 @@ export function generateTradeGridText(state, sprites = []) {
             return obtainedSet.has(s.id) ? '✅' : '❌';
         });
 
-        lines.push(`| ${rowStates.join(' | ')} | ${getCharName(charKey, sprites)}`);
+        lines.push(`| ${rowStates.join(' | ')} | ${resolveCharName(charNameMap, charKey)}`);
     });
 
     lines.push(

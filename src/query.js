@@ -2,13 +2,42 @@
    Sprite Querying, Filtering & Sorting
    =================================================== */
 
-import { THEME_ORDER, RARITY_ORDER, getOrderedIndex } from './share-order.js';
+import { THEME_ORDER, RARITY_ORDER } from './share-order.js';
 import { THEME, RARITIES } from './taxonomy.js';
 
 const defaultCollator = new Intl.Collator();
+const THEME_INDEX_MAP = new Map(THEME_ORDER.map((name, idx) => [name, idx]));
+const RARITY_INDEX_MAP = new Map(RARITY_ORDER.map((name, idx) => [name, idx]));
+
+function getThemeOrder(theme) {
+    return THEME_INDEX_MAP.get(theme) ?? Infinity;
+}
+
+function getRarityOrder(rarity) {
+    return RARITY_INDEX_MAP.get(rarity) ?? Infinity;
+}
+
+function compareRank(rankA, rankB) {
+    if (rankA === rankB) return 0;
+    return rankA - rankB;
+}
+
+function buildCollatorRankMap(values) {
+    const unique = [...new Set(values)].sort(defaultCollator.compare);
+    const ranks = new Map();
+    let rank = 0;
+    for (let i = 0; i < unique.length; i++) {
+        if (i > 0 && defaultCollator.compare(unique[i - 1], unique[i]) !== 0) {
+            rank += 1;
+        }
+        ranks.set(unique[i], rank);
+    }
+    return ranks;
+}
 
 export function getFamilyKey(sprite) {
-    return sprite.id.split('_')[0];
+    const idx = sprite.id.indexOf('_');
+    return idx === -1 ? sprite.id : sprite.id.slice(0, idx);
 }
 
 export function getSpriteIdSet(sprites = []) {
@@ -75,14 +104,44 @@ export function getActiveThemes(sprites) {
     for (const sprite of sprites) {
         seen.add(sprite.theme);
     }
-    return [...seen].sort(
-        (a, b) => getOrderedIndex(THEME_ORDER, a) - getOrderedIndex(THEME_ORDER, b)
-    );
+    return [...seen].sort((a, b) => compareRank(getThemeOrder(a), getThemeOrder(b)));
+}
+
+function formatFallbackCharName(charKey) {
+    return charKey.charAt(0).toUpperCase() + charKey.slice(1);
+}
+
+/**
+ * Pré-computa índice O(1) de família -> nome do sprite `_basic` em uma única varredura.
+ * @param {Array<{ id: string, name?: string }>} [sprites]
+ * @returns {Map<string, string>}
+ */
+export function getCharNameMap(sprites = []) {
+    const names = new Map();
+    for (const sprite of sprites) {
+        if (typeof sprite?.id !== 'string' || !sprite.id.endsWith('_basic')) continue;
+        const familyKey = sprite.id.slice(0, -6);
+        if (!names.has(familyKey) && sprite.name !== undefined) {
+            names.set(familyKey, sprite.name);
+        }
+    }
+    return names;
+}
+
+/**
+ * Resolve o nome exibido de uma família usando o índice pré-computado.
+ * @param {Map<string, string>} charNameMap
+ * @param {string} charKey
+ * @returns {string}
+ */
+export function resolveCharName(charNameMap, charKey) {
+    const match = charNameMap.get(charKey);
+    return match !== undefined ? match : formatFallbackCharName(charKey);
 }
 
 export function getCharName(charKey, sprites = []) {
     const basicSprite = sprites.find(sprite => sprite.id === `${charKey}_basic`);
-    return basicSprite ? basicSprite.name : charKey.charAt(0).toUpperCase() + charKey.slice(1);
+    return basicSprite ? basicSprite.name : formatFallbackCharName(charKey);
 }
 
 export function getDisplayName(name) {
@@ -194,35 +253,48 @@ export function filterSprites(sprites, state) {
 }
 
 export function sortSprites(items, method) {
-    const sorted = [...items];
     if (method === 'theme') {
-        return sorted.sort((a, b) => {
-            const idxA = getOrderedIndex(THEME_ORDER, a.theme);
-            const idxB = getOrderedIndex(THEME_ORDER, b.theme);
-            if (idxA !== idxB) return idxA - idxB;
-            return 0;
-        });
+        const decorated = items.map(item => ({
+            item,
+            themeRank: getThemeOrder(item.theme),
+        }));
+        decorated.sort((a, b) => compareRank(a.themeRank, b.themeRank));
+        return decorated.map(entry => entry.item);
     }
     if (method === 'sprite') {
-        return sorted.sort((a, b) => {
-            const familyA = getFamilyKey(a);
-            const familyB = getFamilyKey(b);
-            if (familyA !== familyB) return defaultCollator.compare(familyA, familyB);
-            return getOrderedIndex(THEME_ORDER, a.theme) - getOrderedIndex(THEME_ORDER, b.theme);
+        const families = items.map(getFamilyKey);
+        const familyRanks = buildCollatorRankMap(families);
+        const decorated = items.map((item, idx) => ({
+            item,
+            familyRank: familyRanks.get(families[idx]) ?? 0,
+            themeRank: getThemeOrder(item.theme),
+        }));
+        decorated.sort((a, b) => {
+            if (a.familyRank !== b.familyRank) return a.familyRank - b.familyRank;
+            return compareRank(a.themeRank, b.themeRank);
         });
+        return decorated.map(entry => entry.item);
     }
     if (method === 'name') {
-        return sorted.sort((a, b) => defaultCollator.compare(a.name, b.name));
+        return [...items].sort((a, b) =>
+            a.name === b.name ? 0 : defaultCollator.compare(a.name, b.name)
+        );
     }
     if (method === 'rarity') {
-        return sorted.sort((a, b) => {
-            const idxA = getOrderedIndex(RARITY_ORDER, a.rarity);
-            const idxB = getOrderedIndex(RARITY_ORDER, b.rarity);
-            if (idxA !== idxB) return idxA - idxB;
-            return defaultCollator.compare(a.name, b.name);
+        const decorated = items.map(item => ({
+            item,
+            rarityRank: getRarityOrder(item.rarity),
+        }));
+        decorated.sort((a, b) => {
+            const rankDiff = compareRank(a.rarityRank, b.rarityRank);
+            if (rankDiff !== 0) return rankDiff;
+            return a.item.name === b.item.name
+                ? 0
+                : defaultCollator.compare(a.item.name, b.item.name);
         });
+        return decorated.map(entry => entry.item);
     }
-    return sorted;
+    return [...items];
 }
 
 /**
