@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, useDeferredValue } from 'react';
 import { KEYS, STATUS_FILTERS, SORT_METHODS } from '../share-order.js';
 import { decompressCollection } from '../share-codec.js';
 import {
@@ -37,8 +37,9 @@ function getShareCode() {
 function getStoredCollection(sprites) {
     const validIds = getSpriteIdSet(sprites);
     const obtained = uniqueValidIds(readStoredArray(KEYS.obtained), validIds);
+    const obtainedSet = new Set(obtained);
     const mastered = uniqueValidIds(readStoredArray(KEYS.mastered), validIds).filter(id =>
-        obtained.includes(id)
+        obtainedSet.has(id)
     );
     return { obtained, mastered };
 }
@@ -94,16 +95,45 @@ export function useTrackerState(sprites) {
         return {
             shareCode,
             collection: shareCode ? EMPTY_COLLECTION : getStoredCollection(sprites),
+            filters: getInitialFilters(sprites),
+            settings: getInitialSettings(),
         };
     });
 
     const [viewMode, setViewMode] = useState(Boolean(initial.shareCode));
     const [loadingShared, setLoadingShared] = useState(Boolean(initial.shareCode));
     const [collection, setCollection] = useState(initial.collection);
-    const [filters, setFilters] = useState(() => getInitialFilters(sprites));
-    const [settings, setSettings] = useState(getInitialSettings);
+    const [filters, setFilters] = useState(initial.filters);
+    const [settings, setSettings] = useState(initial.settings);
 
     const { obtained, mastered } = collection;
+    const deferredSearch = useDeferredValue(filters.search);
+
+    const persistedCollectionRef = useRef(initial.collection);
+    const persistedFiltersRef = useRef({
+        theme: initial.filters.theme,
+        season: initial.filters.season,
+        status: initial.filters.status,
+    });
+    const persistedSettingsRef = useRef(initial.settings);
+    const persistedSearchRef = useRef(initial.filters.search);
+    const pendingSearchRef = useRef(initial.filters.search);
+    const hasPendingSearchRef = useRef(false);
+    const searchDebounceRef = useRef(null);
+
+    const flushPendingSearch = useCallback(() => {
+        if (searchDebounceRef.current !== null) {
+            clearTimeout(searchDebounceRef.current);
+            searchDebounceRef.current = null;
+        }
+        if (!hasPendingSearchRef.current) return;
+        hasPendingSearchRef.current = false;
+        const nextSearch = pendingSearchRef.current;
+        if (persistedSearchRef.current !== nextSearch) {
+            persistedSearchRef.current = nextSearch;
+            persistValue(KEYS.search, nextSearch);
+        }
+    }, []);
 
     // Decodifica a coleção compartilhada (?c=...) enquanto estiver em modo somente leitura
     useEffect(() => {
@@ -121,20 +151,75 @@ export function useTrackerState(sprites) {
         };
     }, [viewMode, initial.shareCode, sprites]);
 
-    // Persistência: coleção (nunca sobrescreve a coleção local em modo compartilhado)
+    // Persistência incremental: coleção (nunca sobrescreve a coleção local em modo compartilhado)
     useEffect(() => {
         if (viewMode) return;
-        persistValue(KEYS.obtained, collection.obtained);
-        persistValue(KEYS.mastered, collection.mastered);
+        const prev = persistedCollectionRef.current;
+        if (prev.obtained !== collection.obtained) {
+            persistValue(KEYS.obtained, collection.obtained);
+        }
+        if (prev.mastered !== collection.mastered) {
+            persistValue(KEYS.mastered, collection.mastered);
+        }
+        persistedCollectionRef.current = collection;
     }, [collection, viewMode]);
 
-    // Persistência: filtros e configurações
+    // Persistência incremental: filtros imediatos (theme, season, status)
     useEffect(() => {
-        Object.entries(filters).forEach(([key, value]) => persistValue(KEYS[key], value));
-    }, [filters]);
+        const prev = persistedFiltersRef.current;
+        if (prev.theme !== filters.theme) persistValue(KEYS.theme, filters.theme);
+        if (prev.season !== filters.season) persistValue(KEYS.season, filters.season);
+        if (prev.status !== filters.status) persistValue(KEYS.status, filters.status);
+        persistedFiltersRef.current = {
+            theme: filters.theme,
+            season: filters.season,
+            status: filters.status,
+        };
+    }, [filters.theme, filters.season, filters.status]);
+
+    // Persistência da busca com debounce de ~200 ms e flush garantido em saída/ocultamento
+    useEffect(() => {
+        pendingSearchRef.current = filters.search;
+        if (persistedSearchRef.current === filters.search) {
+            if (searchDebounceRef.current !== null) {
+                clearTimeout(searchDebounceRef.current);
+                searchDebounceRef.current = null;
+            }
+            hasPendingSearchRef.current = false;
+            return;
+        }
+
+        hasPendingSearchRef.current = true;
+        if (searchDebounceRef.current !== null) {
+            clearTimeout(searchDebounceRef.current);
+        }
+        searchDebounceRef.current = setTimeout(flushPendingSearch, 200);
+    }, [filters.search, flushPendingSearch]);
 
     useEffect(() => {
-        Object.entries(settings).forEach(([key, value]) => persistValue(KEYS[key], value));
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                flushPendingSearch();
+            }
+        };
+        window.addEventListener('pagehide', flushPendingSearch);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            window.removeEventListener('pagehide', flushPendingSearch);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            flushPendingSearch();
+        };
+    }, [flushPendingSearch]);
+
+    // Persistência incremental: configurações
+    useEffect(() => {
+        const prev = persistedSettingsRef.current;
+        for (const [key, value] of Object.entries(settings)) {
+            if (prev[key] !== value) {
+                persistValue(KEYS[key], value);
+            }
+        }
+        persistedSettingsRef.current = settings;
     }, [settings]);
 
     // Classe global de baixo desempenho no body
@@ -151,15 +236,25 @@ export function useTrackerState(sprites) {
         [obtained, mastered, viewMode, filters, settings]
     );
 
+    const gridFilters = useMemo(
+        () => (deferredSearch === filters.search ? filters : { ...filters, search: deferredSearch }),
+        [filters, deferredSearch]
+    );
+
+    const gridQueryState = useMemo(
+        () => ({ obtained, mastered, viewMode, filters: gridFilters, settings }),
+        [obtained, mastered, viewMode, gridFilters, settings]
+    );
+
     const visibleSprites = useMemo(() => {
-        const filtered = filterSprites(sprites, trackerState);
+        const filtered = filterSprites(sprites, gridQueryState);
         return sortSprites(filtered, settings.sortOrder);
-    }, [sprites, trackerState, settings.sortOrder]);
+    }, [sprites, gridQueryState, settings.sortOrder]);
 
     const progressStats = useMemo(() => {
         const released = getReleasedSprites(sprites, filters.season);
-        return getCollectionCounts(released, trackerState);
-    }, [sprites, filters.season, trackerState]);
+        return getCollectionCounts(released, { obtained, mastered });
+    }, [sprites, filters.season, obtained, mastered]);
 
     const toggleObtained = useCallback(
         id => {
