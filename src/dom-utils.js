@@ -2,9 +2,53 @@
    DOM & UI Utility Functions
    =================================================== */
 
+const MAX_VISIBLE_TOASTS = 4;
+
+function getToastContainer() {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        container.setAttribute('role', 'region');
+        container.setAttribute('aria-label', 'Notificações');
+        if (Object.hasOwn(HTMLElement.prototype, 'popover')) {
+            container.setAttribute('popover', 'manual');
+        }
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+function showToastRegion(container) {
+    if (typeof container.showPopover !== 'function') return;
+    try {
+        if (!container.matches(':popover-open')) {
+            container.showPopover();
+        }
+    } catch {
+        /* Ignora falha ao promover região para top-layer */
+    }
+}
+
+function hideToastRegionIfEmpty(container) {
+    if (container.childElementCount > 0 || typeof container.hidePopover !== 'function') return;
+    try {
+        if (container.matches(':popover-open')) {
+            container.hidePopover();
+        }
+    } catch {
+        /* Ignora falha ao ocultar região vazia */
+    }
+}
+
 export function toast(message, type = 'info', options = {}) {
+    const container = getToastContainer();
     const el = document.createElement('div');
     const hasAction = Boolean(options?.actionLabel);
+    const defaultDuration = hasAction ? 5000 : 2500;
+    const duration = Number.isFinite(options?.duration) ? options.duration : defaultDuration;
+
     el.className = `toast toast-${type}${hasAction ? ' has-action' : ''}`;
     el.setAttribute('role', type === 'error' ? 'alert' : 'status');
     el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
@@ -16,6 +60,24 @@ export function toast(message, type = 'info', options = {}) {
 
     let dismissed = false;
     let autoHideTimer = null;
+    let fallbackRemoveTimer = null;
+    let timerStartedAt = Date.now();
+    let remainingMs = duration;
+    let hovered = false;
+    let focused = false;
+    let priorExternalFocus = null;
+
+    const removeToastNode = () => {
+        if (fallbackRemoveTimer !== null) {
+            clearTimeout(fallbackRemoveTimer);
+            fallbackRemoveTimer = null;
+        }
+        if (el.isConnected) {
+            el.remove();
+        }
+        hideToastRegionIfEmpty(container);
+    };
+
     const dismiss = () => {
         if (dismissed) return;
         dismissed = true;
@@ -23,10 +85,59 @@ export function toast(message, type = 'info', options = {}) {
             clearTimeout(autoHideTimer);
             autoHideTimer = null;
         }
+        const focusWasInside = el.contains(document.activeElement);
         el.classList.remove('visible');
-        el.addEventListener('transitionend', () => el.remove(), { once: true });
-        setTimeout(() => el.remove(), 500);
+        el.addEventListener('transitionend', removeToastNode, { once: true });
+        fallbackRemoveTimer = setTimeout(removeToastNode, 500);
+
+        if (focusWasInside) {
+            const nextControl = [...container.querySelectorAll('.toast-action')].find(
+                btn => !el.contains(btn) && !btn.closest('.toast')?.classList.contains('dismissing')
+            );
+            if (nextControl) {
+                nextControl.focus({ preventScroll: true });
+            } else if (priorExternalFocus?.isConnected) {
+                priorExternalFocus.focus({ preventScroll: true });
+            }
+        }
     };
+
+    el.__dismissToast = dismiss;
+
+    const pauseTimer = () => {
+        if (autoHideTimer !== null) {
+            clearTimeout(autoHideTimer);
+            autoHideTimer = null;
+            remainingMs = Math.max(1000, remainingMs - (Date.now() - timerStartedAt));
+        }
+    };
+
+    const resumeTimer = () => {
+        if (dismissed || hovered || focused || autoHideTimer !== null) return;
+        timerStartedAt = Date.now();
+        autoHideTimer = setTimeout(dismiss, remainingMs);
+    };
+
+    el.addEventListener('pointerenter', () => {
+        hovered = true;
+        pauseTimer();
+    });
+    el.addEventListener('pointerleave', () => {
+        hovered = false;
+        resumeTimer();
+    });
+    el.addEventListener('focusin', e => {
+        focused = true;
+        if (e.relatedTarget && !container.contains(e.relatedTarget)) {
+            priorExternalFocus = e.relatedTarget;
+        }
+        pauseTimer();
+    });
+    el.addEventListener('focusout', e => {
+        if (el.contains(e.relatedTarget)) return;
+        focused = false;
+        resumeTimer();
+    });
 
     if (hasAction) {
         const actionBtn = document.createElement('button');
@@ -40,9 +151,20 @@ export function toast(message, type = 'info', options = {}) {
         el.appendChild(actionBtn);
     }
 
-    document.body.appendChild(el);
+    while (container.childElementCount >= MAX_VISIBLE_TOASTS) {
+        const oldest = container.firstElementChild;
+        if (typeof oldest?.__dismissToast === 'function') {
+            oldest.__dismissToast();
+        }
+        if (oldest?.isConnected) {
+            oldest.remove();
+        }
+    }
+
+    container.appendChild(el);
+    showToastRegion(container);
     requestAnimationFrame(() => el.classList.add('visible'));
-    autoHideTimer = setTimeout(dismiss, 2500);
+    resumeTimer();
 }
 
 export function isIOS() {
@@ -52,9 +174,38 @@ export function isIOS() {
     );
 }
 
+function legacyCopyText(text) {
+    if (typeof document.execCommand !== 'function') return false;
+    const field = Object.assign(document.createElement('textarea'), { value: text });
+    field.setAttribute('readonly', '');
+    field.setAttribute('aria-hidden', 'true');
+    field.style.cssText = 'position:fixed;inset-block-start:0;opacity:0;pointer-events:none';
+    document.body.append(field);
+    field.select();
+    try {
+        return document.execCommand('copy');
+    } catch {
+        return false;
+    } finally {
+        field.remove();
+    }
+}
+
 export function copyText(text, successMsg, errorMsg, successOptions) {
+    const notifyFailure = () => {
+        const msg =
+            window.isSecureContext === false
+                ? `${errorMsg} (requer HTTPS ou permissão de cópia)`
+                : errorMsg;
+        toast(msg, 'error');
+    };
+
     if (!navigator.clipboard?.writeText) {
-        toast(errorMsg, 'error');
+        if (legacyCopyText(text)) {
+            toast(successMsg, 'success', successOptions);
+        } else {
+            notifyFailure();
+        }
         return;
     }
 
@@ -64,7 +215,11 @@ export function copyText(text, successMsg, errorMsg, successOptions) {
             toast(successMsg, 'success', successOptions);
         })
         .catch(() => {
-            toast(errorMsg, 'error');
+            if (legacyCopyText(text)) {
+                toast(successMsg, 'success', successOptions);
+            } else {
+                notifyFailure();
+            }
         });
 }
 

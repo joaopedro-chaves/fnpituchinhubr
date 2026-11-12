@@ -214,7 +214,6 @@ const M3FilterMenu = memo(function M3FilterMenu({
                     ref={menuRef}
                     className="m3-menu"
                     role="menu"
-                    {...{ focusgroup: 'menu nomemory' }}
                     aria-labelledby={`${id}MenuTrigger`}
                     onKeyDown={handleMenuKeyDown}
                 >
@@ -231,7 +230,7 @@ const M3FilterMenu = memo(function M3FilterMenu({
                                     onClick={() => {
                                         onSelect(option.value);
                                         onClose();
-                                        triggerRef.current?.focus({ focusVisible: false });
+                                        triggerRef.current?.focus({ preventScroll: true });
                                     }}
                                 >
                                     <span className="m3-menu-item-text">{option.label}</span>
@@ -268,6 +267,24 @@ export const FilterBar = memo(function FilterBar({
     const [openFilterMenu, setOpenFilterMenu] = useState(null); // 'theme' | 'season' | 'sortOrder' | null
     const fileInputRef = useRef(null);
     const filtersRowRef = useRef(null);
+    const popupInvokerRef = useRef(null);
+    const prevPopupRef = useRef(null);
+
+    // Restaura foco ao gatilho apenas se o ambiente/suspense não devolver o foco nativamente ao fechar o dialog
+    useEffect(() => {
+        if (prevPopupRef.current && !activePopup) {
+            const invoker = popupInvokerRef.current;
+            queueMicrotask(() => {
+                if (
+                    invoker?.isConnected &&
+                    (!document.activeElement || document.activeElement === document.body)
+                ) {
+                    invoker.focus({ preventScroll: true });
+                }
+            });
+        }
+        prevPopupRef.current = activePopup;
+    }, [activePopup]);
 
     // Fecha menu M3 ao clicar fora ou perder o foco no desktop
     useEffect(() => {
@@ -293,38 +310,16 @@ export const FilterBar = memo(function FilterBar({
         };
     }, [openFilterMenu]);
 
-    // Fecha popup ao pressionar Escape e previne rolagem do fundo
-    useEffect(() => {
-        if (!activePopup) return;
-
-        const handleKeyDown = e => {
-            if (e.key === 'Escape') {
-                setActivePopup(null);
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        const originalOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = originalOverflow;
-        };
-    }, [activePopup]);
-
     const handleClosePopup = useCallback(() => setActivePopup(null), []);
 
     const handleExportAction = useCallback(
         mode => {
             onExportImage(mode);
-            setActivePopup(null);
         },
         [onExportImage]
     );
 
     const handleTriggerImport = useCallback(() => {
-        setActivePopup(null);
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
@@ -379,8 +374,8 @@ export const FilterBar = memo(function FilterBar({
     );
 
     return (
-        <nav className="toolbar" aria-label="Filtros e ações da coleção">
-            <search className="toolbar-search">
+        <div className="toolbar">
+            <div className="toolbar-search" role="search" aria-label="Buscar e filtrar pituchinhos">
                 {/* 1ª Linha: Busca + Segmented Button à esquerda; Botões de Ação à direita */}
                 <div className="toolbar-row toolbar-row-primary">
                     <div className="toolbar-primary-left">
@@ -404,9 +399,16 @@ export const FilterBar = memo(function FilterBar({
                             />
                         </div>
 
-                        <div className="pills" id="statusPills" role="group" aria-label="Filtro de status">
+                        <div
+                            className={`pills${viewMode ? ' is-view-mode' : ''}`}
+                            id="statusPills"
+                            role="group"
+                            aria-label="Filtro de status"
+                        >
                             {STATUS_PILLS.map(pill => {
-                                const isActive = filters.status === pill.value;
+                                const isActive = viewMode
+                                    ? pill.value === 'owned'
+                                    : filters.status === pill.value;
                                 return (
                                     <button
                                         key={pill.value}
@@ -414,6 +416,7 @@ export const FilterBar = memo(function FilterBar({
                                         className={`pill${isActive ? ' active' : ''}`}
                                         data-status={pill.value}
                                         aria-pressed={String(isActive)}
+                                        disabled={viewMode}
                                         onClick={() => {
                                             if (!viewMode) onFilterChange('status', pill.value);
                                         }}
@@ -435,7 +438,8 @@ export const FilterBar = memo(function FilterBar({
                             aria-expanded={String(activePopup === 'export')}
                             onPointerEnter={handlePrefetchExport}
                             onFocus={handlePrefetchExport}
-                            onClick={() => {
+                            onClick={e => {
+                                popupInvokerRef.current = e.currentTarget;
                                 handlePrefetchExport();
                                 setActivePopup('export');
                             }}
@@ -474,7 +478,8 @@ export const FilterBar = memo(function FilterBar({
                             aria-expanded={String(activePopup === 'settings')}
                             onPointerEnter={handlePrefetchSettings}
                             onFocus={handlePrefetchSettings}
-                            onClick={() => {
+                            onClick={e => {
+                                popupInvokerRef.current = e.currentTarget;
                                 handlePrefetchSettings();
                                 setActivePopup('settings');
                             }}
@@ -525,11 +530,11 @@ export const FilterBar = memo(function FilterBar({
                     />
 
                     {/* Mobile Native Selects (max-width: 767px) */}
-                    <label className="sr-only" htmlFor="themeFilter">
+                    <label className="sr-only" htmlFor="themeFilterMobile">
                         Tipos
                     </label>
                     <select
-                        id="themeFilter"
+                        id="themeFilterMobile"
                         name="theme"
                         className="select filter-chip mobile-filter-select"
                         value={filters.theme}
@@ -543,11 +548,11 @@ export const FilterBar = memo(function FilterBar({
                         ))}
                     </select>
 
-                    <label className="sr-only" htmlFor="seasonFilter">
+                    <label className="sr-only" htmlFor="seasonFilterMobile">
                         Temporadas
                     </label>
                     <select
-                        id="seasonFilter"
+                        id="seasonFilterMobile"
                         name="season"
                         className="select filter-chip mobile-filter-select"
                         value={filters.season}
@@ -559,11 +564,11 @@ export const FilterBar = memo(function FilterBar({
                         <option value="C7T5">C7T5</option>
                     </select>
 
-                    <label className="sr-only" htmlFor="sortOrder">
+                    <label className="sr-only" htmlFor="sortOrderMobile">
                         Categorias
                     </label>
                     <select
-                        id="sortOrder"
+                        id="sortOrderMobile"
                         name="sortOrder"
                         className="select filter-chip mobile-filter-select"
                         value={settings.sortOrder}
@@ -575,7 +580,7 @@ export const FilterBar = memo(function FilterBar({
                         <option value="rarity">Raridade</option>
                     </select>
                 </div>
-            </search>
+            </div>
 
             {/* Popup Modal Centralizado: Exportar */}
             {activePopup === 'export' && (
@@ -601,6 +606,6 @@ export const FilterBar = memo(function FilterBar({
                     />
                 </Suspense>
             )}
-        </nav>
+        </div>
     );
 });

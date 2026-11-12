@@ -342,18 +342,79 @@ export function useTrackerState(sprites) {
         setFilters(prev => ({ ...prev, [key]: value }));
     }, []);
 
+    const clearFilters = useCallback(() => {
+        if (searchDebounceRef.current !== null) {
+            clearTimeout(searchDebounceRef.current);
+            searchDebounceRef.current = null;
+        }
+        hasPendingSearchRef.current = false;
+        pendingSearchRef.current = '';
+        if (persistedSearchRef.current !== '') {
+            persistedSearchRef.current = '';
+            persistValue(KEYS.search, '');
+        }
+        setFilters({
+            search: '',
+            theme: 'all',
+            season: 'all',
+            status: 'all',
+        });
+    }, []);
+
     const updateSetting = useCallback((key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
     }, []);
 
     const importCollection = useCallback(
         (rawObtained, rawMastered) => {
-            if (viewMode) return false;
+            if (viewMode) return { imported: false, reason: 'view_mode' };
             const validIds = getSpriteIdSet(sprites);
             const cleanObtained = uniqueValidIds(rawObtained, validIds);
             const obtainedSet = new Set(cleanObtained);
-            const cleanMastered = uniqueValidIds(rawMastered, validIds).filter(id => obtainedSet.has(id));
+            const cleanMastered = uniqueValidIds(rawMastered, validIds).filter(id =>
+                obtainedSet.has(id)
+            );
 
+            const totalUniqueInput = new Set([
+                ...rawObtained.filter(id => typeof id === 'string'),
+                ...rawMastered.filter(id => typeof id === 'string'),
+            ]).size;
+            const validUniqueMatched = new Set([...cleanObtained, ...cleanMastered]).size;
+            const ignoredCount = Math.max(0, totalUniqueInput - validUniqueMatched);
+
+            if (cleanObtained.length === 0) {
+                return {
+                    imported: false,
+                    reason:
+                        rawObtained.length === 0 && rawMastered.length === 0
+                            ? 'empty'
+                            : 'no_valid_ids',
+                    obtainedCount: 0,
+                    masteredCount: 0,
+                    ignoredCount,
+                };
+            }
+
+            setCollection({ obtained: cleanObtained, mastered: cleanMastered });
+            return {
+                imported: true,
+                obtainedCount: cleanObtained.length,
+                masteredCount: cleanMastered.length,
+                ignoredCount,
+            };
+        },
+        [sprites, viewMode]
+    );
+
+    const restoreCollection = useCallback(
+        snapshot => {
+            if (viewMode || !snapshot) return false;
+            const validIds = getSpriteIdSet(sprites);
+            const cleanObtained = uniqueValidIds(snapshot.obtained || [], validIds);
+            const obtainedSet = new Set(cleanObtained);
+            const cleanMastered = uniqueValidIds(snapshot.mastered || [], validIds).filter(id =>
+                obtainedSet.has(id)
+            );
             setCollection({ obtained: cleanObtained, mastered: cleanMastered });
             return true;
         },
@@ -390,8 +451,10 @@ export function useTrackerState(sprites) {
         toggleObtained,
         toggleMastery,
         updateFilter,
+        clearFilters,
         updateSetting,
         importCollection,
+        restoreCollection,
         exitViewMode,
     };
 }

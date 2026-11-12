@@ -37,6 +37,8 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
     afterEach(() => {
         delete window.__recordPerfRender;
         globalThis.IntersectionObserver = originalIntersectionObserver;
+        window.history.replaceState({}, '', '/');
+        document.getElementById('toastContainer')?.remove();
         cleanup();
     });
 
@@ -182,22 +184,78 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         });
     });
 
-    it('carrega os modais de Exportar e Configurações sob demanda via React.lazy', async () => {
+    it('carrega os modais de Exportar e Configurações como dialog nativo e devolve o foco ao fechar', async () => {
         const { container } = render(createElement(CatalogPage));
         expect(container.querySelector('#exportPopupTitle')).toBeNull();
         expect(container.querySelector('#settingsPopupTitle')).toBeNull();
 
-        fireEvent.click(container.querySelector('#exportToggle'));
+        const exportBtn = container.querySelector('#exportToggle');
+        exportBtn.focus();
+        fireEvent.click(exportBtn);
         await waitFor(() => {
             expect(container.querySelector('#exportPopupTitle')).not.toBeNull();
         });
 
+        const exportDialog = container.querySelector('dialog.modal-popup');
+        expect(exportDialog).not.toBeNull();
+        expect(exportDialog.hasAttribute('open')).toBe(true);
+        expect(exportDialog.getAttribute('role')).toBeNull();
+        expect(document.activeElement).toBe(container.querySelector('.modal-close-btn'));
+
         fireEvent.click(container.querySelector('.modal-close-btn'));
         expect(container.querySelector('#exportPopupTitle')).toBeNull();
+        await waitFor(() => {
+            expect(document.activeElement).toBe(exportBtn);
+        });
 
-        fireEvent.click(container.querySelector('#settingsToggle'));
+        const settingsBtn = container.querySelector('#settingsToggle');
+        settingsBtn.focus();
+        fireEvent.click(settingsBtn);
         await waitFor(() => {
             expect(container.querySelector('#settingsPopupTitle')).not.toBeNull();
+        });
+
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(container.querySelector('#settingsPopupTitle')).toBeNull();
+        await waitFor(() => {
+            expect(document.activeElement).toBe(settingsBtn);
+        });
+    });
+
+    it('exibe empty state com botão Limpar filtros, desabilita pílulas em viewMode e ignora Ctrl+D', async () => {
+        const { container } = render(createElement(CatalogPage));
+
+        // 1. Ctrl+D no grid não deve ativar o HUD de teclado
+        const grid = container.querySelector('#spriteGrid');
+        fireEvent.keyDown(grid, { key: 'd', ctrlKey: true });
+        expect(container.querySelector('.controller-hud')).toBeNull();
+
+        // 2. Busca sem resultados mostra .empty-state com botão Limpar filtros
+        const searchInput = container.querySelector('#searchInput');
+        fireEvent.change(searchInput, { target: { value: '__termo_inexistente_xyz__' } });
+
+        await waitFor(() => {
+            expect(container.querySelector('.empty-state')).not.toBeNull();
+        });
+        const clearBtn = container.querySelector('#clearFiltersBtn');
+        expect(clearBtn).not.toBeNull();
+
+        fireEvent.click(clearBtn);
+        await waitFor(() => {
+            expect(container.querySelector('.empty-state')).toBeNull();
+            expect(container.querySelectorAll('.card[data-id]').length).toBe(INITIAL_BATCH_SIZE);
+        });
+        cleanup();
+
+        // 3. Em viewMode, pílulas ficam desabilitadas com Coletados ativo
+        window.history.replaceState({}, '', '/?c=2.invalido');
+        const viewRender = render(createElement(CatalogPage));
+        const pills = viewRender.container.querySelectorAll('#statusPills .pill');
+        expect(pills.length).toBe(3);
+        pills.forEach(pill => {
+            expect(pill.disabled).toBe(true);
+            const expectedPressed = pill.dataset.status === 'owned' ? 'true' : 'false';
+            expect(pill.getAttribute('aria-pressed')).toBe(expectedPressed);
         });
     });
 });

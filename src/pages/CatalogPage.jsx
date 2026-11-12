@@ -50,8 +50,10 @@ export function CatalogPage() {
         toggleObtained,
         toggleMastery,
         updateFilter,
+        clearFilters,
         updateSetting,
         importCollection,
+        restoreCollection,
         exitViewMode,
     } = useTrackerState(baseSprites);
 
@@ -242,8 +244,35 @@ export function CatalogPage() {
                     if (!data || !Array.isArray(data.obtained) || !Array.isArray(data.mastered)) {
                         throw new Error('Invalid backup file format');
                     }
-                    importCollection(data.obtained, data.mastered);
-                    toast('Coleção importada com sucesso!', 'success');
+
+                    const previousCollection = {
+                        obtained: trackerStateRef.current.obtained,
+                        mastered: trackerStateRef.current.mastered,
+                    };
+
+                    const result = importCollection(data.obtained, data.mastered);
+                    if (!result?.imported) {
+                        if (result?.reason === 'empty') {
+                            toast('Arquivo de backup vazio: nenhum pituchinho para importar.', 'info');
+                        } else {
+                            toast('Nenhum pituchinho válido encontrado no arquivo de backup!', 'error');
+                        }
+                        return;
+                    }
+
+                    const summaryMsg =
+                        result.ignoredCount > 0
+                            ? `${result.obtainedCount} pituchinho(s) importado(s) (${result.ignoredCount} item(ns) desconhecido(s) ignorado(s)).`
+                            : `${result.obtainedCount} pituchinho(s) importado(s) com sucesso!`;
+
+                    toast(summaryMsg, 'success', {
+                        duration: 6000,
+                        actionLabel: 'Desfazer',
+                        onAction: () => {
+                            restoreCollection(previousCollection);
+                            toast('Importação desfeita!', 'info');
+                        },
+                    });
                 } catch (err) {
                     toast('Falha ao importar: formato JSON inválido', 'error');
                     console.error(err);
@@ -251,7 +280,7 @@ export function CatalogPage() {
             };
             reader.readAsText(file);
         },
-        [viewMode, importCollection]
+        [viewMode, importCollection, restoreCollection]
     );
 
     const handleShare = useCallback(async () => {
@@ -279,13 +308,26 @@ export function CatalogPage() {
 
     const handleMainKeyDown = useCallback(
         e => {
-            if (e.key === 'Enter' || e.key === 'd' || e.key === 'D') {
+            if (
+                !e.defaultPrevented &&
+                !e.ctrlKey &&
+                !e.altKey &&
+                !e.metaKey &&
+                (e.key === 'Enter' || e.key === 'd' || e.key === 'D')
+            ) {
                 handleCardKeyNavigate();
             }
             handleGridKeyDown(e);
         },
         [handleCardKeyNavigate, handleGridKeyDown]
     );
+
+    const hasActiveFilters =
+        filters.search.trim() !== '' ||
+        filters.theme !== 'all' ||
+        filters.season !== 'all' ||
+        filters.status !== 'all';
+    const showEmptyState = !loadingShared && !sharedError && displayedSprites.length === 0;
 
     return (
         <>
@@ -357,6 +399,43 @@ export function CatalogPage() {
                             />
                         );
                     })}
+                    {showEmptyState && (
+                        <div className="empty-state" role="status">
+                            {hasActiveFilters ? (
+                                <>
+                                    <p className="empty-state-message">
+                                        Nenhum pituchinho encontrado para os filtros atuais.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="btn"
+                                        id="clearFiltersBtn"
+                                        onClick={clearFilters}
+                                    >
+                                        Limpar filtros
+                                    </button>
+                                </>
+                            ) : settings.hideMastered && obtained.length > 0 ? (
+                                <>
+                                    <p className="empty-state-message">
+                                        Todos os pituchinhos visíveis já estão dominados.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="btn"
+                                        id="showMasteredBtn"
+                                        onClick={() => updateSetting('hideMastered', false)}
+                                    >
+                                        Mostrar dominados
+                                    </button>
+                                </>
+                            ) : (
+                                <p className="empty-state-message">
+                                    Nenhum pituchinho encontrado.
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </main>
                 {hasMoreSprites && (
                     <div
