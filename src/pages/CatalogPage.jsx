@@ -6,9 +6,27 @@ import { Header } from '../components/Header.jsx';
 import { FilterBar } from '../components/FilterBar.jsx';
 import { SpriteCard } from '../components/SpriteCard.jsx';
 import { ControllerHud } from '../components/ControllerHud.jsx';
-import { exportImage, generateTradeText, generateTradeGridText } from '../view-export.js';
 import { compressCollection } from '../share-codec.js';
 import { toast, copyText } from '../dom-utils.js';
+
+let viewExportModule = null;
+let viewExportPromise = null;
+
+function loadViewExport() {
+    if (viewExportModule) return Promise.resolve(viewExportModule);
+    if (!viewExportPromise) {
+        viewExportPromise = import('../view-export.js')
+            .then(mod => {
+                viewExportModule = mod;
+                return mod;
+            })
+            .catch(err => {
+                viewExportPromise = null;
+                throw err;
+            });
+    }
+    return viewExportPromise;
+}
 
 // Quantidade de cards "acima da dobra" que carregam a imagem com prioridade alta
 const PRIORITY_CARDS = 24;
@@ -54,25 +72,61 @@ export function CatalogPage() {
         onToggleMastery: toggleMastery,
     });
 
+    const handlePrepareExport = useCallback(() => {
+        void loadViewExport().catch(() => {});
+    }, []);
+
     const handleExportImage = useCallback(
-        mode => exportImage(mode, trackerState, baseSprites),
+        mode => {
+            if (viewExportModule) {
+                viewExportModule.exportImage(mode, trackerState, baseSprites);
+                return;
+            }
+            loadViewExport()
+                .then(mod => mod.exportImage(mode, trackerState, baseSprites))
+                .catch(() => toast('Erro ao carregar módulo de exportação!', 'error'));
+        },
         [trackerState]
     );
 
     const handleCopyTradeText = useCallback(() => {
-        copyText(
-            generateTradeText(trackerState, baseSprites),
-            'Lista de trocas copiada para a área de transferência!',
-            'Falha ao copiar lista de trocas'
-        );
+        if (viewExportModule) {
+            copyText(
+                viewExportModule.generateTradeText(trackerState, baseSprites),
+                'Lista de trocas copiada para a área de transferência!',
+                'Falha ao copiar lista de trocas'
+            );
+            return;
+        }
+        loadViewExport()
+            .then(mod => {
+                copyText(
+                    mod.generateTradeText(trackerState, baseSprites),
+                    'Lista de trocas copiada para a área de transferência!',
+                    'Falha ao copiar lista de trocas'
+                );
+            })
+            .catch(() => toast('Falha ao copiar lista de trocas', 'error'));
     }, [trackerState]);
 
     const handleCopyTradeGrid = useCallback(() => {
-        copyText(
-            generateTradeGridText(trackerState, baseSprites),
-            'Grelha de trocas copiada para a área de transferência!',
-            'Falha ao copiar grelha de trocas'
-        );
+        if (viewExportModule) {
+            copyText(
+                viewExportModule.generateTradeGridText(trackerState, baseSprites),
+                'Grelha de trocas copiada para a área de transferência!',
+                'Falha ao copiar grelha de trocas'
+            );
+            return;
+        }
+        loadViewExport()
+            .then(mod => {
+                copyText(
+                    mod.generateTradeGridText(trackerState, baseSprites),
+                    'Grelha de trocas copiada para a área de transferência!',
+                    'Falha ao copiar grelha de trocas'
+                );
+            })
+            .catch(() => toast('Falha ao copiar grelha de trocas', 'error'));
     }, [trackerState]);
 
     const handleExportBackup = useCallback(() => {
@@ -148,6 +202,7 @@ export function CatalogPage() {
                     viewMode={viewMode}
                     onFilterChange={updateFilter}
                     onSettingChange={updateSetting}
+                    onPrepareExport={handlePrepareExport}
                     onExportImage={handleExportImage}
                     onCopyTradeText={handleCopyTradeText}
                     onCopyTradeGrid={handleCopyTradeGrid}

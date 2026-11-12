@@ -231,6 +231,7 @@ export function SpriteCard({
                         src={getSpriteImageUrl(sprite.id)}
                         alt={displayName}
                         loading={priority ? 'eager' : 'lazy'}
+                        decoding="async"
                         fetchPriority={priority ? 'high' : 'auto'}
                         width="80"
                         height="80"

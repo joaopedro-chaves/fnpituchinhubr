@@ -224,6 +224,7 @@ export function FilterBar({
     viewMode,
     onFilterChange,
     onSettingChange,
+    onPrepareExport,
     onExportImage,
     onCopyTradeText,
     onCopyTradeGrid,
@@ -355,7 +356,12 @@ export function FilterBar({
                             aria-label="Exportar"
                             aria-haspopup="dialog"
                             aria-expanded={String(activePopup === 'export')}
-                            onClick={() => setActivePopup('export')}
+                            onPointerEnter={onPrepareExport}
+                            onFocus={onPrepareExport}
+                            onClick={() => {
+                                onPrepareExport?.();
+                                setActivePopup('export');
+                            }}
                         >
                             <ExportIcon />
                             <span className="btn-label">Exportar</span>

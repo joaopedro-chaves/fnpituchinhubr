@@ -110,11 +110,19 @@ export function getExportCardState(sprite, mode, state) {
     return 'empty';
 }
 
+const loadedImageCache = new Map();
+
 export function loadImage(item) {
+    if (loadedImageCache.has(item.src)) {
+        return Promise.resolve({ id: item.id, img: loadedImageCache.get(item.src), success: true });
+    }
     return new Promise(resolve => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        img.onload = () => resolve({ id: item.id, img, success: true });
+        img.onload = () => {
+            loadedImageCache.set(item.src, img);
+            resolve({ id: item.id, img, success: true });
+        };
         img.onerror = () => resolve({ id: item.id, img, success: false });
         img.src = item.src;
     });
@@ -337,7 +345,7 @@ export function exportImage(mode, state, sprites = []) {
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
     const imagesToLoad = [
         { id: 'mascot', src: getMascotImageUrl() },
-        ...releasedSprites.map(sprite => ({ id: sprite.id, src: getSpriteImageUrl(sprite.id) })),
+        ...config.items.map(sprite => ({ id: sprite.id, src: getSpriteImageUrl(sprite.id) })),
     ];
 
     toast('Gerando imagem...', 'info');
@@ -668,11 +676,19 @@ export function exportImage(mode, state, sprites = []) {
                 toast('Imagem aberta em nova aba!', 'success');
             }, 'image/png');
         } else {
-            const link = document.createElement('a');
-            link.download = `${config.filename}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            toast('Imagem exportada com sucesso!', 'success');
+            canvas.toBlob(blob => {
+                if (!blob) {
+                    toast('Erro ao gerar imagem!', 'error');
+                    return;
+                }
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `${config.filename}.png`;
+                link.href = url;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                toast('Imagem exportada com sucesso!', 'success');
+            }, 'image/png');
         }
     });
 }
