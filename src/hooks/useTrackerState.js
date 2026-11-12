@@ -29,8 +29,12 @@ function persistValue(key, value) {
     }
 }
 
-function getShareCode() {
-    return new URLSearchParams(window.location.search).get('c');
+function getShareInfo() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        hasShareParam: params.has('c'),
+        shareCode: params.get('c') || '',
+    };
 }
 
 function getStoredCollection(sprites) {
@@ -91,17 +95,21 @@ export function useTrackerState(sprites) {
     // Lido uma única vez: se a URL tem ?c=..., já nasce em modo somente leitura
     // com coleção vazia, evitando "piscar" a coleção local antes da compartilhada.
     const [initial] = useState(() => {
-        const shareCode = getShareCode();
+        const { hasShareParam, shareCode } = getShareInfo();
         return {
+            hasShareParam,
             shareCode,
-            collection: shareCode ? EMPTY_COLLECTION : getStoredCollection(sprites),
+            collection: hasShareParam ? EMPTY_COLLECTION : getStoredCollection(sprites),
             filters: getInitialFilters(sprites),
             settings: getInitialSettings(),
         };
     });
 
-    const [viewMode, setViewMode] = useState(Boolean(initial.shareCode));
+    const [viewMode, setViewMode] = useState(initial.hasShareParam);
     const [loadingShared, setLoadingShared] = useState(Boolean(initial.shareCode));
+    const [sharedError, setSharedError] = useState(() =>
+        initial.hasShareParam && !initial.shareCode ? 'empty' : null
+    );
     const [collection, setCollection] = useState(initial.collection);
     const [filters, setFilters] = useState(initial.filters);
     const [settings, setSettings] = useState(initial.settings);
@@ -146,11 +154,13 @@ export function useTrackerState(sprites) {
                 if (cancelled) return;
                 setCollection(decoded);
                 setLoadingShared(false);
+                setSharedError(decoded.obtained.length === 0 ? 'invalid' : null);
             })
             .catch(err => {
                 if (cancelled) return;
                 console.warn('Unable to decode shared collection.', err);
                 setLoadingShared(false);
+                setSharedError('invalid');
             });
 
         return () => {
@@ -356,9 +366,12 @@ export function useTrackerState(sprites) {
         url.searchParams.delete('c');
         window.history.replaceState({}, '', url.toString());
 
+        const restored = getStoredCollection(sprites);
+        persistedCollectionRef.current = restored;
         setViewMode(false);
         setLoadingShared(false);
-        setCollection(getStoredCollection(sprites));
+        setSharedError(null);
+        setCollection(restored);
     }, [sprites]);
 
     return {
@@ -366,6 +379,8 @@ export function useTrackerState(sprites) {
         mastered,
         viewMode,
         loadingShared,
+        sharedError,
+        deferredSearch,
         filters,
         settings,
         trackerState,

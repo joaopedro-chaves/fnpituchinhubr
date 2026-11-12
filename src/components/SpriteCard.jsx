@@ -163,15 +163,12 @@ export const SpriteCard = memo(function SpriteCard({
     const handleKeyDown = useCallback(
         e => {
             if (viewMode) return;
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                if (onToggleObtained) onToggleObtained(sprite.id);
-            } else if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 e.preventDefault();
                 if (onToggleMastery) onToggleMastery(sprite.id);
             }
         },
-        [viewMode, onToggleObtained, onToggleMastery, sprite.id]
+        [viewMode, onToggleMastery, sprite.id]
     );
 
     const handleCrownClick = useCallback(
@@ -192,26 +189,76 @@ export const SpriteCard = memo(function SpriteCard({
         setImgError(true);
     }, []);
 
+    const cardBody = (
+        <>
+            {/* Faixa Superior de Status (Header Banner) */}
+            {sprite.unreleased ? (
+                <div
+                    className="card-badge unreleased-badge"
+                    aria-hidden={!viewMode ? 'true' : undefined}
+                >
+                    NÃO LANÇADO
+                </div>
+            ) : mastered ? (
+                <div
+                    className="card-badge mastered-badge"
+                    aria-hidden={!viewMode ? 'true' : undefined}
+                >
+                    DOMINADO
+                </div>
+            ) : obtained ? (
+                <div
+                    className="card-badge collected"
+                    aria-hidden={!viewMode ? 'true' : undefined}
+                >
+                    COLETADO
+                </div>
+            ) : null}
+
+            <div className="card-display">
+                {viewMode && mastered && (
+                    <span className="card-crown-display" aria-hidden="true">
+                        <CrownIcon />
+                    </span>
+                )}
+
+                <img
+                    src={meta.imgSrc}
+                    alt={meta.displayName}
+                    loading={priority ? 'eager' : 'lazy'}
+                    decoding="async"
+                    fetchPriority={priority ? 'high' : 'auto'}
+                    width="80"
+                    height="80"
+                    draggable="false"
+                    style={imgError ? { opacity: 0.2 } : undefined}
+                    onError={handleImgError}
+                />
+            </div>
+
+            <div className="card-rarity-wrap" aria-hidden={!viewMode ? 'true' : undefined}>
+                <div className="card-rarity">{meta.rarityLabel}</div>
+            </div>
+
+            <div className="card-name">
+                <span className="card-title">{meta.displayName}</span>
+                {meta.seasonName !== 'none' && (
+                    <span
+                        className="card-season"
+                        aria-hidden={!viewMode ? 'true' : undefined}
+                    >
+                        {meta.seasonName}
+                    </span>
+                )}
+            </div>
+        </>
+    );
+
     return (
         <div
             className={className}
             data-id={sprite.id}
             data-name={meta.displayName}
-            tabIndex={!viewMode ? tabIndex : undefined}
-            role={!viewMode ? 'button' : undefined}
-            aria-pressed={!viewMode ? String(obtained) : undefined}
-            aria-label={
-                !viewMode
-                    ? mastered
-                        ? meta.masteredCardLabel
-                        : obtained
-                          ? meta.removeLabel
-                          : meta.collectLabel
-                    : undefined
-            }
-            onClick={handleCardClick}
-            onKeyDown={handleKeyDown}
-            onFocus={handleFocus}
             /*
             onBlur={() => setTooltipVisible(false)}
             onPointerEnter={handlePointerEnter}
@@ -234,86 +281,61 @@ export const SpriteCard = memo(function SpriteCard({
             */}
 
             <div className="card-inner">
-                {/* Faixa Superior de Status (Header Banner) */}
-                {sprite.unreleased ? (
-                    <div
-                        className="card-badge unreleased-badge"
-                        aria-hidden={!viewMode ? 'true' : undefined}
-                    >
-                        NÃO LANÇADO
-                    </div>
-                ) : mastered ? (
-                    <div
-                        className="card-badge mastered-badge"
-                        aria-hidden={!viewMode ? 'true' : undefined}
-                    >
-                        DOMINADO
-                    </div>
-                ) : obtained ? (
-                    <div
-                        className="card-badge collected"
-                        aria-hidden={!viewMode ? 'true' : undefined}
-                    >
-                        COLETADO
-                    </div>
-                ) : null}
-
-                {/* Botão de ação para marcar/desmarcar como dominado (coroa) */}
-                {obtained && !mastered && !viewMode && (
-                    <button
-                        className="card-crown"
-                        type="button"
-                        title="Alternar dominação"
-                        aria-label={meta.masterTitleLabel}
-                        onClick={handleCrownClick}
-                    >
-                        <CrownIcon />
-                    </button>
-                )}
-
-                <div className="card-display">
-                    {mastered && (
+                {viewMode ? (
+                    cardBody
+                ) : (
+                    <>
                         <button
-                            className="card-crown-display"
                             type="button"
-                            title={!viewMode ? 'Remover dominação' : undefined}
-                            aria-label={!viewMode ? meta.unmasterLabel : undefined}
-                            disabled={viewMode}
-                            onClick={handleCrownClick}
+                            className="card-primary"
+                            tabIndex={tabIndex}
+                            aria-pressed={String(obtained)}
+                            aria-label={
+                                mastered
+                                    ? meta.masteredCardLabel
+                                    : obtained
+                                      ? meta.removeLabel
+                                      : meta.collectLabel
+                            }
+                            onClick={handleCardClick}
+                            onKeyDown={handleKeyDown}
+                            onFocus={handleFocus}
                         >
-                            <CrownIcon />
+                            {cardBody}
                         </button>
-                    )}
 
-                    <img
-                        src={meta.imgSrc}
-                        alt={meta.displayName}
-                        loading={priority ? 'eager' : 'lazy'}
-                        decoding="async"
-                        fetchPriority={priority ? 'high' : 'auto'}
-                        width="80"
-                        height="80"
-                        draggable="false"
-                        style={imgError ? { opacity: 0.2 } : undefined}
-                        onError={handleImgError}
-                    />
-                </div>
+                        {/* Botão irmão para marcar/desmarcar como dominado (coroa) */}
+                        {obtained && !mastered && (
+                            <button
+                                className="card-crown"
+                                type="button"
+                                tabIndex={tabIndex}
+                                title="Alternar dominação"
+                                aria-label={meta.masterTitleLabel}
+                                onClick={handleCrownClick}
+                                onKeyDown={handleKeyDown}
+                                onFocus={handleFocus}
+                            >
+                                <CrownIcon />
+                            </button>
+                        )}
 
-                <div className="card-rarity-wrap" aria-hidden={!viewMode ? 'true' : undefined}>
-                    <div className="card-rarity">{meta.rarityLabel}</div>
-                </div>
-
-                <div className="card-name">
-                    <span className="card-title">{meta.displayName}</span>
-                    {meta.seasonName !== 'none' && (
-                        <span
-                            className="card-season"
-                            aria-hidden={!viewMode ? 'true' : undefined}
-                        >
-                            {meta.seasonName}
-                        </span>
-                    )}
-                </div>
+                        {mastered && (
+                            <button
+                                className="card-crown-display"
+                                type="button"
+                                tabIndex={tabIndex}
+                                title="Remover dominação"
+                                aria-label={meta.unmasterLabel}
+                                onClick={handleCrownClick}
+                                onKeyDown={handleKeyDown}
+                                onFocus={handleFocus}
+                            >
+                                <CrownIcon />
+                            </button>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

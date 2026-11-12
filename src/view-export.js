@@ -345,7 +345,7 @@ export function drawMiniCard(ctx, sprite, x, y, w, h, cardState, imageMap, palet
     ctx.fillRect(x, y, w, displayH * 0.6);
 
     /* Sprite image */
-    const img = imageMap?.[sprite.id];
+    const img = imageMap?.[sprite.id] || imageMap?.__fallback__;
     const hasTopBanner = isMasteredCard || cardState === 'owned' || cardState === 'unmastered' || isMissingColor;
     const spriteTopOffset = hasTopBanner ? badgeH : 4;
     const spriteAreaH = displayH - stripH * 0.65 - spriteTopOffset;
@@ -582,14 +582,56 @@ function drawModeChip(ctx, x, y, label, dotColor, palette) {
     return chipW;
 }
 
+function triggerPngDownload(url, filename, revokeDelayMs = 1000) {
+    const link = document.createElement('a');
+    link.download = `${filename}.png`;
+    link.href = url;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), revokeDelayMs);
+}
+
+function openPreviewTabSync() {
+    try {
+        const previewTab = window.open('', '_blank');
+        if (!previewTab) return null;
+        try {
+            previewTab.opener = null;
+            if (previewTab.document?.body) {
+                previewTab.document.title = 'Gerando imagem...';
+                previewTab.document.body.textContent = 'Gerando imagem...';
+            }
+        } catch {
+            /* Ignora restrições de acesso ao documento auxiliar */
+        }
+        return previewTab;
+    } catch {
+        return null;
+    }
+}
+
+function closePreviewTab(previewTab) {
+    if (!previewTab) return;
+    try {
+        if (!previewTab.closed) {
+            previewTab.close();
+        }
+    } catch {
+        /* Ignora falha ao fechar aba auxiliar */
+    }
+}
+
 export function exportImage(mode, state, sprites = []) {
     const config = getExportConfig(mode, state, sprites);
     if (!config) return;
 
     const palette = getExportThemePalette(Boolean(state?.settings?.lightTheme));
     const releasedSprites = getReleasedSprites(sprites, state.filters.season);
+    const shouldOpenInNewTab = isIOS() || Boolean(state?.settings?.openExports);
+    // Aberta de forma síncrona ainda no clique para preservar o gesto do usuário no Safari/iOS
+    const previewTab = shouldOpenInNewTab ? openPreviewTabSync() : null;
     const imagesToLoad = [
         { id: 'mascot', src: getMascotImageUrl() },
+        { id: '__fallback__', src: getSpriteImageUrl('sprite_unreal') },
         ...config.items.map(sprite => ({ id: sprite.id, src: getSpriteImageUrl(sprite.id) })),
     ];
 
@@ -935,33 +977,54 @@ export function exportImage(mode, state, sprites = []) {
         );
 
         // Export mode
-        const shouldOpenInNewTab = isIOS() || state.settings.openExports;
+        canvas.toBlob(blob => {
+            if (!blob) {
+                closePreviewTab(previewTab);
+                toast('Erro ao gerar imagem!', 'error');
+                return;
+            }
+            const url = URL.createObjectURL(blob);
 
-        if (shouldOpenInNewTab) {
-            canvas.toBlob(blob => {
-                if (!blob) {
-                    toast('Erro ao gerar imagem!', 'error');
-                    return;
-                }
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                toast('Imagem aberta em nova aba!', 'success');
-            }, 'image/png');
-        } else {
-            canvas.toBlob(blob => {
-                if (!blob) {
-                    toast('Erro ao gerar imagem!', 'error');
-                    return;
-                }
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = `${config.filename}.png`;
-                link.href = url;
-                link.click();
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            if (!shouldOpenInNewTab) {
+                triggerPngDownload(url, config.filename, 1000);
                 toast('Imagem exportada com sucesso!', 'success');
-            }, 'image/png');
-        }
+                return;
+            }
+
+            let routedToTab = false;
+            if (previewTab && !previewTab.closed) {
+                try {
+                    previewTab.location.replace(url);
+                    routedToTab = true;
+                } catch {
+                    closePreviewTab(previewTab);
+                }
+            }
+
+            if (!routedToTab) {
+                const openedTab = window.open(url, '_blank');
+                if (openedTab) {
+                    try {
+                        openedTab.opener = null;
+                    } catch {
+                        /* Ignora bloqueio ao limpar opener */
+                    }
+                    routedToTab = true;
+                }
+            }
+
+            if (routedToTab) {
+                setTimeout(() => URL.revokeObjectURL(url), 60_000);
+                toast('Imagem aberta em nova aba!', 'success');
+            } else {
+                triggerPngDownload(url, config.filename, 1000);
+                toast('Pop-up bloqueado — imagem baixada!', 'info');
+            }
+        }, 'image/png');
+    }).catch(err => {
+        closePreviewTab(previewTab);
+        toast('Erro ao gerar imagem!', 'error');
+        console.error(err);
     });
 }
 

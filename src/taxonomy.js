@@ -23,7 +23,7 @@ export const THEME = {
     'Metálico': { order: 5, slug: 'metalico', gradient: ['#204454', '#09171f'], exportLabel: 'METÁLICO' },
     'Cubo': { order: 6, slug: 'cubo', gradient: ['#4c1d95', '#1e0b3d'], exportLabel: 'CUBO' },
     'Pato': { order: 7, slug: 'pato', gradient: ['#322554', '#12091f'], exportLabel: 'PATO' },
-    'Trapaceiro': { order: 8, slug: 'trapaceiro', gradient: ['#441359', '#15051c'], exportLabel: 'TRAPACEIRO' },
+    'Trapaceiro': { order: 8, slug: 'trapaceiro', gradient: ['#295913', '#0f360a'], exportLabel: 'TRAPACEIRO' },
     'Hacker de Saque': { order: 9, slug: 'hacker', gradient: ['#114030', '#051b14'], exportLabel: 'HACKER' },
     'Caçador de Recompensas': { order: 10, slug: 'cacador', gradient: ['#3b1c1c', '#170606'], exportLabel: 'CAÇADOR' },
     'Doce ou Travessura': { order: 11, slug: 'doce-ou-travessura', gradient: ['#592510', '#240a02'], exportLabel: 'DOCE OU TRAVESSURA' },

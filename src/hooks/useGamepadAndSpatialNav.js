@@ -184,7 +184,8 @@ export function useGamepadAndSpatialNav({
             activeCardIdRef.current = nextId;
             setActiveCardId(nextId);
         }
-        cardEl.focus({ preventScroll: true });
+        const focusTarget = cardEl.querySelector('.card-primary') || cardEl;
+        focusTarget.focus({ preventScroll: true });
         if (typeof cardEl.scrollIntoView === 'function') {
             cardEl.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         }
@@ -197,13 +198,12 @@ export function useGamepadAndSpatialNav({
             if (!container) return false;
 
             const currentId = activeCardIdRef.current;
-            const activeEl = document.activeElement;
+            const activeCard = document.activeElement?.closest?.('.card[data-id]');
             let currentEl =
-                activeEl &&
-                activeEl.parentElement === container &&
-                activeEl.classList?.contains('card') &&
-                (!currentId || activeEl.getAttribute('data-id') === currentId)
-                    ? activeEl
+                activeCard &&
+                activeCard.parentElement === container &&
+                (!currentId || activeCard.getAttribute('data-id') === currentId)
+                    ? activeCard
                     : null;
 
             if (!currentEl && currentId) {
@@ -254,10 +254,10 @@ export function useGamepadAndSpatialNav({
             const container = gridRef.current;
             if (!container) return;
 
-            const activeEl = document.activeElement;
-            if (!activeEl || !activeEl.classList?.contains('card')) return;
+            const activeCard = document.activeElement?.closest?.('.card[data-id]');
+            if (!activeCard || activeCard.parentElement !== container) return;
 
-            const nextCandidate = findSpatialCandidate(container, activeEl, direction);
+            const nextCandidate = findSpatialCandidate(container, activeCard, direction);
             if (nextCandidate) {
                 e.preventDefault();
                 setInputMode(prev => (prev === 'gamepad' ? 'gamepad' : 'keyboard'));

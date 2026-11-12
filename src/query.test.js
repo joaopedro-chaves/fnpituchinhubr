@@ -217,12 +217,14 @@ describe('integridade dos dados reais (sprites-data.js)', () => {
     });
 
     it('usa sprite_unreal.webp como fallback quando a imagem do id ainda não existe', () => {
-        const fallbackUrl = getSpriteImageUrl('treasurechest_gold');
-        const sameFallbackUrl = getSpriteImageUrl('treasuremap_gold');
+        const fallbackUrl = getSpriteImageUrl('__sprite_inexistente_1__');
+        const sameFallbackUrl = getSpriteImageUrl('__sprite_inexistente_2__');
+        const unrealUrl = getSpriteImageUrl('sprite_unreal');
         const realUrl = getSpriteImageUrl('water_basic');
 
         expect(fallbackUrl).toBeTruthy();
         expect(fallbackUrl).toBe(sameFallbackUrl);
+        expect(fallbackUrl).toBe(unrealUrl);
         expect(fallbackUrl).not.toBe(realUrl);
     });
 });

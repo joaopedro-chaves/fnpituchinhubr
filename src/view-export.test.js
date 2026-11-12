@@ -16,6 +16,7 @@ import {
     getExportConfig,
     getExportCardState,
     getExportThemePalette,
+    getRarityGradient,
     drawMiniCard,
     generateTradeText,
     generateTradeGridText,
@@ -233,5 +234,48 @@ describe('view-export (paridade)', () => {
         expect(filledTexts).not.toContain('FALTANDO');
         expect(filledTexts).not.toContain('COLETADO');
         expect(filledTexts).toContain('MÍTICO');
+    });
+
+    it('getRarityGradient usa verde no tema Trapaceiro e drawMiniCard usa __fallback__ quando falta imagem', () => {
+        expect(getRarityGradient('Especial', 'Trapaceiro')).toEqual(['#295913', '#0f360a']);
+
+        const fallbackImg = { complete: true, naturalWidth: 128, width: 128, height: 128 };
+        const gradientStub = { addColorStop: vi.fn() };
+        const ctx = {
+            save: vi.fn(),
+            restore: vi.fn(),
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
+            clip: vi.fn(),
+            fill: vi.fn(),
+            stroke: vi.fn(),
+            fillRect: vi.fn(),
+            translate: vi.fn(),
+            rotate: vi.fn(),
+            scale: vi.fn(),
+            setLineDash: vi.fn(),
+            createLinearGradient: vi.fn(() => gradientStub),
+            measureText: vi.fn(text => ({ width: String(text).length * 5 })),
+            fillText: vi.fn(),
+            drawImage: vi.fn(),
+        };
+
+        drawMiniCard(
+            ctx,
+            { id: 'sprite_sem_imagem', name: 'Teste', theme: 'Trapaceiro', rarity: 'Especial', season: 'C7T3' },
+            0,
+            0,
+            88,
+            114,
+            'owned',
+            { __fallback__: fallbackImg },
+            getExportThemePalette(false)
+        );
+
+        expect(ctx.drawImage).toHaveBeenCalledTimes(1);
+        expect(ctx.drawImage.mock.calls[0][0]).toBe(fallbackImg);
     });
 });

@@ -39,6 +39,8 @@ export function CatalogPage() {
         mastered,
         viewMode,
         loadingShared,
+        sharedError,
+        deferredSearch,
         filters,
         settings,
         trackerState,
@@ -57,22 +59,47 @@ export function CatalogPage() {
     const obtainedSet = useMemo(() => new Set(obtained), [obtained]);
     const masteredSet = useMemo(() => new Set(mastered), [mastered]);
 
+    // Chave estrutural da consulta: alternar coletado/dominado não reinicia os lotes já expandidos
+    const batchResetKey = useMemo(
+        () =>
+            [
+                viewMode ? '1' : '0',
+                deferredSearch,
+                filters.theme,
+                filters.season,
+                filters.status,
+                settings.hideMastered ? '1' : '0',
+                settings.showUnreleased ? '1' : '0',
+                settings.sortOrder,
+            ].join('|'),
+        [
+            viewMode,
+            deferredSearch,
+            filters.theme,
+            filters.season,
+            filters.status,
+            settings.hideMastered,
+            settings.showUnreleased,
+            settings.sortOrder,
+        ]
+    );
+
     // Renderização incremental em lotes para reduzir TBT e tamanho inicial do DOM
     const [batchState, setBatchState] = useState(() => ({
-        list: visibleSprites,
+        key: batchResetKey,
         count: INITIAL_BATCH_SIZE,
     }));
 
     const loadMoreSprites = useCallback(() => {
         setBatchState(prev => {
-            const currentCount = prev.list === visibleSprites ? prev.count : INITIAL_BATCH_SIZE;
+            const currentCount = prev.key === batchResetKey ? prev.count : INITIAL_BATCH_SIZE;
             if (currentCount >= visibleSprites.length) return prev;
             return {
-                list: visibleSprites,
+                key: batchResetKey,
                 count: Math.min(visibleSprites.length, currentCount + BATCH_INCREMENT),
             };
         });
-    }, [visibleSprites]);
+    }, [batchResetKey, visibleSprites.length]);
 
     const gridRef = useRef(null);
     const loadMoreRef = useRef(null);
@@ -100,7 +127,7 @@ export function CatalogPage() {
     const renderedCount = Math.min(
         visibleSprites.length,
         Math.max(
-            batchState.list === visibleSprites ? batchState.count : INITIAL_BATCH_SIZE,
+            batchState.key === batchResetKey ? batchState.count : INITIAL_BATCH_SIZE,
             minRequiredForFocus
         )
     );
@@ -230,8 +257,16 @@ export function CatalogPage() {
     const handleShare = useCallback(async () => {
         try {
             const current = trackerStateRef.current;
+            if (!current.obtained.length) {
+                toast('Colete pelo menos um pituchinho antes de compartilhar!', 'info');
+                return;
+            }
             const { compressCollection } = await import('../share-codec.js');
             const code = await compressCollection(current.obtained, current.mastered);
+            if (!code) {
+                toast('Falha ao compartilhar', 'error');
+                return;
+            }
             const url = `${window.location.origin}${window.location.pathname}?c=${code}`;
             copyText(url, 'Link compartilhado!', 'Falha ao compartilhar', {
                 actionLabel: 'Fechar',
@@ -257,8 +292,9 @@ export function CatalogPage() {
             {viewMode && (
                 <div className="banner" id="viewBanner">
                     <span>
-                        Visualizando uma coleção compartilhada - exibindo apenas pituchinhos
-                        coletados.
+                        {!loadingShared && sharedError
+                            ? 'Link de compartilhamento inválido ou vazio — nenhum pituchinho encontrado.'
+                            : 'Visualizando uma coleção compartilhada - exibindo apenas pituchinhos coletados.'}
                     </span>
                     <a
                         href="./"

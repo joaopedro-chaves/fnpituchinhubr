@@ -8,11 +8,13 @@ import { KEYS } from './share-order.js';
 describe('useTrackerState (persistência incremental, debounce e tema claro/escuro)', () => {
     beforeEach(() => {
         localStorage.clear();
+        window.history.replaceState({}, '', '/');
         delete document.documentElement.dataset.theme;
     });
 
     afterEach(() => {
         vi.useRealTimers();
+        window.history.replaceState({}, '', '/');
         delete document.documentElement.dataset.theme;
         cleanup();
     });
@@ -24,7 +26,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         expect(setItemSpy).not.toHaveBeenCalled();
 
         const firstCard = container.querySelector('.card[data-id]');
-        fireEvent.click(firstCard);
+        fireEvent.click(firstCard.querySelector('.card-primary'));
 
         expect(setItemSpy).toHaveBeenCalledTimes(1);
         expect(setItemSpy).toHaveBeenCalledWith(KEYS.obtained, JSON.stringify([firstCard.dataset.id]));
@@ -91,6 +93,48 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         expect(themeSwitch.checked).toBe(false);
         expect(document.documentElement.dataset.theme).toBeUndefined();
         expect(localStorage.getItem(KEYS.lightTheme)).toBe('false');
+    });
+
+    it('sinaliza erro amigável em ?c= vazio sem sobrescrever coleção local', () => {
+        const saved = JSON.stringify(['water_basic']);
+        localStorage.setItem(KEYS.obtained, saved);
+        window.history.replaceState({}, '', '/?c=');
+
+        const { container } = render(createElement(CatalogPage));
+        const banner = container.querySelector('#viewBanner');
+        expect(banner).not.toBeNull();
+        expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
+        expect(container.querySelectorAll('.card[data-id]').length).toBe(0);
+        expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
+
+        fireEvent.click(banner.querySelector('a'));
+        expect(container.querySelector('#viewBanner')).toBeNull();
+        expect(window.location.search).toBe('');
+        expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
+    });
+
+    it('sinaliza erro amigável em ?c=2.invalido e ?c=!!! sem quebrar o app ou perder dados locais', async () => {
+        const saved = JSON.stringify(['water_basic']);
+        localStorage.setItem(KEYS.obtained, saved);
+        window.history.replaceState({}, '', '/?c=2.invalido');
+
+        const { container } = render(createElement(CatalogPage));
+        await waitFor(() => {
+            const banner = container.querySelector('#viewBanner');
+            expect(banner).not.toBeNull();
+            expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
+        });
+        expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
+        cleanup();
+
+        window.history.replaceState({}, '', '/?c=!!!');
+        const secondRender = render(createElement(CatalogPage));
+        await waitFor(() => {
+            const banner = secondRender.container.querySelector('#viewBanner');
+            expect(banner).not.toBeNull();
+            expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
+        });
+        expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
     });
 });
 

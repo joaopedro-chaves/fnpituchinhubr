@@ -52,7 +52,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         });
 
         tracker.reset();
-        fireEvent.focus(cards[1]);
+        fireEvent.focus(cards[1].querySelector('.card-primary'));
 
         expect(tracker.counts.spriteCard).toBe(2);
         expect(tracker.counts.header).toBe(0);
@@ -85,29 +85,62 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(tracker.counts.spriteCard).toBe(INITIAL_BATCH_SIZE);
     });
 
+    it('preserva lotes já carregados ao marcar pituchinho sob filtro Faltando', () => {
+        let observerCallback = null;
+        globalThis.IntersectionObserver = class MockIntersectionObserver {
+            constructor(cb) {
+                observerCallback = cb;
+            }
+            observe() {}
+            disconnect() {}
+        };
+
+        const { container } = render(createElement(CatalogPage));
+        fireEvent.click(container.querySelector('[data-status="missing"]'));
+
+        act(() => {
+            observerCallback([{ isIntersecting: true }]);
+        });
+
+        const expandedCards = container.querySelectorAll('.card[data-id]');
+        expect(expandedCards.length).toBe(INITIAL_BATCH_SIZE * 2);
+
+        const card49 = expandedCards[INITIAL_BATCH_SIZE];
+        const card49Id = card49.dataset.id;
+        fireEvent.click(card49.querySelector('.card-primary'));
+
+        const remainingCards = container.querySelectorAll('.card[data-id]');
+        expect(remainingCards.length).toBe(INITIAL_BATCH_SIZE * 2);
+        expect(container.querySelector(`.card[data-id="${card49Id}"]`)).toBeNull();
+    });
+
     it('clicar para coletar, dominar e desmarcar domínio re-renderiza apenas 1 card e atualiza aria-label em PT-BR', () => {
         const { container } = render(createElement(CatalogPage));
         const cards = container.querySelectorAll('.card[data-id]');
         const targetCard = cards[0];
+        const targetBtn = targetCard.querySelector('.card-primary');
         const cardTitle = targetCard.querySelector('.card-title').textContent;
 
-        expect(targetCard.getAttribute('aria-label')).toContain(cardTitle);
-        expect(targetCard.getAttribute('aria-label')).toContain('Não coletado');
+        expect(targetBtn).not.toBeNull();
+        expect(targetCard.querySelector('.card-primary button, .card-primary a, .card-primary [role="button"]')).toBeNull();
+        expect(targetBtn.getAttribute('aria-label')).toContain(cardTitle);
+        expect(targetBtn.getAttribute('aria-label')).toContain('Não coletado');
 
         // 1. Marcar como coletado
         tracker.reset();
-        fireEvent.click(targetCard);
+        fireEvent.click(targetBtn);
         expect(tracker.counts.spriteCard).toBe(1);
         expect(tracker.counts.header).toBe(1);
         expect(tracker.counts.filterBar).toBe(0);
         expect(tracker.counts.controllerHud).toBe(0);
         expect(targetCard.classList.contains('obtained')).toBe(true);
         expect(targetCard.classList.contains('mastered')).toBe(false);
-        expect(targetCard.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Coletado`));
+        expect(targetBtn.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Coletado`));
 
-        // 2. Marcar como dominado pela coroa
+        // 2. Marcar como dominado pela coroa (irmã de .card-primary, sem aninhamento interativo)
         const crownBtn = targetCard.querySelector('.card-crown');
         expect(crownBtn).not.toBeNull();
+        expect(targetBtn.contains(crownBtn)).toBe(false);
         tracker.reset();
         fireEvent.click(crownBtn);
         expect(tracker.counts.spriteCard).toBe(1);
@@ -115,11 +148,11 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(tracker.counts.filterBar).toBe(0);
         expect(tracker.counts.controllerHud).toBe(0);
         expect(targetCard.classList.contains('mastered')).toBe(true);
-        expect(targetCard.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Dominado`));
+        expect(targetBtn.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Dominado`));
 
         // 3. Clicar no card dominado volta para apenas coletado
         tracker.reset();
-        fireEvent.click(targetCard);
+        fireEvent.click(targetBtn);
         expect(tracker.counts.spriteCard).toBe(1);
         expect(tracker.counts.header).toBe(1);
         expect(tracker.counts.filterBar).toBe(0);

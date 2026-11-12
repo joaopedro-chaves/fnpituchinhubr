@@ -23,6 +23,7 @@
     --surface: #141218;
     --surface-dim: #141218;
     --surface-bright: #3b383e;
+    --surface-container-lowest: #0f0d13;
     --surface-container-low: #1d1b20;
     --surface-container: #211f26;
     --surface-container-high: #2b2930;
@@ -90,6 +91,7 @@
     /* ── Motion Tokens (MD3) ── */
     --duration-short1: 50ms;
     --duration-short2: 100ms;
+    --duration-short3: 150ms;
     --duration-short: 150ms;
     /* legacy alias */
     --duration-medium1: 250ms;
@@ -166,6 +168,7 @@
     --surface: #fef7ff;
     --surface-dim: #ded8e1;
     --surface-bright: #fef7ff;
+    --surface-container-lowest: #ffffff;
     --surface-container-low: #f7f2fa;
     --surface-container: #f3edf7;
     --surface-container-high: #ece6f0;
@@ -1111,7 +1114,6 @@ body.low-fidelity .modal-backdrop {
     border-radius: var(--radius);
     border: none;
     overflow: visible;
-    cursor: pointer;
     user-select: none;
     -webkit-touch-callout: none;
     transition: transform var(--duration-medium1) var(--ease-decelerate),
@@ -1130,6 +1132,21 @@ body.low-fidelity .modal-backdrop {
     border-radius: inherit;
     overflow: hidden;
     background: var(--card-surface);
+}
+
+.card-primary {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex: 1;
+    padding: 0;
+    text-align: inherit;
+    border-radius: inherit;
+    background: transparent;
+}
+
+.card-primary:focus-visible {
+    outline: none;
 }
 
 /* M3 Plain Tooltip (Desktop Hover & Mobile Long-Press - desativado temporariamente)
@@ -1186,11 +1203,13 @@ body.low-fidelity .modal-backdrop {
 }
 
 .card:focus-visible::before,
+.card:has(.card-primary:focus-visible)::before,
 .card.gamepad-selected::before {
     opacity: 0.08;
 }
 
 .card:focus-visible,
+.card:has(.card-primary:focus-visible),
 .card.gamepad-selected {
     outline: 3px solid var(--primary);
     outline-offset: 2px;
@@ -1381,7 +1400,7 @@ body.low-fidelity .modal-backdrop {
     position: absolute;
     top: 25px;
     right: 8px;
-    z-index: 5;
+    z-index: 6;
     width: 26px;
     height: 26px;
     background: rgba(0, 0, 0, 0.55);
@@ -1393,15 +1412,19 @@ body.low-fidelity .modal-backdrop {
     transition: opacity var(--duration-short) var(--ease), background-color var(--duration-short) var(--ease);
 }
 
-.card:hover .card-crown {
+.card:hover .card-crown,
+.card:focus-within .card-crown,
+.card-crown:focus-visible {
     opacity: 1;
 }
 
-.card-crown:hover {
+.card-crown:hover,
+.card-crown:focus-visible {
     background-color: #2e3545;
 }
 
-.card-crown:hover .crown-icon {
+.card-crown:hover .crown-icon,
+.card-crown:focus-visible .crown-icon {
     fill: var(--mastered);
 }
 
@@ -1420,7 +1443,7 @@ body.low-fidelity .modal-backdrop {
     position: absolute;
     top: 25px;
     right: 14px;
-    z-index: 4;
+    z-index: 5;
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
     display: flex;
     align-items: center;
