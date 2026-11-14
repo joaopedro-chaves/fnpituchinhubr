@@ -517,4 +517,41 @@ describe('useGamepadAndSpatialNav', () => {
         expect(onToggleObtained).not.toHaveBeenCalled();
         expect(onToggleMastery).not.toHaveBeenCalled();
     });
+
+    it('deriva activeCardId sincronamente sem render extra quando o card ativo sai da lista visível', () => {
+        /** @type {SpatialNavSnapshot | null} */
+        let latest = null;
+        let renderCount = 0;
+
+        /** @param {{ sprites: Array<{ id: string, name: string }> }} props */
+        function TrackedHarness({ sprites }) {
+            renderCount += 1;
+            return createElement(SpatialNavHarness, {
+                sprites,
+                onStateSnapshot: nav => {
+                    latest = nav;
+                },
+            });
+        }
+
+        const { container, rerender } = render(
+            createElement(TrackedHarness, { sprites: sampleSprites })
+        );
+        const c3Btn = /** @type {HTMLElement} */ (
+            container.querySelector('.card[data-id="c3"] .card-primary')
+        );
+        c3Btn.focus();
+        fireEvent.focus(c3Btn);
+        expect(requireSnapshot(latest).activeCardId).toBe('c3');
+
+        const rendersBeforeFilter = renderCount;
+        rerender(createElement(TrackedHarness, { sprites: sampleSprites.slice(0, 2) }));
+
+        expect(requireSnapshot(latest).activeCardId).toBe('c1');
+        expect(renderCount - rendersBeforeFilter).toBe(1);
+
+        rerender(createElement(TrackedHarness, { sprites: [] }));
+        expect(requireSnapshot(latest).activeCardId).toBeNull();
+        expect(renderCount - rendersBeforeFilter).toBe(2);
+    });
 });

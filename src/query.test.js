@@ -220,8 +220,10 @@ describe('contagens e temas', () => {
         expect(getDisplayName('Burnt Peanut')).toBe('Burnt Peanut');
     });
 
-    it('getFamilyKey usa o prefixo do id', () => {
+    it('getFamilyKey usa o prefixo do id até o último underscore', () => {
         expect(getFamilyKey({ id: 'water_basic' })).toBe('water');
+        expect(getFamilyKey({ id: 'ice_king_basic' })).toBe('ice_king');
+        expect(getFamilyKey({ id: 'solo' })).toBe('solo');
     });
 
     it('rótulos de exportação e troca vêm da taxonomia', () => {

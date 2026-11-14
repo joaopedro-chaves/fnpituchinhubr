@@ -27,6 +27,30 @@ describe('share-codec v2', () => {
         expect(decoded.obtained).toEqual(['water_basic']);
     });
 
+    it('agrupa e faz round-trip de ids com múltiplos underscores na família', async () => {
+        const customSprites = [
+            { id: 'ice_king_basic' },
+            { id: 'ice_king_gold' },
+            { id: 'water_basic' },
+        ];
+        const obtained = ['ice_king_basic', 'ice_king_gold'];
+        const mastered = ['ice_king_gold'];
+
+        const code = await compressCollection(obtained, mastered);
+        const decoded = await decompressCollection(customSprites, code);
+        expect([...decoded.obtained].sort()).toEqual([...obtained].sort());
+        expect(decoded.mastered).toEqual(mastered);
+
+        // Mantém compatibilidade com link serializado pelo particionamento legado (primeiro _)
+        const legacyPayload = btoa('ice:king_basic,king_gold*')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+        const legacyDecoded = await decompressCollection(customSprites, `2r.${legacyPayload}`);
+        expect(legacyDecoded.obtained).toEqual(obtained);
+        expect(legacyDecoded.mastered).toEqual(mastered);
+    });
+
     it('decodifica o formato sem compressão (2r.)', async () => {
         const payload = btoa('water:basic*,gold')
             .replace(/\+/g, '-')

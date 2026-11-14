@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { toast } from '../dom-utils.js';
 
 const STICK_DEADZONE = 0.55;
@@ -149,24 +149,22 @@ export function useGamepadAndSpatialNav({
     });
     const [inputMode, setInputMode] = useState(null); // 'gamepad' | 'keyboard' | null
 
-    const activeCardIdRef = useRef(activeCardId);
+    const resolvedActiveCardId = useMemo(() => {
+        if (!visibleSprites.length) return null;
+        if (activeCardId && visibleSprites.some(s => s.id === activeCardId)) {
+            return activeCardId;
+        }
+        return visibleSprites[0].id;
+    }, [activeCardId, visibleSprites]);
+
+    const activeCardIdRef = useRef(resolvedActiveCardId);
     const viewModeRef = useRef(viewMode);
     const onToggleObtainedRef = useRef(onToggleObtained);
     const onToggleMasteryRef = useRef(onToggleMastery);
 
     useEffect(() => {
-        activeCardIdRef.current = activeCardId;
-    }, [activeCardId]);
-
-    useEffect(() => {
-        if (
-            visibleSprites.length > 0 &&
-            (!activeCardIdRef.current ||
-                !visibleSprites.some(s => s.id === activeCardIdRef.current))
-        ) {
-            setActiveCardId(visibleSprites[0].id);
-        }
-    }, [visibleSprites]);
+        activeCardIdRef.current = resolvedActiveCardId;
+    }, [resolvedActiveCardId]);
 
     useEffect(() => {
         viewModeRef.current = viewMode;
@@ -444,7 +442,7 @@ export function useGamepadAndSpatialNav({
     }, []);
 
     return {
-        activeCardId,
+        activeCardId: resolvedActiveCardId,
         gamepadInfo,
         inputMode,
         handleGridKeyDown,

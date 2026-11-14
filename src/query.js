@@ -36,7 +36,7 @@ function buildCollatorRankMap(values) {
 }
 
 export function getFamilyKey(sprite) {
-    const idx = sprite.id.indexOf('_');
+    const idx = sprite.id.lastIndexOf('_');
     return idx === -1 ? sprite.id : sprite.id.slice(0, idx);
 }
 

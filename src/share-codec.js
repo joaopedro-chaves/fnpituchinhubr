@@ -99,7 +99,7 @@ async function pipeBytes(bytes, stream) {
 /* ---------- v2 (por id) ---------- */
 
 function splitId(id) {
-    const idx = id.indexOf('_');
+    const idx = id.lastIndexOf('_');
     return idx === -1 ? [id, ''] : [id.slice(0, idx), id.slice(idx + 1)];
 }
 
