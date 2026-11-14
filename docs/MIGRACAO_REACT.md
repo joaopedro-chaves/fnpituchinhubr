@@ -1,6 +1,6 @@
 # Documentação da Migração: Vanilla JS para React + Vite
 
-Este documento registra as mudanças arquiteturais, organização de pastas e comparativos de código ("Antes vs. Depois") da migração inicial do **Rastreador de Pituchinhos (`fnpituchinhubr`)** para **React com Vite** (posteriormente consolidada na branch `main` e estendida com PWA, testes de UI e consolidação de tokens).
+Este documento registra as mudanças arquiteturais, organização de pastas e comparativos de código ("Antes vs. Depois") da migração inicial do **Rastreador de Pituchinhus (`fnpituchinhubr`)** para **React com Vite** (posteriormente consolidada na branch `main` e estendida com PWA, testes de UI, tipagem `strictNullChecks` e consolidação de tokens).
 
 ---
 
@@ -16,11 +16,11 @@ fnpituchinhubr/
 │   ├── pwa-192x192.png         # Ícone do manifesto PWA (192x192)
 │   └── pwa-512x512.png         # Ícone do manifesto PWA (512x512)
 ├── package.json                # Scripts: dev, build, preview, lint, typecheck, test
-├── tsconfig.json               # Configuração checkJs (--noEmit) para JS/JSX com React 19 e Vite
+├── tsconfig.json               # Configuração checkJs (--noEmit, strictNullChecks) para JS/JSX
 ├── vite.config.js              # Vite + plugin React + VitePWA + Vitest
 ├── eslint.config.js            # ESLint 9 (flat config) com regras de React e Hooks
 ├── styles.css                  # Folha de estilos global + variáveis CSS por card
-├── sprites/                    # Imagens .webp dos pituchinhos (otimizadas em 256x256)
+├── sprites/                    # Imagens .webp dos pituchinhus (otimizadas em 256x256)
 ├── scripts/
 │   ├── convert_webp.sh         # Conversão em lote PNG -> WebP (ffmpeg / cwebp / Pillow)
 │   ├── compress_webp.sh        # Compressão de imagens para WebP
@@ -29,15 +29,17 @@ fnpituchinhubr/
 │   ├── main.yml                # CI/CD: lint + testes + build + deploy GitHub Pages
 │   └── release-sprites.yml     # Automação manual/agendada de sprites (Node 22 + CI checks)
 └── src/
-    ├── main.jsx                # Bootstrap do React (createRoot) + registro PWA
+    ├── main.jsx                # Bootstrap do React (createRoot)
     ├── App.jsx                 # Raiz da aplicação (<CatalogPage />)
     ├── global.d.ts             # Declarações globais de tipos (Vite e gancho de teste)
     ├── pages/
     │   └── CatalogPage.jsx     # Página do catálogo: estado, filtros, grade, modais e exportações
     ├── components/
     │   ├── Header.jsx          # Cabeçalho e barras de progresso reativas
-    │   ├── FilterBar.jsx       # Busca, menus M3 desktop, selects mobile e ações
-    │   ├── SpriteCard.jsx      # Cartão reutilizável de pituchinho
+    │   ├── FilterBar.jsx       # Busca, filtros responsivos (Desktop M3 / Mobile select) e ações
+    │   ├── M3FilterMenu.jsx    # Dropdown estilo Material Design 3 para filtros desktop
+    │   ├── ToolbarIcons.jsx    # Ícones SVG da barra de ferramentas
+    │   ├── SpriteCard.jsx      # Cartão reutilizável de pituchinhu (com fallback de imagem)
     │   ├── ModalDialog.jsx     # Invólucro acessível baseado em <dialog> nativo
     │   ├── ExportModal.jsx     # Modal de exportação/backup/compartilhamento (lazy)
     │   ├── BatchModal.jsx      # Modal de ações em lote por filtro, temporada ou família (lazy)
@@ -45,7 +47,8 @@ fnpituchinhubr/
     │   └── ControllerHud.jsx   # Guia de controles para navegação por gamepad
     ├── hooks/
     │   ├── useTrackerState.js          # Estado, persistência incremental e filtros
-    │   └── useGamepadAndSpatialNav.js  # Navegação espacial e suporte a gamepad
+    │   ├── useGamepadAndSpatialNav.js  # Navegação espacial e suporte a gamepad
+    │   └── useMediaQuery.js            # Assinatura responsiva de media query via useSyncExternalStore
     ├── assets/
     │   └── spriteImages.js     # Mapeamento de imagens .webp com import.meta.glob
     ├── data/
@@ -53,9 +56,11 @@ fnpituchinhubr/
     ├── taxonomy.js             # FONTE ÚNICA de temas, raridades, rótulos e cores (UI e Canvas)
     ├── query.js                # Funções puras de filtro, ordenação, lote, temporadas e validação
     ├── share-order.js          # Chaves de localStorage, layout de exportação e filtros
-    ├── share-codec.js          # Links compartilháveis (?c=...) v1 e v2
+    ├── share-codec.js          # Links compartilháveis (?c=...) v1 e v2 (lazy-loaded)
     ├── share-legacy-order.js   # Ordem congelada do formato v1 (não editar)
-    ├── view-export.js          # Imagens em Canvas 2D e textos de troca
+    ├── view-export.js          # Imagens em Canvas 2D (reexporta texto e paleta)
+    ├── export-palette.js       # Paletas MD3 da exportação Canvas (tokens CSS + fallback)
+    ├── export-text.js          # Geração de texto simples e grade de trocas
     ├── dom-utils.js            # Toasts empilháveis, área de transferência e Canvas
     ├── query.test.js                   # Testes de query, ações em lote, taxonomia e dados
     ├── share-codec.test.js             # Testes do codec de compartilhamento
@@ -63,14 +68,14 @@ fnpituchinhubr/
     ├── useTrackerState.test.js         # Testes de persistência, debounce e tema no hook
     ├── useGamepadAndSpatialNav.test.js # Testes de gamepad e navegação espacial
     ├── modals-backup-share.test.js     # Testes de modais, backup JSON, fluxo ?c= e lote
-    └── render-count.test.js            # Testes de lotes de renderização, modais nativos e a11y
+    └── render-count.test.js            # Testes de lotes, filtros responsivos, fallback e a11y
 ```
 
 ---
 
 ## 2. Como Executar o Projeto (Setup Vite)
 
-No terminal, certifique-se de estar na branch `react` e possuir o Node.js e `npm` instalados:
+No terminal, certifique-se de estar na branch `main` e possuir o Node.js e `npm` instalados:
 
 ```bash
 # 1. Instalar as dependências do React e Vite
@@ -350,7 +355,7 @@ useEffect(() => {
 <SpriteCard priority={index < PRIORITY_CARDS} /* ... */ />
 ```
 
-**Por que:** pedir prioridade alta para as 279 imagens equivale a não priorizar nenhuma. Agora o navegador carrega primeiro o que o usuário vê e adia o resto.
+**Por que:** pedir prioridade alta para todas as imagens do catálogo (na ocasião 279; hoje 338 sprites) equivale a não priorizar nenhuma. Agora o navegador carrega primeiro o que o usuário vê e adia o resto *(na `main` atual, ajustado para `EAGER_CARDS = 8` com `loading="eager"` e `PRIORITY_CARDS = 2` com `fetchPriority="high"`)*.
 
 ### 4.4. Coleção compartilhada sem "piscar"
 
@@ -433,8 +438,8 @@ navigate('/codes');
 
 | Ferramenta | Comando | O que cobre |
 |---|---|---|
-| ESLint 9 + `react` + `react-hooks` | `npm run lint` | Erros comuns, regras dos Hooks, variáveis não usadas |
-| Vitest + Testing Library | `npm test` | 5 suítes (56 testes): query/taxonomia/temporadas, codec de compartilhamento, exportação Canvas/texto, persistência/tema no hook `useTrackerState` e componentes React (lotes, `<dialog>` nativo e acessibilidade) |
+| ESLint 9 + `react` + `react-hooks` + TypeScript (`checkJs`) | `npm run lint` | Regras React/Hooks, variáveis não usadas e `tsc --noEmit` (`strictNullChecks: true`) |
+| Vitest + Testing Library | `npm test` | 7 suítes (87 testes): query/taxonomia/temporadas, codec de compartilhamento, exportação Canvas/texto, persistência/tema em `useTrackerState`, navegação por teclado/gamepad, fluxos de modais/backup/lote/`?c=` e renders/a11y/fallback |
 | GitHub Actions | `.github/workflows/main.yml` e `.github/workflows/release-sprites.yml` | Roda `lint`, `npm test` e `build` antes do deploy no Pages e em atualizações automatizadas de sprites (Node 22) |
 
 > **Nota:** o ESLint está fixado na versão 9 porque `eslint-plugin-react` ainda não declara suporte ao ESLint 10. O lint ajudou na própria refatoração: apontou os fallbacks `baseSprites` herdados do Vanilla JS e um bloco `catch` vazio.
@@ -447,9 +452,9 @@ navigate('/codes');
 
 | Verificação | Resultado observado |
 |---|---|
-| `npm run lint` | Sem erros nem avisos |
-| `npm test` | 5 arquivos, 56 testes passando |
-| `npm run build` | 388 módulos transformados; CSS 32.67 kB (7.20 kB gzip); PWA com precache de 13 entradas (404.03 KiB) |
+| `npm run lint` | ESLint e `tsc --noEmit` (`strictNullChecks: true`) sem erros nem avisos |
+| `npm test` | 7 arquivos, 87 testes passando |
+| `npm run build` | 394 módulos transformados; CSS 34.94 kB (7.64 kB gzip); chunk principal `index-*.js` 355.26 kB (102.69 kB gzip); PWA com precache de 14 entradas (416.12 KiB) |
 
 ---
 
@@ -497,5 +502,4 @@ Durante o merge das novidades da temporada `C7T5` e a publicação no GitHub Pag
 * **Solução:** Removida a verificação `typeof import.meta.glob === 'function'` em `src/assets/spriteImages.js`, chamando `import.meta.glob` diretamente:
   ```javascript
   const spriteModules = import.meta.glob('/sprites/*.webp', { eager: true, import: 'default' });
-  const siteImageModules = import.meta.glob('/siteimages/*.webp', { eager: true, import: 'default' });
   ```

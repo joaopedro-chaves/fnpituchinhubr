@@ -28,7 +28,7 @@ npm run dev        # servidor de desenvolvimento com HMR
 npm run build      # build de produção e Service Worker em dist/
 npm run preview    # serve o build localmente
 npm run lint       # ESLint (React/Hooks) + checagem de tipos (tsc --noEmit)
-npm run typecheck  # TypeScript checkJs (--noEmit) sobre os arquivos JS/JSX
+npm run typecheck  # TypeScript checkJs (--noEmit, strictNullChecks) sobre JS/JSX
 npm test           # suíte de testes unitários e de componentes (Vitest)
 ```
 

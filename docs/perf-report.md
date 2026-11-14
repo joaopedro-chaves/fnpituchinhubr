@@ -1,23 +1,27 @@
 # Relatório de Refatoração de Desempenho
 
-Relatório final das Fases 0 a 7 executadas no repositório `fnpituchinhubr`, preservando integralmente o comportamento externo, o visual e os bugs pré-existentes.
+Relatório das otimizações de desempenho executadas inicialmente nas Fases 0 a 7 e seu estado consolidado após os refinamentos recentes na branch `main`.
 
 ---
 
 ## 1. Comparativo de Chunks e Métricas (Antes vs. Depois)
 
-| Artefato / Métrica | Baseline (Fase 0 — `61427b7`) | Final (Fase 7 — `54a05ba`) | Variação |
+| Artefato / Métrica | Baseline (Fase 0 — `61427b7`) | Refatoração Perf (Fase 7 — `54a05ba`) | Estado Atual (`main`, pós-remediação) |
 | --- | ---: | ---: | ---: |
-| Chunk principal JS (`index-*.js`) | `347.35 kB` (`98.17 kB` gzip) | `341.19 kB` (`95.90 kB` gzip) | `-6.16 kB` (`-2.27 kB` gzip) |
-| Chunk sob demanda (`view-export-*.js`) | *embutido no principal* | `12.31 kB` (`4.76 kB` gzip) | carregado só ao exportar |
-| CSS principal (`index-*.css`) | `34.20 kB` (`7.39 kB` gzip) | `30.62 kB` (`6.89 kB` gzip) | `-3.58 kB` (`-0.50 kB` gzip / `-10.5%` bruto) |
-| HTML (`dist/index.html`) | `1.18 kB` (`0.61 kB` gzip) | `1.13 kB` (`0.59 kB` gzip) | `-0.05 kB` (`Roboto Mono` removida) |
-| Precache Workbox (`dist/sw.js`) | `322` entradas (`6644.75 KiB`) | `323` entradas (`6647.21 KiB`) | `+1` chunk separado |
-| `npm run lint` | `0` erros | `0` erros | — |
-| `npm test` (Vitest) | `2` arquivos, `23` testes (`real 1.32s`) | `5` arquivos, `40` testes (`real 5.16s`, inclui `jsdom`) | `+17` testes (paridade, renders e persistência) |
-| `npm run build` | `2.77s` Vite / `real 6.60s` total | `2.81s` Vite / `real 6.81s` total | `+0.21s` |
+| Chunk principal JS (`index-*.js`) | `347.35 kB` (`98.17 kB` gzip) | `341.19 kB` (`95.90 kB` gzip) | `355.26 kB` (`102.69 kB` gzip) |
+| Chunk sob demanda (`view-export-*.js`) | *embutido no principal* | `12.31 kB` (`4.76 kB` gzip) | `17.25 kB` (`6.45 kB` gzip) |
+| Chunk sob demanda (`share-codec-*.js`) | *embutido no principal* | *embutido no principal* | `6.74 kB` (`2.28 kB` gzip) |
+| CSS principal (`index-*.css`) | `34.20 kB` (`7.39 kB` gzip) | `30.62 kB` (`6.89 kB` gzip) | `34.94 kB` (`7.64 kB` gzip) |
+| HTML (`dist/index.html`) | `1.18 kB` (`0.61 kB` gzip) | `1.13 kB` (`0.59 kB` gzip) | `3.07 kB` (`1.00 kB` gzip) |
+| Precache Workbox (`dist/sw.js`) | `322` entradas (`6644.75 KiB`) | `323` entradas (`6647.21 KiB`) | `14` entradas (`416.12 KiB`) + WebP em runtime |
+| `npm run lint` | `0` erros | `0` erros | `0` erros (ESLint + `strictNullChecks`) |
+| `npm test` (Vitest) | `2` arquivos, `23` testes | `5` arquivos, `40` testes | `7` arquivos, `87` testes |
+| Catálogo (`baseSprites`) | `314` sprites | `314` sprites | `338` sprites |
 
-> **Nota sobre o chunk JS principal:** A extração de [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js) reduziu o JS inicial de `347.35 kB` (`98.17 kB` gzip) para `338.51 kB` (`95.13 kB` gzip) na Fase 3; as pequenas adições estruturais das Fases 4 e 5 (`React.memo`, `WeakMap`, hooks incrementais/debounce) deixaram o final em `341.19 kB` (`95.90 kB` gzip).
+> **Notas de evolução na `main`:**
+> - **Precache Workbox:** O `vite.config.js` restringiu o `globPatterns` do App Shell a `**/*.{js,css,html,svg}` e moveu os `.webp` de `dist/assets/` para `runtimeCaching` com estratégia `CacheFirst` (`sprite-images-v1`), reduzindo o precache inicial de ~`6.6 MiB` para **`416.12 KiB`** (`14` entradas).
+> - **Chunks sob demanda:** Além de [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js) (agora modularizado com [src/export-text.js](file:///home/radiant/DevHub/fnpituchinhubr/src/export-text.js) e [src/export-palette.js](file:///home/radiant/DevHub/fnpituchinhubr/src/export-palette.js)), os modais (`ExportModal`, `BatchModal`, `SettingsModal`, `ModalDialog`) e [src/share-codec.js](file:///home/radiant/DevHub/fnpituchinhubr/src/share-codec.js) são carregados dinamicamente via `import()`.
+> - **Chunk JS principal na `main`:** Inclui a ampliação do catálogo para `338` sprites (e metadados de temporadas/lote), suporte de navegação e paginação incremental.
 
 ---
 
@@ -35,16 +39,13 @@ Relatório final das Fases 0 a 7 executadas no repositório `fnpituchinhubr`, pr
   - `decoding="async"` na `<img>` de [src/components/SpriteCard.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/SpriteCard.jsx).
   - Carregamento sob demanda de [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js) com preload em `onPointerEnter`/`onFocus`/`onClick` de `#exportToggle` em [src/components/FilterBar.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/FilterBar.jsx) e execução síncrona quando já pré-carregado (preservando o *user gesture* para Clipboard/`window.open`).
   - Em [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js): carregamento apenas de `mascot` + `config.items` (os sprites realmente desenhados), cache em memória (`loadedImageCache` `Map` por `src`), e exportação desktop via `canvas.toBlob` + `URL.createObjectURL` + `URL.revokeObjectURL`.
-  - **Proposta para `PRIORITY_CARDS` (mantido em `24` sem alteração):** Com base em `.app` (`max-width: 1400px`, `padding: 20px`) e `.grid` em [styles.css](file:///home/radiant/DevHub/fnpituchinhubr/styles.css):
-    - **Desktop:** `repeat(auto-fill, minmax(116px, 1fr))` com `gap: 16px` acomoda até ~10 colunas; acima da dobra cabem ~2 linhas (`~20` cards).
-    - **Mobile:** `repeat(3, minmax(0, 1fr))` em `<= 480px` (~6–9 cards acima da dobra) e `repeat(2, ...)` em `<= 320px` (~4–6 cards).
-    - **Proposta:** separar `EAGER_CARDS = 20` (`loading="eager"`) e `fetchPriority="high"` apenas nos primeiros `8` cards (primeira linha mobile/desktop), reduzindo contenção inicial de rede no mobile sem impactar LCP.
+  - **Proposta para `PRIORITY_CARDS` (na ocasião em `24` → ajustada posteriormente para `PRIORITY_CARDS = 2` e `EAGER_CARDS = 8`):** Com base em `.app` (`max-width: 1400px`, `padding: 20px`) e `.grid` em [styles.css](file:///home/radiant/DevHub/fnpituchinhubr/styles.css), a separação foi aplicada em [CatalogPage.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/pages/CatalogPage.jsx), priorizando os primeiros `2` cards com `fetchPriority="high"` e `8` com `loading="eager"`, além de carregamento em lotes (`INITIAL_BATCH_SIZE = 48`).
 - **Fase 4 (`30c80bc`):**
   - Instalação de `@testing-library/react` e `jsdom` em `devDependencies` (autorizada pelo usuário).
-  - `React.memo` em [SpriteCard.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/SpriteCard.jsx), [Header.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/Header.jsx), [FilterBar.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/FilterBar.jsx) (`M3FilterMenu` + `FilterBar`) e [ControllerHud.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/ControllerHud.jsx).
+  - `React.memo` em [SpriteCard.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/SpriteCard.jsx), [Header.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/Header.jsx), [FilterBar.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/FilterBar.jsx) ([M3FilterMenu.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/M3FilterMenu.jsx) + `FilterBar`) e [ControllerHud.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/ControllerHud.jsx).
   - `WeakMap` de metadados estáticos do sprite em `SpriteCard` (confirmado via `grep` que `baseSprites` e os objetos `sprite` nunca são mutados em `src/`).
-  - Memoização de opções (`themeOptions`, `SEASON_OPTIONS`, `SORT_OPTIONS`) em `FilterBar.jsx` e estabilização de handlers com `useRef`/`useCallback` em [CatalogPage.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/pages/CatalogPage.jsx).
-  - Teste automatizado em [src/render-count.test.js](file:///home/radiant/DevHub/fnpituchinhubr/src/render-count.test.js) comprovando sobre todos os 314 cards reais: mover foco re-renderiza apenas **`2` `SpriteCard`s** (`0` `Header`/`FilterBar`/`ControllerHud`); clicar para coletar/dominar/desmarcar domínio re-renderiza **`1` `SpriteCard`** (`0` `FilterBar`/`ControllerHud`). Telemetria protegida por `import.meta.env.MODE === 'test'` (`0` ocorrências no bundle de produção verificado com `grep`).
+  - Memoização de opções (`themeOptions`, `seasonOptions` dinâmico e `SORT_OPTIONS`) em `FilterBar.jsx` e estabilização de handlers com `useRef`/`useCallback` em [CatalogPage.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/pages/CatalogPage.jsx).
+  - Teste automatizado em [src/render-count.test.js](file:///home/radiant/DevHub/fnpituchinhubr/src/render-count.test.js) (originalmente sobre os `314` cards; hoje `338` sprites no catálogo): mover foco re-renderiza apenas **`2` `SpriteCard`s** (`0` `Header`/`FilterBar`/`ControllerHud`); clicar para coletar/dominar/desmarcar domínio re-renderiza **`1` `SpriteCard`** (`0` `FilterBar`/`ControllerHud`). Telemetria protegida por `import.meta.env.MODE === 'test'` (`0` ocorrências no bundle de produção verificado com `grep`).
 - **Fase 5 (`59b280c`):** Em [src/hooks/useTrackerState.js](file:///home/radiant/DevHub/fnpituchinhubr/src/hooks/useTrackerState.js):
   - Persistência incremental no `localStorage` (0 gravações no mount inicial; grava apenas a chave alterada), debounce de `200 ms` para `KEYS.search` com flush imediato em `pagehide`, `visibilitychange` (`hidden`) e unmount — validado em [src/useTrackerState.test.js](file:///home/radiant/DevHub/fnpituchinhubr/src/useTrackerState.test.js).
   - `useDeferredValue(filters.search)` para filtrar o grid mantendo digitação responsiva, `progressStats` com dependências mínimas `[sprites, filters.season, obtained, mastered]` e `new Set(obtained)` em `getStoredCollection`.
@@ -52,26 +53,30 @@ Relatório final das Fases 0 a 7 executadas no repositório `fnpituchinhubr`, pr
 - **Fase 7 (`54a05ba`):** Remoção segura em [styles.css](file:///home/radiant/DevHub/fnpituchinhubr/styles.css) após `grep` em `index.html`, `src/`, `src/taxonomy.js` e `sprites-data.js`: utilitários tipográficos (`.display-*`, `.headline-*`, `.title-*`, `.body-*`, `.label-*`), botões legados (`.btn-accent`, `.btn-sm`, `.btn-redeemed`), dropdowns legados (`.dropdown`, `.dropdown-menu*`), temas ausentes da taxonomia (`.theme-Rift`, `.theme-Trapaça`, `.theme-Hacker` mantendo `.theme-Trapaceiro` e `.theme-Hacker-de-Saque`) e `.footer a`.
 
 ### O Que Foi Pulado e Por Quê
-- **Import dinâmico de `share-legacy-order.js` / `share-codec.js`:** Pulado na Fase 3 porque [src/share-legacy-order.js](file:///home/radiant/DevHub/fnpituchinhubr/src/share-legacy-order.js) tem apenas `4.913` bytes brutos (`1.271` bytes gzip), ganho irrisório frente ao custo de um chunk e roundtrip extras.
+- **Import dinâmico de `share-legacy-order.js` / `share-codec.js` (na Fase 3):** Pulado originalmente na Fase 3 pelo tamanho enxuto de [src/share-legacy-order.js](file:///home/radiant/DevHub/fnpituchinhubr/src/share-legacy-order.js) (`4.913` bytes brutos / `1.271` bytes gzip); posteriormente na `main`, [src/share-codec.js](file:///home/radiant/DevHub/fnpituchinhubr/src/share-codec.js) (junto de `share-legacy-order.js`) passou a ser carregado sob demanda via `import('../share-codec.js')` ao compartilhar ou abrir um link `?c=`, isolando o chunk `share-codec-*.js` (`6.74 kB` / `2.28 kB` gzip).
 - **Lógica condicional para pular `filterSprites`/`sortSprites` (Fase 5):** Pulada conforme regra explícita do usuário, mantendo dependências completas e corretas.
 - **Caches `WeakMap`/`Map` em `getSeasonData`, `getCharName`, `getFamilyKeys`, `getActiveThemes` e `getOrderedIndex` (Fase 6):** Pulados conforme regra da versão enxuta.
-- **`.m3-card-tooltip`, `.dropdown-divider` e `.dropdown-section-title` (Fase 7):** `.m3-card-tooltip` foi mantida porque ainda é referenciada no trecho comentado em `SpriteCard.jsx` (reservado para reativação futura); `.dropdown-divider` e `.dropdown-section-title` são ativamente usadas dentro de `.modal-body` em `FilterBar.jsx`.
+- **`.dropdown-divider` e `.dropdown-section-title` (Fase 7):** Mantidas por serem ativamente usadas dentro de `.modal-body` em [ExportModal.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/ExportModal.jsx) e [BatchModal.jsx](file:///home/radiant/DevHub/fnpituchinhubr/src/components/BatchModal.jsx).
 
 ---
 
 ## 3. Divergências Entre o Plano e o Código Real
 
-1. **`FilterBar.jsx` e IDs duplicados:** O plano mencionava possível duplicidade de `id`, porém `M3FilterMenu` já usa `${id}MenuTrigger` enquanto os `<select>` mobile usam `id="themeFilter"|"seasonFilter"|"sortOrder"` — não havia duplicidade no DOM.
+1. **`FilterBar.jsx` e filtros responsivos:** Na refatoração de performance havia menus desktop (`${id}MenuTrigger`) e `<select>` mobile no DOM simultaneamente; na remediação posterior na `main`, `FilterBar.jsx` passou a usar `useMediaQuery('(max-width: 767px)')` para montar apenas a variante ativa no DOM sem duplicação.
 2. **`importCollection` em `useTrackerState.js`:** Já validava `mastered` com `new Set(cleanObtained)`; apenas `getStoredCollection` ainda usava `obtained.includes(id)`.
 3. **Referências de linha:** Os números de linha do plano original não correspondiam exatamente ao `HEAD` atual (deslocados após commits anteriores de UI/M3); todas as edições foram localizadas diretamente nos arquivos reais.
 4. **Google Fonts:** A busca simples por `"Roboto Mono"` não encontrava a string em `index.html` porque na URL estava codificada como `Roboto+Mono`.
 
 ---
 
-## 4. Bugs Pré-Existentes Encontrados (Não Corrigidos)
+## 4. Bugs Pré-Existentes Encontrados e Corrigidos na `main`
 
-1. **`--duration-short3` indefinido em [styles.css](file:///home/radiant/DevHub/fnpituchinhubr/styles.css):** Usado em `.m3-menu` (`L550`) e `.m3-card-tooltip` (`L1051-1053`), porém apenas `--duration-short1`, `--duration-short2`, `--duration-short`, `--duration-medium1`, `--duration-standard`, `--duration-medium2` e `--duration-long1` existem em `:root`, fazendo essas transições/animações caírem no fallback `0s`.
-2. **ObjectURL sem `revokeObjectURL` no fluxo iOS/`openExports` em [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js):** Na linha do `shouldOpenInNewTab` (`window.open(url, '_blank')`), a URL criada não é revogada após abrir a aba.
+Os dois itens originalmente identificados como abertos ao término da Fase 7 foram corrigidos posteriormente na branch `main`:
+
+1. **`--duration-short3` em [styles.css](file:///home/radiant/DevHub/fnpituchinhubr/styles.css):** Token `--duration-short3: 150ms` passou a ser definido em `:root` e utilizado em `.m3-menu`.
+2. **Revogação de `ObjectURL` em `shouldOpenInNewTab` no [src/view-export.js](file:///home/radiant/DevHub/fnpituchinhubr/src/view-export.js):** Quando a exportação abre a imagem em nova aba, a URL gerada passa a ser revogada após `60_000 ms` (`setTimeout(() => URL.revokeObjectURL(url), 60_000)`).
+
+Além disso, o ciclo posterior de remediação habilitou `"strictNullChecks": true` em [tsconfig.json](file:///home/radiant/DevHub/fnpituchinhubr/tsconfig.json), protegeu importações/Canvas, corrigiu fallback de imagem e toasts em modais nativos e expandiu a suíte Vitest para `7` arquivos (`87` testes).
 
 ---
 
