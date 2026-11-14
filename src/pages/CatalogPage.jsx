@@ -32,6 +32,7 @@ export const EAGER_CARDS = 8;
 export const PRIORITY_CARDS = 2;
 export const INITIAL_BATCH_SIZE = 48;
 const BATCH_INCREMENT = 48;
+export const MAX_BACKUP_FILE_BYTES = 2 * 1024 * 1024;
 
 export function CatalogPage() {
 
@@ -253,6 +254,10 @@ export function CatalogPage() {
         file => {
             if (viewMode) {
                 toast('Não é possível importar no modo somente leitura!', 'error');
+                return;
+            }
+            if (file.size > MAX_BACKUP_FILE_BYTES) {
+                toast('Arquivo de backup muito grande (máximo 2 MB).', 'error');
                 return;
             }
             const reader = new FileReader();

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const { toastMock } = vi.hoisted(() => ({
     toastMock: vi.fn(),
@@ -18,6 +18,7 @@ import {
     getExportThemePalette,
     getRarityGradient,
     drawMiniCard,
+    exportImage,
     generateTradeText,
     generateTradeGridText,
 } from './view-export.js';
@@ -44,6 +45,11 @@ function makeState(overrides = {}) {
 describe('view-export (paridade)', () => {
     beforeEach(() => {
         toastMock.mockClear();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
     });
 
     it('getExportCardState retorna o estado exato para cada modo', () => {
@@ -277,5 +283,52 @@ describe('view-export (paridade)', () => {
 
         expect(ctx.drawImage).toHaveBeenCalledTimes(1);
         expect(ctx.drawImage.mock.calls[0][0]).toBe(fallbackImg);
+    });
+
+    it('exportImage aguarda document.fonts.ready e notifica erro seguro quando getContext("2d") retorna null', async () => {
+        let resolveFonts;
+        const fontsReadyPromise = new Promise(resolve => {
+            resolveFonts = resolve;
+        });
+        const mockCanvas = {
+            width: 0,
+            height: 0,
+            getContext: vi.fn(() => null),
+        };
+        class FakeImage {
+            constructor() {
+                this.complete = true;
+                this.naturalWidth = 80;
+                this.width = 80;
+                this.height = 80;
+                this.onload = null;
+                this.onerror = null;
+                this._src = '';
+            }
+            set src(val) {
+                this._src = val;
+                queueMicrotask(() => this.onload?.());
+            }
+            get src() {
+                return this._src;
+            }
+        }
+        vi.stubGlobal('Image', FakeImage);
+        vi.stubGlobal('document', {
+            fonts: { ready: fontsReadyPromise },
+            createElement: vi.fn(tag => (tag === 'canvas' ? mockCanvas : {})),
+        });
+
+        exportImage('collected', makeState(), sampleSprites);
+        expect(toastMock).toHaveBeenCalledWith('Gerando imagem...', 'info');
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(mockCanvas.getContext).not.toHaveBeenCalled();
+
+        resolveFonts();
+        await vi.waitFor(() => {
+            expect(mockCanvas.getContext).toHaveBeenCalledWith('2d');
+            expect(toastMock).toHaveBeenCalledWith('Erro ao gerar imagem!', 'error');
+        });
     });
 });

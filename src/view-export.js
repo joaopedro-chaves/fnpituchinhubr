@@ -594,7 +594,12 @@ export function exportImage(mode, state, sprites = []) {
 
     toast('Gerando imagem...', 'info');
 
-    Promise.all(imagesToLoad.map(loadImage)).then(loadedImages => {
+    const fontsReady =
+        typeof document !== 'undefined' && document.fonts?.ready
+            ? document.fonts.ready.catch(() => {})
+            : Promise.resolve();
+
+    Promise.all([Promise.all(imagesToLoad.map(loadImage)), fontsReady]).then(([loadedImages]) => {
         const imageMap = {};
         loadedImages.forEach(res => {
             if (res.success) {
@@ -675,6 +680,11 @@ export function exportImage(mode, state, sprites = []) {
         canvas.height = canvasH * scale;
 
         const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            closePreviewTab(previewTab);
+            toast('Erro ao gerar imagem!', 'error');
+            return;
+        }
         ctx.scale(scale, scale);
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';

@@ -2,7 +2,7 @@
 import { createElement } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { CatalogPage } from './pages/CatalogPage.jsx';
+import { CatalogPage, MAX_BACKUP_FILE_BYTES } from './pages/CatalogPage.jsx';
 import { ModalDialog } from './components/ModalDialog.jsx';
 import ExportModal from './components/ExportModal.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
@@ -350,6 +350,23 @@ describe('Backup JSON completo (exportação, validações e modo leitura)', () 
                 'Não é possível importar no modo somente leitura!'
             );
         });
+    });
+
+    it('recusa arquivo de backup acima do limite antes de chamar FileReader.readAsText', async () => {
+        const readAsTextSpy = vi.spyOn(FileReader.prototype, 'readAsText');
+        const { container } = render(createElement(CatalogPage));
+        const input = /** @type {HTMLInputElement} */ (container.querySelector('#importInput'));
+        const oversizedFile = new File(['{}'], 'huge.json', { type: 'application/json' });
+        Object.defineProperty(oversizedFile, 'size', { value: MAX_BACKUP_FILE_BYTES + 1 });
+
+        fireEvent.change(input, { target: { files: [oversizedFile] } });
+
+        await waitFor(() => {
+            expect(document.body.textContent).toContain(
+                'Arquivo de backup muito grande (máximo 2 MB).'
+            );
+        });
+        expect(readAsTextSpy).not.toHaveBeenCalled();
     });
 });
 
