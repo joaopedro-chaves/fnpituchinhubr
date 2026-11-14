@@ -55,7 +55,7 @@ export function getExportConfig(mode, state, sprites = []) {
     const configs = {
         collected: {
             items,
-            titleL1: 'Rastreador de Pituchinhos',
+            titleL1: 'Rastreador de Pituchinhus',
             titleL2: 'Minha coleção',
             color: '#4ade80',
             filename: 'pituchinhus-collection',
@@ -63,7 +63,7 @@ export function getExportConfig(mode, state, sprites = []) {
         },
         missing: {
             items,
-            titleL1: 'Rastreador de Pituchinhos',
+            titleL1: 'Rastreador de Pituchinhus',
             titleL2: 'Eu procuro estes!',
             color: '#e57373',
             filename: 'pituchinhus-missing',
@@ -71,7 +71,7 @@ export function getExportConfig(mode, state, sprites = []) {
         },
         unmastered: {
             items,
-            titleL1: 'Rastreador de Pituchinhos',
+            titleL1: 'Rastreador de Pituchinhus',
             titleL2: 'Não Dominados',
             color: '#4fc3f7',
             filename: 'pituchinhus-unmastered',
@@ -79,7 +79,7 @@ export function getExportConfig(mode, state, sprites = []) {
         },
         mastered: {
             items,
-            titleL1: 'Rastreador de Pituchinhos',
+            titleL1: 'Rastreador de Pituchinhus',
             titleL2: 'Dominados',
             color: '#facc15',
             filename: 'pituchinhus-mastered',
@@ -87,7 +87,7 @@ export function getExportConfig(mode, state, sprites = []) {
         },
         trade: {
             items,
-            titleL1: 'Rastreador de Pituchinhos',
+            titleL1: 'Rastreador de Pituchinhus',
             titleL2: 'Lista de Trocas',
             color: '#d0bcff',
             filename: 'pituchinhus-trade-card',

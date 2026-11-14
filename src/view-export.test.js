@@ -83,6 +83,7 @@ describe('view-export (paridade)', () => {
 
         const collected = getExportConfig('collected', state, sampleSprites);
         expect(collected.filename).toBe('pituchinhus-collection');
+        expect(collected.titleL1).toBe('Rastreador de Pituchinhus');
         expect(collected.titleL2).toBe('Minha coleção');
         expect(collected.items.map(s => s.id)).toEqual(['water_basic', 'fire_basic']);
 

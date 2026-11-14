@@ -8,7 +8,9 @@ import { SpriteCard } from '../components/SpriteCard.jsx';
 import { ControllerHud } from '../components/ControllerHud.jsx';
 import { toast, copyText } from '../dom-utils.js';
 
+/** @type {typeof import('../view-export.js') | null} */
 let viewExportModule = null;
+/** @type {Promise<typeof import('../view-export.js')> | null} */
 let viewExportPromise = null;
 
 function loadViewExport() {
@@ -279,17 +281,18 @@ export function CatalogPage() {
                     const result = importCollection(data.obtained, data.mastered);
                     if (!result?.imported) {
                         if (result?.reason === 'empty') {
-                            toast('Arquivo de backup vazio: nenhum pituchinho para importar.', 'info');
+                            toast('Arquivo de backup vazio: nenhum pituchinhu para importar.', 'info');
                         } else {
-                            toast('Nenhum pituchinho válido encontrado no arquivo de backup!', 'error');
+                            toast('Nenhum pituchinhu válido encontrado no arquivo de backup!', 'error');
                         }
                         return;
                     }
 
+                    const ignoredCount = result.ignoredCount ?? 0;
                     const summaryMsg =
-                        result.ignoredCount > 0
-                            ? `${result.obtainedCount} pituchinho(s) importado(s) (${result.ignoredCount} item(ns) desconhecido(s) ignorado(s)).`
-                            : `${result.obtainedCount} pituchinho(s) importado(s) com sucesso!`;
+                        ignoredCount > 0
+                            ? `${result.obtainedCount} pituchinhu(s) importado(s) (${ignoredCount} item(ns) desconhecido(s) ignorado(s)).`
+                            : `${result.obtainedCount} pituchinhu(s) importado(s) com sucesso!`;
 
                     toast(summaryMsg, 'success', {
                         duration: 6000,
@@ -339,7 +342,7 @@ export function CatalogPage() {
         try {
             const current = trackerStateRef.current;
             if (!current.obtained.length) {
-                toast('Colete pelo menos um pituchinho antes de compartilhar!', 'info');
+                toast('Colete pelo menos um pituchinhu antes de compartilhar!', 'info');
                 return;
             }
             const { compressCollection } = await import('../share-codec.js');
@@ -387,8 +390,8 @@ export function CatalogPage() {
                 <div className="banner" id="viewBanner">
                     <span>
                         {!loadingShared && sharedError
-                            ? 'Link de compartilhamento inválido ou vazio — nenhum pituchinho encontrado.'
-                            : 'Visualizando uma coleção compartilhada - exibindo apenas pituchinhos coletados.'}
+                            ? 'Link de compartilhamento inválido ou vazio — nenhum pituchinhu encontrado.'
+                            : 'Visualizando uma coleção compartilhada - exibindo apenas pituchinhus coletados.'}
                     </span>
                     <a
                         href="./"
@@ -429,7 +432,7 @@ export function CatalogPage() {
                         ref={gridRef}
                         className="grid"
                         id="spriteGrid"
-                        aria-label="Coleção de pituchinhos"
+                        aria-label="Coleção de pituchinhus"
                         aria-busy={loadingShared}
                         onKeyDown={handleMainKeyDown}
                     >
@@ -461,7 +464,7 @@ export function CatalogPage() {
                             {hasActiveFilters ? (
                                 <>
                                     <p className="empty-state-message">
-                                        Nenhum pituchinho encontrado para os filtros atuais.
+                                        Nenhum pituchinhu encontrado para os filtros atuais.
                                     </p>
                                     <button
                                         type="button"
@@ -475,7 +478,7 @@ export function CatalogPage() {
                             ) : settings.hideMastered && obtained.length > 0 ? (
                                 <>
                                     <p className="empty-state-message">
-                                        Todos os pituchinhos visíveis já estão dominados.
+                                        Todos os pituchinhus visíveis já estão dominados.
                                     </p>
                                     <button
                                         type="button"
@@ -488,7 +491,7 @@ export function CatalogPage() {
                                 </>
                             ) : (
                                 <p className="empty-state-message">
-                                    Nenhum pituchinho encontrado.
+                                    Nenhum pituchinhu encontrado.
                                 </p>
                             )}
                         </div>

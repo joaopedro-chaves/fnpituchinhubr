@@ -76,19 +76,21 @@ export const FilterBar = memo(
         window.__recordPerfRender?.('filterBar');
     }
 
-    const [activePopup, setActivePopup] = useState(null); // 'export' | 'settings' | 'batch' | null
+    const [activePopup, setActivePopup] = useState(
+        /** @type {'export' | 'settings' | 'batch' | null} */ (null)
+    );
     const [batchContext, setBatchContext] = useState(
         /** @type {{ visibleIds: string[], scopeSprites: Array<{ id: string, name: string, season?: string, unreleased?: boolean }> } | null} */ (
             null
         )
     );
-    const [openFilterMenu, setOpenFilterMenu] = useState(null); // 'theme' | 'season' | 'sortOrder' | null
+    const [openFilterMenu, setOpenFilterMenu] = useState(/** @type {string | null} */ (null)); // 'theme' | 'season' | 'sortOrder' | null
     const isMobileViewport = useMediaQuery('(max-width: 767px)');
     const activeFilterMenu = isMobileViewport ? null : openFilterMenu;
-    const fileInputRef = useRef(null);
-    const filtersRowRef = useRef(null);
-    const popupInvokerRef = useRef(null);
-    const prevPopupRef = useRef(null);
+    const fileInputRef = useRef(/** @type {HTMLInputElement | null} */ (null));
+    const filtersRowRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+    const popupInvokerRef = useRef(/** @type {HTMLElement | null} */ (null));
+    const prevPopupRef = useRef(/** @type {'export' | 'settings' | 'batch' | null} */ (null));
 
     // Restaura foco ao gatilho apenas se o ambiente/suspense não devolver o foco nativamente ao fechar o dialog
     useEffect(() => {
@@ -272,7 +274,7 @@ export const FilterBar = memo(
 
     return (
         <div className="toolbar">
-            <div className="toolbar-search" role="search" aria-label="Buscar e filtrar pituchinhos">
+            <div className="toolbar-search" role="search" aria-label="Buscar e filtrar pituchinhus">
                 {/* 1ª Linha: Busca + Segmented Button à esquerda; Botões de Ação à direita */}
                 <div className="toolbar-row toolbar-row-primary">
                     <div className="toolbar-primary-left">

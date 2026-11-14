@@ -64,7 +64,9 @@ export function toast(message, type = 'info', options = {}) {
     el.appendChild(textEl);
 
     let dismissed = false;
+    /** @type {ReturnType<typeof setTimeout> | null} */
     let autoHideTimer = null;
+    /** @type {ReturnType<typeof setTimeout> | null} */
     let fallbackRemoveTimer = null;
     let timerStartedAt = Date.now();
     let remainingMs = duration;

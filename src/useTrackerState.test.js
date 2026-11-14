@@ -8,6 +8,20 @@ import { baseSprites } from './data/sprites-data.js';
 import { KEYS } from './share-order.js';
 import { toast, copyText } from './dom-utils.js';
 
+/** @param {ParentNode} root @param {string} selector */
+function mustQuery(root, selector) {
+    const el = root.querySelector(selector);
+    if (!el) throw new Error(`Elemento esperado não encontrado: ${selector}`);
+    return /** @type {HTMLElement} */ (el);
+}
+
+/** @param {string} key */
+function readJsonStorage(key) {
+    const raw = localStorage.getItem(key);
+    if (raw === null) throw new Error(`Chave ausente no localStorage: ${key}`);
+    return JSON.parse(raw);
+}
+
 describe('useTrackerState (persistência incremental, debounce e tema claro/escuro)', () => {
     beforeEach(() => {
         localStorage.clear();
@@ -30,14 +44,14 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
 
         expect(setItemSpy).not.toHaveBeenCalled();
 
-        const firstCard = /** @type {HTMLElement} */ (container.querySelector('.card[data-id]'));
-        fireEvent.click(firstCard.querySelector('.card-primary'));
+        const firstCard = mustQuery(container, '.card[data-id]');
+        fireEvent.click(mustQuery(firstCard, '.card-primary'));
 
         expect(setItemSpy).toHaveBeenCalledTimes(1);
         expect(setItemSpy).toHaveBeenCalledWith(KEYS.obtained, JSON.stringify([firstCard.dataset.id]));
 
         setItemSpy.mockClear();
-        const crownBtn = firstCard.querySelector('.card-crown');
+        const crownBtn = mustQuery(firstCard, '.card-crown');
         fireEvent.click(crownBtn);
 
         expect(setItemSpy).toHaveBeenCalledTimes(1);
@@ -51,7 +65,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
         const { container } = render(createElement(CatalogPage));
 
-        const searchInput = container.querySelector('#searchInput');
+        const searchInput = mustQuery(container, '#searchInput');
         fireEvent.change(searchInput, { target: { value: 'fogo' } });
 
         // Antes dos 200ms ainda não persistiu
@@ -80,7 +94,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         const { container } = render(createElement(CatalogPage));
         expect(document.documentElement.dataset.theme).toBeUndefined();
 
-        fireEvent.click(container.querySelector('#settingsToggle'));
+        fireEvent.click(mustQuery(container, '#settingsToggle'));
         const themeSwitch = /** @type {HTMLInputElement} */ (
             await waitFor(() => {
                 const el = container.querySelector('#lightTheme');
@@ -108,13 +122,12 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         window.history.replaceState({}, '', '/?c=');
 
         const { container } = render(createElement(CatalogPage));
-        const banner = container.querySelector('#viewBanner');
-        expect(banner).not.toBeNull();
+        const banner = mustQuery(container, '#viewBanner');
         expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
         expect(container.querySelectorAll('.card[data-id]').length).toBe(0);
         expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
 
-        fireEvent.click(banner.querySelector('a'));
+        fireEvent.click(mustQuery(banner, 'a'));
         expect(container.querySelector('#viewBanner')).toBeNull();
         expect(window.location.search).toBe('');
         expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
@@ -127,8 +140,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
 
         const { container } = render(createElement(CatalogPage));
         await waitFor(() => {
-            const banner = container.querySelector('#viewBanner');
-            expect(banner).not.toBeNull();
+            const banner = mustQuery(container, '#viewBanner');
             expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
         });
         expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
@@ -137,8 +149,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         window.history.replaceState({}, '', '/?c=!!!');
         const secondRender = render(createElement(CatalogPage));
         await waitFor(() => {
-            const banner = secondRender.container.querySelector('#viewBanner');
-            expect(banner).not.toBeNull();
+            const banner = mustQuery(secondRender.container, '#viewBanner');
             expect(banner.textContent).toContain('Link de compartilhamento inválido ou vazio');
         });
         expect(localStorage.getItem(KEYS.obtained)).toBe(saved);
@@ -148,8 +159,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         localStorage.setItem(KEYS.obtained, JSON.stringify(['water_basic']));
         const { container } = render(createElement(CatalogPage));
 
-        const importInput = container.querySelector('#importInput');
-        expect(importInput).not.toBeNull();
+        const importInput = mustQuery(container, '#importInput');
 
         // 1. JSON só com IDs desconhecidos não sobrescreve coleção atual
         const invalidIdsFile = new File(
@@ -160,11 +170,10 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         fireEvent.change(importInput, { target: { files: [invalidIdsFile] } });
 
         await waitFor(() => {
-            const errToast = document.querySelector('#toastContainer .toast-error');
-            expect(errToast).not.toBeNull();
-            expect(errToast.textContent).toContain('Nenhum pituchinho válido encontrado');
+            const errToast = mustQuery(document, '#toastContainer .toast-error');
+            expect(errToast.textContent).toContain('Nenhum pituchinhu válido encontrado');
         });
-        expect(JSON.parse(localStorage.getItem(KEYS.obtained))).toEqual(['water_basic']);
+        expect(readJsonStorage(KEYS.obtained)).toEqual(['water_basic']);
 
         // 2. Importação parcial oferece botão Desfazer e restaura estado anterior ao clicar
         const validBackupFile = new File(
@@ -180,26 +189,24 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
         fireEvent.change(importInput, { target: { files: [validBackupFile] } });
 
         await waitFor(() => {
-            expect(JSON.parse(localStorage.getItem(KEYS.obtained))).toEqual([
+            expect(readJsonStorage(KEYS.obtained)).toEqual([
                 'water_gold',
                 'water_holofoil',
             ]);
         });
 
         const undoBtn = await waitFor(() => {
-            const toastEl = document.querySelector('#toastContainer .toast-success');
-            expect(toastEl).not.toBeNull();
-            expect(toastEl.textContent).toContain('2 pituchinho(s) importado(s)');
+            const toastEl = mustQuery(document, '#toastContainer .toast-success');
+            expect(toastEl.textContent).toContain('2 pituchinhu(s) importado(s)');
             expect(toastEl.textContent).toContain('1 item(ns) desconhecido(s) ignorado(s)');
-            const btn = toastEl.querySelector('.toast-action');
-            expect(btn).not.toBeNull();
+            const btn = mustQuery(toastEl, '.toast-action');
             expect(btn.textContent).toBe('Desfazer');
             return btn;
         });
 
         fireEvent.click(undoBtn);
         await waitFor(() => {
-            expect(JSON.parse(localStorage.getItem(KEYS.obtained))).toEqual(['water_basic']);
+            expect(readJsonStorage(KEYS.obtained)).toEqual(['water_basic']);
         });
     });
 
@@ -209,6 +216,7 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
 
         const region = document.getElementById('toastContainer');
         expect(region).not.toBeNull();
+        if (!region) throw new Error('Container de toast não encontrado');
         expect(region.getAttribute('role')).toBe('region');
         expect(region.querySelectorAll('.toast').length).toBe(2);
 
@@ -218,6 +226,8 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
             configurable: true,
             value: undefined,
         });
+        const hadOwnExecCommand = Object.prototype.hasOwnProperty.call(document, 'execCommand');
+        const originalExecCommand = document.execCommand;
         document.execCommand = vi.fn(() => true);
 
         copyText('texto teste', 'Copiado no HTTP!', 'Erro ao copiar');
@@ -228,7 +238,11 @@ describe('useTrackerState (persistência incremental, debounce e tema claro/escu
             configurable: true,
             value: originalClipboard,
         });
-        delete document.execCommand;
+        if (hadOwnExecCommand) {
+            document.execCommand = originalExecCommand;
+        } else {
+            Reflect.deleteProperty(document, 'execCommand');
+        }
     });
 
     it('preserva referência de visibleSprites ao marcar cards na visão padrão e recalcula sob status/hideMastered', () => {

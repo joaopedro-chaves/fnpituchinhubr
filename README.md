@@ -1,4 +1,4 @@
-# Rastreador de Pituchinhos (Fortnite Sprites Tracker)
+# Rastreador de Pituchinhus (Fortnite Sprites Tracker)
 
 ![Elemental sprites](https://github.com/joaopedro-chaves/fnpituchinhubr/blob/main/public/favicon.webp)
 

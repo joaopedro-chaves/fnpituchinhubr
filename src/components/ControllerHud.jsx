@@ -74,7 +74,7 @@ export const ControllerHud = memo(
     /**
      * @param {{
      *   gamepadInfo?: { connected?: boolean, type?: string } | null,
-     *   inputMode: string,
+     *   inputMode: string | null,
      *   viewMode: boolean,
      * }} props
      */
@@ -87,7 +87,7 @@ export const ControllerHud = memo(
 
     const isGamepadActive = Boolean(gamepadInfo?.connected);
     const activeMode = isGamepadActive
-        ? gamepadInfo.type || 'xbox'
+        ? gamepadInfo?.type || 'xbox'
         : inputMode === 'keyboard'
           ? 'keyboard'
           : null;

@@ -267,6 +267,7 @@ describe('Backup JSON completo (exportação, validações e modo leitura)', () 
         expect(anchorClickSpy).toHaveBeenCalledTimes(1);
         expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-backup');
         expect(capturedBlob).not.toBeNull();
+        if (!capturedBlob) throw new Error('Backup blob não foi capturado');
         const parsed = JSON.parse(await /** @type {Blob} */ (capturedBlob).text());
         expect(parsed).toEqual({
             obtained: ['water_basic', 'water_gold'],
@@ -402,10 +403,10 @@ describe('Fluxo ponta a ponta ?c= (compartilhar, somente leitura e sair)', () =>
             },
         });
 
-        // 1. Sem pituchinhos coletados apenas orienta o usuário
+        // 1. Sem pituchinhus coletados apenas orienta o usuário
         const emptyRender = render(createElement(CatalogPage));
         fireEvent.click(/** @type {HTMLElement} */ (emptyRender.container.querySelector('#shareBtn')));
-        expect(document.body.textContent).toContain('Colete pelo menos um pituchinho antes de compartilhar!');
+        expect(document.body.textContent).toContain('Colete pelo menos um pituchinhu antes de compartilhar!');
         emptyRender.unmount();
 
         // 2. Com coleção salva, gera ?c= v2 e copia link

@@ -16,7 +16,9 @@ const EMPTY_COLLECTION = { obtained: [], mastered: [] };
 
 function readStoredArray(key) {
     try {
-        const value = JSON.parse(localStorage.getItem(key));
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const value = JSON.parse(raw);
         return Array.isArray(value) ? value : [];
     } catch {
         return [];
@@ -134,7 +136,7 @@ export function useTrackerState(sprites) {
     const persistedSearchRef = useRef(initial.filters.search);
     const pendingSearchRef = useRef(initial.filters.search);
     const hasPendingSearchRef = useRef(false);
-    const searchDebounceRef = useRef(null);
+    const searchDebounceRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
 
     const flushPendingSearch = useCallback(() => {
         if (searchDebounceRef.current !== null) {

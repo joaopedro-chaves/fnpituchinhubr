@@ -65,7 +65,7 @@ export const Header = memo(
                     width="36"
                     height="36"
                 />
-                <h1>Rastreador de Pituchinhos</h1>
+                <h1>Rastreador de Pituchinhus</h1>
             </div>
             <div className="progress-group">
                 <div className="progress-item">

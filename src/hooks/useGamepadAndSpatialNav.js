@@ -147,7 +147,7 @@ export function useGamepadAndSpatialNav({
         connected: false,
         type: 'xbox',
     });
-    const [inputMode, setInputMode] = useState(null); // 'gamepad' | 'keyboard' | null
+    const [inputMode, setInputMode] = useState(/** @type {'gamepad' | 'keyboard' | null} */ (null));
 
     const resolvedActiveCardId = useMemo(() => {
         if (!visibleSprites.length) return null;
@@ -271,10 +271,11 @@ export function useGamepadAndSpatialNav({
     useEffect(() => {
         if (typeof window === 'undefined' || !('getGamepads' in navigator)) return;
 
+        /** @type {number | null} */
         let rafId = null;
         const prevButtonsRef = { collect: false, master: false };
         const navStateRef = {
-            lastDirection: null,
+            lastDirection: /** @type {string | null} */ (null),
             nextRepeatTime: 0,
         };
 
@@ -319,6 +320,7 @@ export function useGamepadAndSpatialNav({
             const rightPressed =
                 Boolean(pad.buttons?.[15]?.pressed) || (pad.axes?.[0] ?? 0) > STICK_DEADZONE;
 
+            /** @type {string | null} */
             let activeDir = null;
             if (upPressed) activeDir = 'up';
             else if (downPressed) activeDir = 'down';

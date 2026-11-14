@@ -10,6 +10,13 @@ import {
 } from './pages/CatalogPage.jsx';
 import { getSpriteImageUrl } from './assets/spriteImages.js';
 
+/** @param {ParentNode} root @param {string} selector */
+function mustQuery(root, selector) {
+    const el = root.querySelector(selector);
+    if (!el) throw new Error(`Elemento esperado não encontrado: ${selector}`);
+    return /** @type {HTMLElement} */ (el);
+}
+
 function setupRenderCounter() {
     const counts = {
         spriteCard: 0,
@@ -62,7 +69,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         });
 
         tracker.reset();
-        fireEvent.focus(cards[1].querySelector('.card-primary'));
+        fireEvent.focus(mustQuery(cards[1], '.card-primary'));
 
         expect(tracker.counts.spriteCard).toBe(2);
         expect(tracker.counts.header).toBe(0);
@@ -71,6 +78,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
     });
 
     it('carrega lotes adicionais via IntersectionObserver conforme rolagem', () => {
+        /** @type {((entries: Array<{ isIntersecting: boolean }>) => void) | null} */
         let observerCallback = null;
         globalThis.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (
             /** @type {unknown} */ (
@@ -92,7 +100,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
         tracker.reset();
         act(() => {
-            observerCallback([{ isIntersecting: true }]);
+            observerCallback?.([{ isIntersecting: true }]);
         });
 
         const updatedCards = container.querySelectorAll('.card[data-id]');
@@ -103,14 +111,15 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         // Avança até esgotar os lotes e verifica que o sentinela sai e o footer entra no fim
         for (let step = 0; step < 8 && container.querySelector('.load-more-sentinel'); step++) {
             act(() => {
-                observerCallback([{ isIntersecting: true }]);
+                observerCallback?.([{ isIntersecting: true }]);
             });
         }
         expect(container.querySelector('.load-more-sentinel')).toBeNull();
         expect(container.querySelector('footer.footer')).not.toBeNull();
     });
 
-    it('preserva lotes já carregados ao marcar pituchinho sob filtro Faltando', () => {
+    it('preserva lotes já carregados ao marcar pituchinhu sob filtro Faltando', () => {
+        /** @type {((entries: Array<{ isIntersecting: boolean }>) => void) | null} */
         let observerCallback = null;
         globalThis.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (
             /** @type {unknown} */ (
@@ -125,10 +134,10 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         );
 
         const { container } = render(createElement(CatalogPage));
-        fireEvent.click(container.querySelector('[data-status="missing"]'));
+        fireEvent.click(mustQuery(container, '[data-status="missing"]'));
 
         act(() => {
-            observerCallback([{ isIntersecting: true }]);
+            observerCallback?.([{ isIntersecting: true }]);
         });
 
         const expandedCards = container.querySelectorAll('.card[data-id]');
@@ -136,7 +145,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
         const card49 = /** @type {HTMLElement} */ (expandedCards[INITIAL_BATCH_SIZE]);
         const card49Id = card49.dataset.id;
-        fireEvent.click(card49.querySelector('.card-primary'));
+        fireEvent.click(mustQuery(card49, '.card-primary'));
 
         const remainingCards = container.querySelectorAll('.card[data-id]');
         expect(remainingCards.length).toBe(INITIAL_BATCH_SIZE * 2);
@@ -147,10 +156,9 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         const { container } = render(createElement(CatalogPage));
         const cards = container.querySelectorAll('.card[data-id]');
         const targetCard = cards[0];
-        const targetBtn = targetCard.querySelector('.card-primary');
-        const cardTitle = targetCard.querySelector('.card-title').textContent;
+        const targetBtn = mustQuery(targetCard, '.card-primary');
+        const cardTitle = mustQuery(targetCard, '.card-title').textContent || '';
 
-        expect(targetBtn).not.toBeNull();
         expect(targetCard.querySelector('.card-primary button, .card-primary a, .card-primary [role="button"]')).toBeNull();
         expect(targetBtn.getAttribute('aria-label')).toContain(cardTitle);
         expect(targetBtn.getAttribute('aria-label')).toContain('Não coletado');
@@ -167,8 +175,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(targetBtn.getAttribute('aria-label')).toMatch(new RegExp(`^${cardTitle}.*Coletado`));
 
         // 2. Marcar como dominado pela coroa (irmã de .card-primary, sem aninhamento interativo)
-        const crownBtn = targetCard.querySelector('.card-crown');
-        expect(crownBtn).not.toBeNull();
+        const crownBtn = mustQuery(targetCard, '.card-crown');
         expect(targetBtn.contains(crownBtn)).toBe(false);
         tracker.reset();
         fireEvent.click(crownBtn);
@@ -192,7 +199,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
 
     it('configura prioridade de imagens e semântica ARIA acessível no grid e cards', () => {
         const { container } = render(createElement(CatalogPage));
-        const grid = container.querySelector('#spriteGrid');
+        const grid = mustQuery(container, '#spriteGrid');
         expect(grid.getAttribute('role')).toBeNull();
 
         const imgs = container.querySelectorAll('.card-display img');
@@ -220,26 +227,25 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         expect(container.querySelector('#exportPopupTitle')).toBeNull();
         expect(container.querySelector('#settingsPopupTitle')).toBeNull();
 
-        const exportBtn = /** @type {HTMLElement} */ (container.querySelector('#exportToggle'));
+        const exportBtn = mustQuery(container, '#exportToggle');
         exportBtn.focus();
         fireEvent.click(exportBtn);
         await waitFor(() => {
             expect(container.querySelector('#exportPopupTitle')).not.toBeNull();
         });
 
-        const exportDialog = container.querySelector('dialog.modal-popup');
-        expect(exportDialog).not.toBeNull();
+        const exportDialog = mustQuery(container, 'dialog.modal-popup');
         expect(exportDialog.hasAttribute('open')).toBe(true);
         expect(exportDialog.getAttribute('role')).toBeNull();
         expect(document.activeElement).toBe(container.querySelector('.modal-close-btn'));
 
-        fireEvent.click(container.querySelector('.modal-close-btn'));
+        fireEvent.click(mustQuery(container, '.modal-close-btn'));
         expect(container.querySelector('#exportPopupTitle')).toBeNull();
         await waitFor(() => {
             expect(document.activeElement).toBe(exportBtn);
         });
 
-        const settingsBtn = /** @type {HTMLElement} */ (container.querySelector('#settingsToggle'));
+        const settingsBtn = mustQuery(container, '#settingsToggle');
         settingsBtn.focus();
         fireEvent.click(settingsBtn);
         await waitFor(() => {
@@ -257,19 +263,18 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         const { container } = render(createElement(CatalogPage));
 
         // 1. Ctrl+D no grid não deve ativar o HUD de teclado
-        const grid = container.querySelector('#spriteGrid');
+        const grid = mustQuery(container, '#spriteGrid');
         fireEvent.keyDown(grid, { key: 'd', ctrlKey: true });
         expect(container.querySelector('.controller-hud')).toBeNull();
 
         // 2. Busca sem resultados mostra .empty-state com botão Limpar filtros
-        const searchInput = container.querySelector('#searchInput');
+        const searchInput = mustQuery(container, '#searchInput');
         fireEvent.change(searchInput, { target: { value: '__termo_inexistente_xyz__' } });
 
         await waitFor(() => {
             expect(container.querySelector('.empty-state')).not.toBeNull();
         });
-        const clearBtn = container.querySelector('#clearFiltersBtn');
-        expect(clearBtn).not.toBeNull();
+        const clearBtn = mustQuery(container, '#clearFiltersBtn');
 
         fireEvent.click(clearBtn);
         await waitFor(() => {

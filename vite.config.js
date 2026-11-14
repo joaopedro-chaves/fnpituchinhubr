@@ -58,7 +58,7 @@ export default defineConfig({
                 name: 'Pituchinhu',
                 short_name: 'Pituchinhu',
                 description:
-                    'Rastreie, gerencie e compartilhe sua coleção de pituchinhos do Fortnite e seu progresso de dominação.',
+                    'Rastreie, gerencie e compartilhe sua coleção de pituchinhus do Fortnite e seu progresso de dominação.',
                 lang: 'pt-BR',
                 theme_color: '#141218',
                 background_color: '#141218',

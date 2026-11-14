@@ -24,8 +24,8 @@ export function closeEnclosingDialog(triggerEl, afterClose) {
  * }} props
  */
 export function ModalDialog({ title, titleId, bodyAriaLabel, onClose, children }) {
-    const dialogRef = useRef(null);
-    const closeBtnRef = useRef(null);
+    const dialogRef = useRef(/** @type {HTMLDialogElement | null} */ (null));
+    const closeBtnRef = useRef(/** @type {HTMLButtonElement | null} */ (null));
     const closedNotifiedRef = useRef(false);
 
     const notifyClose = useCallback(() => {
