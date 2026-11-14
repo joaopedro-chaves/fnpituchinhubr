@@ -34,6 +34,7 @@ function setupRenderCounter() {
 describe('Otimizações de renderização, carregamento e acessibilidade', () => {
     let tracker;
     const originalIntersectionObserver = globalThis.IntersectionObserver;
+    const originalMatchMedia = window.matchMedia;
 
     beforeEach(() => {
         localStorage.clear();
@@ -43,6 +44,7 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
     afterEach(() => {
         delete window.__recordPerfRender;
         globalThis.IntersectionObserver = originalIntersectionObserver;
+        window.matchMedia = originalMatchMedia;
         window.history.replaceState({}, '', '/');
         document.getElementById('toastContainer')?.remove();
         cleanup();
@@ -305,5 +307,47 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
         fireEvent.error(img);
         expect(tracker.counts.spriteCard).toBe(0);
         expect(img.getAttribute('src')).toBe(fallbackUrl);
+    });
+
+    it('monta apenas filtros desktop ou selects mobile conforme viewport matchMedia', () => {
+        let matchesMobile = false;
+        /** @type {Set<() => void>} */
+        const listeners = new Set();
+
+        window.matchMedia = /** @type {typeof window.matchMedia} */ (
+            query =>
+                /** @type {MediaQueryList} */ (
+                    /** @type {unknown} */ ({
+                        matches: query === '(max-width: 767px)' ? matchesMobile : false,
+                        media: query,
+                        addEventListener: (_event, cb) => listeners.add(cb),
+                        removeEventListener: (_event, cb) => listeners.delete(cb),
+                    })
+                )
+        );
+
+        const { container, unmount } = render(createElement(CatalogPage));
+
+        expect(container.querySelector('#themeFilterMenuTrigger')).not.toBeNull();
+        expect(container.querySelector('#seasonFilterMenuTrigger')).not.toBeNull();
+        expect(container.querySelector('#sortOrderMenuTrigger')).not.toBeNull();
+        expect(container.querySelector('#themeFilterMobile')).toBeNull();
+        expect(container.querySelector('#seasonFilterMobile')).toBeNull();
+        expect(container.querySelector('#sortOrderMobile')).toBeNull();
+
+        act(() => {
+            matchesMobile = true;
+            listeners.forEach(cb => cb());
+        });
+
+        expect(container.querySelector('#themeFilterMenuTrigger')).toBeNull();
+        expect(container.querySelector('#seasonFilterMenuTrigger')).toBeNull();
+        expect(container.querySelector('#sortOrderMenuTrigger')).toBeNull();
+        expect(container.querySelector('#themeFilterMobile')).not.toBeNull();
+        expect(container.querySelector('#seasonFilterMobile')).not.toBeNull();
+        expect(container.querySelector('#sortOrderMobile')).not.toBeNull();
+
+        unmount();
+        expect(listeners.size).toBe(0);
     });
 });

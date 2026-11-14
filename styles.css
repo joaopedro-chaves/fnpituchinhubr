@@ -579,17 +579,7 @@ a:hover {
 }
 
 .mobile-filter-select {
-    display: none;
-}
-
-@media (max-width: 767px) {
-    .m3-filter-dropdown {
-        display: none;
-    }
-
-    .mobile-filter-select {
-        display: block;
-    }
+    display: block;
 }
 
 .m3-menu-trigger {

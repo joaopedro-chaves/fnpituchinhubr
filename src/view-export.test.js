@@ -331,4 +331,33 @@ describe('view-export (paridade)', () => {
             expect(toastMock).toHaveBeenCalledWith('Erro ao gerar imagem!', 'error');
         });
     });
+
+    it('getExportThemePalette lê tokens CSS computados quando o tema ativo coincide e usa fallback caso contrário', () => {
+        const fakeRoot = { dataset: {} };
+        vi.stubGlobal('document', { documentElement: fakeRoot });
+        vi.stubGlobal('getComputedStyle', () => ({
+            getPropertyValue: prop => {
+                if (prop === '--bg') return ' #101018 ';
+                if (prop === '--primary') return ' #bb86fc ';
+                return '';
+            },
+        }));
+
+        const darkPalette = getExportThemePalette(false);
+        expect(darkPalette.bg).toBe('#101018');
+        expect(darkPalette.primary).toBe('#bb86fc');
+        expect(darkPalette.text).toBe('#e6e0e9');
+
+        const lightFallback = getExportThemePalette(true);
+        expect(lightFallback.bg).toBe('#fef7ff');
+        expect(lightFallback.primary).toBe('#6750a4');
+
+        fakeRoot.dataset = { theme: 'light' };
+        const lightCustom = getExportThemePalette(true);
+        expect(lightCustom.bg).toBe('#101018');
+        expect(lightCustom.primary).toBe('#bb86fc');
+
+        const darkFallback = getExportThemePalette(false);
+        expect(darkFallback.bg).toBe('#141218');
+    });
 });

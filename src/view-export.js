@@ -2,9 +2,10 @@
    Canvas Export & Trade Generation (Material Design 3)
    =================================================== */
 
-import { EXPORT_LAYOUT, TRACKER_URL } from './share-order.js';
+import { EXPORT_LAYOUT } from './share-order.js';
 import { toast, isIOS, drawRoundRect } from './dom-utils.js';
 import { getSpriteImageUrl, getMascotImageUrl } from './assets/spriteImages.js';
+import { DARK_EXPORT_PALETTE, getExportThemePalette } from './export-palette.js';
 import {
     getRarityGradient,
     getRarityDisplayGradient,
@@ -19,7 +20,6 @@ import {
     getFamilyThemeMap,
     getActiveThemes,
     getExportThemeLabel,
-    getTradeThemeLabel,
     getCharNameMap,
     resolveCharName,
     getDisplayName,
@@ -28,63 +28,8 @@ import {
     isMastered,
 } from './query.js';
 
-const DARK_EXPORT_PALETTE = {
-    isLight: false,
-    bg: '#141218',
-    bgGlow: '#271e3a',
-    surfaceContainerLow: '#1d1b20',
-    surfaceContainer: '#211f26',
-    surfaceContainerHigh: '#2b2930',
-    surfaceContainerHighest: '#36343b',
-    outlineVariant: '#49454f',
-    border: 'rgba(230, 224, 233, 0.12)',
-    text: '#e6e0e9',
-    textSoft: '#cac4d0',
-    textMuted: '#a29cae',
-    primary: '#d0bcff',
-    secondaryContainer: '#4a4458',
-    onSecondaryContainer: '#e8def8',
-    uiMastered: '#facc15',
-    cardSurface: '#232938',
-    cardTitleColor: '#e2e8f0',
-    cardSeasonBg: '#9ca3af',
-    cardSeasonColor: '#1e2430',
-    cardBorder: 'rgba(230, 224, 233, 0.14)',
-    emptyCardBorder: 'rgba(230, 224, 233, 0.2)',
-    cardShadow: 'rgba(0, 0, 0, 0.35)',
-};
-
-const LIGHT_EXPORT_PALETTE = {
-    isLight: true,
-    bg: '#fef7ff',
-    bgGlow: '#efe5ff',
-    surfaceContainerLow: '#f7f2fa',
-    surfaceContainer: '#f3edf7',
-    surfaceContainerHigh: '#ece6f0',
-    surfaceContainerHighest: '#e6e0e9',
-    outlineVariant: '#cac4d0',
-    border: 'rgba(29, 27, 32, 0.12)',
-    text: '#1d1b20',
-    textSoft: '#49454f',
-    textMuted: '#5d5766',
-    primary: '#6750a4',
-    secondaryContainer: '#e8def8',
-    onSecondaryContainer: '#1d192b',
-    uiMastered: '#9a5b00',
-    cardSurface: '#ffffff',
-    cardTitleColor: '#1d1b20',
-    cardSeasonBg: '#e8def8',
-    cardSeasonColor: '#1d192b',
-    cardBorder: '#cac4d0',
-    emptyCardBorder: 'rgba(29, 27, 32, 0.24)',
-    cardShadow: 'rgba(29, 27, 32, 0.16)',
-};
-
-export function getExportThemePalette(lightTheme = false) {
-    return lightTheme ? LIGHT_EXPORT_PALETTE : DARK_EXPORT_PALETTE;
-}
-
 export {
+    getExportThemePalette,
     getRarityGradient,
     getRarityDisplayGradient,
     getRarityStripStyle,
@@ -996,83 +941,4 @@ export function exportImage(mode, state, sprites = []) {
     });
 }
 
-export function generateTradeText(state, sprites = []) {
-    const releasedSprites = getReleasedSprites(sprites, state.filters.season);
-    const charKeys = getFamilyKeys(releasedSprites);
-    const charNameMap = getCharNameMap(sprites);
-    const familyThemeMap = getFamilyThemeMap(releasedSprites);
-    const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
-    const obtainedSet = new Set(state?.obtained || []);
-    const masteredSet = new Set(state?.mastered || []);
-
-    const buildSection = (title, selectSprites) => {
-        const lines = [];
-
-        charKeys.forEach(charKey => {
-            const name = resolveCharName(charNameMap, charKey);
-            const themeSprites = [...familyThemeMap.get(charKey).values()];
-            const selected = selectSprites(themeSprites);
-            if (selected.length === 0) return;
-
-            const list = selected.map(sprite => getTradeThemeLabel(sprite.theme)).join(', ');
-            lines.push(`  ▸ ${name} ➔ ${list}`);
-        });
-
-        return lines.length > 0 ? `【 ${title} 】\n${lines.join('\n')}` : '';
-    };
-
-    const sections = [
-        buildSection('LOOKING FOR', items => items.filter(sprite => !obtainedSet.has(sprite.id))),
-        buildSection('HAVE', items => items.filter(sprite => obtainedSet.has(sprite.id))),
-        buildSection('STILL NEED TO MASTER', items =>
-            items.filter(sprite => obtainedSet.has(sprite.id) && !masteredSet.has(sprite.id))
-        ),
-        [
-            `Colecionados: ${collected}/${total}`,
-            `Dominados: ${mastered}/${total}`,
-            `Link do rastreador: ${TRACKER_URL}`,
-        ].join('\n'),
-    ].filter(Boolean);
-
-    return sections.join('\n\n');
-}
-
-export function generateTradeGridText(state, sprites = []) {
-    const releasedSprites = getReleasedSprites(sprites, state.filters.season);
-    const activeThemes = getActiveThemes(releasedSprites);
-    const charKeys = getFamilyKeys(releasedSprites);
-    const charNameMap = getCharNameMap(sprites);
-    const familyThemeMap = getFamilyThemeMap(releasedSprites);
-    const { total, collected, mastered } = getCollectionCounts(releasedSprites, state);
-    const obtainedSet = new Set(state?.obtained || []);
-    const masteredSet = new Set(state?.mastered || []);
-
-    let lines = [
-        '```',
-        '✅ Tenho  👑 Dominado  ❌ Não tenho',
-        '',
-        `| ${activeThemes.map(getExportThemeLabel).join(' | ')} | Sprite`,
-        '-----------------------',
-    ];
-
-    charKeys.forEach(charKey => {
-        const rowStates = activeThemes.map(theme => {
-            const s = familyThemeMap.get(charKey).get(theme);
-            if (!s) return '⬛';
-            if (masteredSet.has(s.id)) return '👑';
-            return obtainedSet.has(s.id) ? '✅' : '❌';
-        });
-
-        lines.push(`| ${rowStates.join(' | ')} | ${resolveCharName(charNameMap, charKey)}`);
-    });
-
-    lines.push(
-        '',
-        `Colecionados: ${collected}/${total}`,
-        `Dominados: ${mastered}/${total}`,
-        `Link: ${TRACKER_URL}`,
-        '```'
-    );
-
-    return lines.join('\n');
-}
+export { generateTradeText, generateTradeGridText } from './export-text.js';
