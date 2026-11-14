@@ -8,6 +8,7 @@ import {
     EAGER_CARDS,
     PRIORITY_CARDS,
 } from './pages/CatalogPage.jsx';
+import { getSpriteImageUrl } from './assets/spriteImages.js';
 
 function setupRenderCounter() {
     const counts = {
@@ -286,5 +287,23 @@ describe('Otimizações de renderização, carregamento e acessibilidade', () =>
             const expectedPressed = pill.dataset.status === 'owned' ? 'true' : 'false';
             expect(pill.getAttribute('aria-pressed')).toBe(expectedPressed);
         });
+    });
+
+    it('substitui src por sprite_unreal no erro de imagem sem loop infinito', () => {
+        const { container } = render(createElement(CatalogPage));
+        const img = /** @type {HTMLImageElement} */ (container.querySelector('.card-display img'));
+        const fallbackUrl = getSpriteImageUrl('sprite_unreal');
+
+        expect(img).not.toBeNull();
+        expect(img.getAttribute('src')).not.toBe(fallbackUrl);
+
+        fireEvent.error(img);
+        expect(img.getAttribute('src')).toBe(fallbackUrl);
+
+        // Um segundo erro no fallback não deve disparar novo ciclo de renderização
+        tracker.reset();
+        fireEvent.error(img);
+        expect(tracker.counts.spriteCard).toBe(0);
+        expect(img.getAttribute('src')).toBe(fallbackUrl);
     });
 });

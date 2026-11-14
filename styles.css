@@ -1000,6 +1000,12 @@ dialog.modal-popup::backdrop {
     background-color: var(--surface-container-highest);
 }
 
+.modal-body button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .modal-body .switches {
     display: flex;
     flex-direction: column;
@@ -1053,10 +1059,6 @@ body.low-fidelity dialog.modal-popup::backdrop {
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
-}
-
-.dot-collected {
-    background: var(--collected);
 }
 
 .dot-collected {
@@ -1772,6 +1774,11 @@ body.low-fidelity :is(.rarity-Especial, .rarity-special) .card-rarity {
 .toast.visible {
     transform: translateY(0);
     opacity: 1;
+}
+
+.toast.dismissing,
+.toast.dismissing .toast-action {
+    pointer-events: none;
 }
 
 .toast-message {

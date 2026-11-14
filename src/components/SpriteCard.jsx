@@ -4,6 +4,7 @@ import { getCardStyleVars } from '../taxonomy.js';
 import { getSpriteImageUrl } from '../assets/spriteImages.js';
 
 const spriteMetaCache = new WeakMap();
+const FALLBACK_SPRITE_URL = getSpriteImageUrl('sprite_unreal');
 
 function getSpriteStaticMeta(sprite) {
     let cached = spriteMetaCache.get(sprite);
@@ -74,10 +75,15 @@ export const SpriteCard = memo(
         window.__recordPerfRender?.('spriteCard');
     }
 
-    const [imgError, setImgError] = useState(false);
+    const [failedImgSrc, setFailedImgSrc] = useState(/** @type {string | null} */ (null));
 
     // Sprites "não lançados" podem ser placeholders sem tema/raridade/nome
     const meta = getSpriteStaticMeta(sprite);
+    const hasImgError = failedImgSrc === meta.imgSrc;
+    const resolvedImgSrc =
+        hasImgError && FALLBACK_SPRITE_URL && FALLBACK_SPRITE_URL !== meta.imgSrc
+            ? FALLBACK_SPRITE_URL
+            : meta.imgSrc;
 
     let className = meta.baseClassName;
     if (obtained) className += ' obtained';
@@ -116,8 +122,10 @@ export const SpriteCard = memo(
     }, [onCardFocus, sprite.id]);
 
     const handleImgError = useCallback(() => {
-        setImgError(true);
-    }, []);
+        if (!hasImgError) {
+            setFailedImgSrc(meta.imgSrc);
+        }
+    }, [hasImgError, meta.imgSrc]);
 
     const cardBody = (
         <>
@@ -153,7 +161,7 @@ export const SpriteCard = memo(
                 )}
 
                 <img
-                    src={meta.imgSrc}
+                    src={resolvedImgSrc}
                     alt={meta.displayName}
                     loading={eager || priority ? 'eager' : 'lazy'}
                     decoding="async"
@@ -161,8 +169,7 @@ export const SpriteCard = memo(
                     width="80"
                     height="80"
                     draggable="false"
-                    style={imgError ? { opacity: 0.2 } : undefined}
-                    onError={handleImgError}
+                    onError={hasImgError ? undefined : handleImgError}
                 />
             </div>
 

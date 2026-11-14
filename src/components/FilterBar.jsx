@@ -712,6 +712,7 @@ export const FilterBar = memo(
             {activePopup === 'export' && (
                 <Suspense fallback={null}>
                     <ExportModal
+                        viewMode={viewMode}
                         onClose={handleClosePopup}
                         onExportImage={handleExportAction}
                         onCopyTradeText={onCopyTradeText}

@@ -23,9 +23,12 @@ function getToastContainer() {
 function showToastRegion(container) {
     if (typeof container.showPopover !== 'function') return;
     try {
-        if (!container.matches(':popover-open')) {
-            container.showPopover();
+        const hasOpenModal = Boolean(document.querySelector('dialog[open]'));
+        if (container.matches(':popover-open')) {
+            if (!hasOpenModal || container.contains(document.activeElement)) return;
+            container.hidePopover();
         }
+        container.showPopover();
     } catch {
         /* Ignora falha ao promover região para top-layer */
     }
@@ -89,7 +92,15 @@ export function toast(message, type = 'info', options = {}) {
             autoHideTimer = null;
         }
         const focusWasInside = el.contains(document.activeElement);
+        el.classList.add('dismissing');
         el.classList.remove('visible');
+        if ('inert' in el) {
+            el.inert = true;
+        }
+        const actionBtn = el.querySelector('.toast-action');
+        if (actionBtn instanceof HTMLButtonElement) {
+            actionBtn.disabled = true;
+        }
         el.addEventListener('transitionend', removeToastNode, { once: true });
         fallbackRemoveTimer = setTimeout(removeToastNode, 500);
 

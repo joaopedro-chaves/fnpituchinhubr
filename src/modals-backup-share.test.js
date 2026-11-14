@@ -7,6 +7,7 @@ import { ModalDialog } from './components/ModalDialog.jsx';
 import ExportModal from './components/ExportModal.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import { KEYS } from './share-order.js';
+import { toast } from './dom-utils.js';
 import { baseSprites } from './data/sprites-data.js';
 import { getActiveSeasons, getFamilyKey, getReleasedSprites } from './query.js';
 import { encodeBits } from './share-codec.js';
@@ -158,6 +159,23 @@ describe('Modais (ModalDialog, ExportModal, SettingsModal)', () => {
         fireEvent.click(/** @type {HTMLElement} */ (container.querySelector('#importBtn')));
         expect(onTriggerImport).toHaveBeenCalledTimes(1);
         expect(onClose).toHaveBeenCalledTimes(5);
+    });
+
+    it('oculta o botão de importação no ExportModal quando está em viewMode', () => {
+        const { container } = render(
+            createElement(ExportModal, {
+                viewMode: true,
+                onClose: vi.fn(),
+                onExportImage: vi.fn(),
+                onCopyTradeText: vi.fn(),
+                onCopyTradeGrid: vi.fn(),
+                onExportBackup: vi.fn(),
+                onTriggerImport: vi.fn(),
+            })
+        );
+
+        expect(container.querySelector('#exportBackupBtn')).not.toBeNull();
+        expect(container.querySelector('#importBtn')).toBeNull();
     });
 
     it('atualiza switches em SettingsModal e oculta Abrir exportações no iOS', () => {
@@ -592,5 +610,62 @@ describe('Ações em lote (BatchModal + Desfazer atômico)', () => {
         expect(
             /** @type {HTMLButtonElement} */ (container.querySelector('#batchCollectBtn')).disabled
         ).toBe(true);
+    });
+});
+
+describe('Toasts (ciclo de vida e top layer)', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+        document.getElementById('toastContainer')?.remove();
+        vi.restoreAllMocks();
+    });
+
+    it('aplica classe .dismissing, desabilita ação ao dispensar e re-promove popover acima de dialog aberto', () => {
+        toast('Primeiro', 'info', { actionLabel: 'Desfazer', onAction: vi.fn() });
+        const container = /** @type {HTMLElement} */ (document.getElementById('toastContainer'));
+        expect(container).not.toBeNull();
+
+        let popoverOpen = false;
+        container.showPopover = vi.fn(() => {
+            popoverOpen = true;
+        });
+        container.hidePopover = vi.fn(() => {
+            popoverOpen = false;
+        });
+        const origMatches = container.matches.bind(container);
+        Object.defineProperty(container, 'matches', {
+            configurable: true,
+            value: selector => (selector === ':popover-open' ? popoverOpen : origMatches(selector)),
+        });
+
+        const firstToast = /** @type {HTMLElement} */ (container.querySelector('.toast'));
+        const actionBtn = /** @type {HTMLButtonElement} */ (
+            firstToast.querySelector('.toast-action')
+        );
+        actionBtn.focus();
+        fireEvent.click(actionBtn);
+
+        expect(firstToast.classList.contains('dismissing')).toBe(true);
+        expect(firstToast.classList.contains('visible')).toBe(false);
+        expect(actionBtn.disabled).toBe(true);
+
+        vi.advanceTimersByTime(500);
+        expect(firstToast.isConnected).toBe(false);
+
+        toast('Base', 'info');
+        expect(container.showPopover).toHaveBeenCalledTimes(1);
+
+        const modal = document.createElement('dialog');
+        modal.setAttribute('open', '');
+        document.body.appendChild(modal);
+
+        toast('Sobre modal', 'gamepad');
+        expect(container.hidePopover).toHaveBeenCalledTimes(1);
+        expect(container.showPopover).toHaveBeenCalledTimes(2);
     });
 });

@@ -9,6 +9,7 @@ const IMAGE_EXPORT_OPTIONS = [
 ];
 
 export default function ExportModal({
+    viewMode = false,
     onClose,
     onExportImage,
     onCopyTradeText,
@@ -71,14 +72,16 @@ export default function ExportModal({
                 <span className="dot dot-backup" />
                 Backup dos dados (JSON)
             </button>
-            <button
-                type="button"
-                id="importBtn"
-                onClick={e => closeAndRun(e, onTriggerImport)}
-            >
-                <span className="dot dot-collected" />
-                Importar dados (JSON)
-            </button>
+            {!viewMode && (
+                <button
+                    type="button"
+                    id="importBtn"
+                    onClick={e => closeAndRun(e, onTriggerImport)}
+                >
+                    <span className="dot dot-collected" />
+                    Importar dados (JSON)
+                </button>
+            )}
         </ModalDialog>
     );
 }
