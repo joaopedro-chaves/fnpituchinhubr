@@ -2,9 +2,9 @@ name: CI & Deploy GitHub Pages
 
 on:
   push:
-    branches: [main, react]
+    branches: [main]
   pull_request:
-    branches: [main, react]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -32,20 +32,22 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Validar integridade de assets offline no bundle PWA
+        run: node scripts/download-offline-assets.js --verify --verify-dist
 
       - name: Configurar GitHub Pages
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
 
       - name: Enviar artefato da pasta dist
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
   deploy:
     name: Deploy para GitHub Pages
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: verify
     runs-on: ubuntu-latest
     environment:

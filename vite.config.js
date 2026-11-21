@@ -3,56 +3,51 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+/** @returns {import('vite').Plugin} */
+function preloadPrimaryFontPlugin() {
+    return {
+        name: 'preload-primary-roboto-font',
+        transformIndexHtml: {
+            order: 'post',
+            handler(html, ctx) {
+                const bundle = ctx.bundle;
+                if (!bundle) return html;
+                const fontFile = Object.keys(bundle).find(file =>
+                    /(?:^|\/)roboto-latin-[^/]+\.woff2$/i.test(file)
+                );
+                if (!fontFile) return html;
+                return {
+                    html,
+                    tags: [
+                        {
+                            tag: 'link',
+                            attrs: {
+                                rel: 'preload',
+                                as: 'font',
+                                type: 'font/woff2',
+                                href: `./${fontFile}`,
+                                crossorigin: true,
+                            },
+                            injectTo: 'head',
+                        },
+                    ],
+                };
+            },
+        },
+    };
+}
+
 export default defineConfig({
     plugins: [
         react(),
+        preloadPrimaryFontPlugin(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.webp', 'pwa-192x192.png', 'pwa-512x512.png'],
             workbox: {
-                // Precache restrito ao App Shell e ícones (sprite_unreal < 4 KB já vai inline no bundle)
-                globPatterns: ['**/*.{js,css,html,svg}'],
-                runtimeCaching: [
-                    {
-                        urlPattern: ({ sameOrigin, url }) =>
-                            sameOrigin && /\/assets\/[^/]+\.webp$/i.test(url.pathname),
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'sprite-images-v1',
-                            cacheableResponse: {
-                                statuses: [200],
-                            },
-                            expiration: {
-                                maxEntries: 500,
-                                maxAgeSeconds: 60 * 60 * 24 * 90,
-                            },
-                        },
-                    },
-                    {
-                        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-                        handler: 'StaleWhileRevalidate',
-                        options: {
-                            cacheName: 'google-fonts-stylesheets',
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
-                        },
-                    },
-                    {
-                        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-                        handler: 'CacheFirst',
-                        options: {
-                            cacheName: 'google-fonts-webfonts',
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
-                            expiration: {
-                                maxEntries: 20,
-                                maxAgeSeconds: 60 * 60 * 24 * 365,
-                            },
-                        },
-                    },
-                ],
+                // Precache completo (App Shell, fontes Roboto locais, sprites .webp + ícones do manifesto)
+                globPatterns: ['**/*.{js,css,html,svg,webp,woff2}'],
+                cleanupOutdatedCaches: true,
+                maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
             },
             manifest: {
                 name: 'Pituchinhu',
@@ -91,9 +86,21 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
+        rolldownOptions: {
+            output: {
+                codeSplitting: {
+                    groups: [
+                        {
+                            name: 'react-vendor',
+                            test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+                        },
+                    ],
+                },
+            },
+        },
     },
     test: {
         environment: 'node',
-        include: ['src/**/*.test.js'],
+        include: ['src/**/*.test.js', 'scripts/**/*.test.js'],
     },
 });
